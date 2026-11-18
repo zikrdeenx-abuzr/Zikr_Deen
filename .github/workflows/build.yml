@@ -20,9 +20,21 @@ jobs:
       - name: Unzip project
         run: |
           mkdir -p build_src
-          unzip -o -q "$(ls *.zip | head -1)" -d build_src
+          MAIN="$(ls *.zip | grep -v '^zd-patch' | head -1)"
+          unzip -o -q "$MAIN" -d build_src
           CFG=$(find build_src -name capacitor.config.json -not -path '*/node_modules/*' | head -1)
           echo "PROJECT=$(dirname "$CFG")" >> $GITHUB_ENV
+
+      - name: Apply patch (new logo, intro, Ask AI fix)
+        run: |
+          if [ -f zd-patch.zip ]; then
+            mkdir -p patch_src
+            unzip -o -q zd-patch.zip -d patch_src
+            cp -r patch_src/www/. "$PROJECT/www/"
+            echo "Patch applied to www"
+          else
+            echo "No zd-patch.zip found - skipping patch"
+          fi
 
       - name: Add Gemini key (Ask Zikr Deen)
         env:
@@ -37,6 +49,16 @@ jobs:
 
       - name: Setup project
         run: cd "$PROJECT" && node scripts/setup.js
+
+      - name: Apply Android launcher icons
+        run: |
+          RES="$PROJECT/android/app/src/main/res"
+          if [ -d patch_src/android-res ] && [ -d "$RES" ]; then
+            cp -r patch_src/android-res/. "$RES/"
+            echo "Launcher icons replaced"
+          else
+            echo "Icon patch skipped"
+          fi
 
       - name: Build debug APK
         run: cd "$PROJECT/android" && chmod +x gradlew && ./gradlew assembleDebug
