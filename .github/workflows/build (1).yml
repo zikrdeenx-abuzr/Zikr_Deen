@@ -39,6 +39,8 @@ jobs:
             unzip -o -q "$PATCH_ZIP" -d patch_src
             cp -r patch_src/www/. "$PROJECT/www/"
             echo "Patch applied to www: $PATCH_ZIP"
+            grep -q "qibla.js" "$PROJECT/www/index.html" || { echo "ERROR: Qibla not linked in index.html"; exit 1; }
+            ls "$PROJECT/www/js/qibla.js" >/dev/null || { echo "ERROR: qibla.js missing"; exit 1; }
           else
             echo "No zd-patch zip found - skipping patch"
           fi
@@ -85,7 +87,10 @@ jobs:
       - name: Show permissions inside the built APK
         run: |
           AAPT=$(ls $ANDROID_HOME/build-tools/*/aapt2 2>/dev/null | tail -1)
-          [ -n "$AAPT" ] && "$AAPT" dump permissions "$PROJECT/android/app/build/outputs/apk/debug/app-debug.apk" || true
+          OUT="$("$AAPT" dump permissions "$PROJECT/android/app/build/outputs/apk/debug/app-debug.apk")"
+          echo "$OUT"
+          echo "$OUT" | grep -q "RECORD_AUDIO" || { echo "ERROR: mic permission is NOT inside the APK"; exit 1; }
+          echo "$OUT" | grep -q "ACCESS_FINE_LOCATION" || { echo "ERROR: location permission is NOT inside the APK"; exit 1; }
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
