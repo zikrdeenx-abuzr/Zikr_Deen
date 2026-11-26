@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "tr",
+    "nativeName": "Türkçe",
+    "englishName": "Turkish",
+    "dir": "ltr",
+    "speechLocale": "tr-TR",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Ana sayfa",
+    "categories": "Kategoriler",
+    "progress": "İlerlemem",
+    "library": "Öğrenme kütüphanesi",
+    "ask": "Sor",
+    "chooseLanguage": "Dil seçin",
+    "learn": "Öğren",
+    "explore": "Keşfet",
+    "checkAnswer": "Yanıtı kontrol et",
+    "basic": "Temel",
+    "moderate": "Orta",
+    "advanced": "İleri",
+    "biology": "Biyoloji",
+    "physics": "Fizik",
+    "mathematics": "Matematik",
+    "quranArabic": "Kur’an ve Arapça",
+    "islamicStudies": "İslami İlimler",
+    "history": "Tarih",
+    "technology": "Teknoloji",
+    "environment": "Çevre",
+    "loading": "Yükleniyor…",
+    "retry": "Tekrar dene",
+    "scientificKnowledge": "Bilimsel bilgi",
+    "islamicConnection": "İslami bağlantı",
+    "reflection": "Düşünme",
+    "reviewRequired": "Genel kullanıma açılmadan önce inceleme gerekir"
+  },
+  "categories": {
+    "biology": "Biyoloji",
+    "physics": "Fizik",
+    "mathematics": "Matematik",
+    "quranArabic": "Kur’an ve Arapça",
+    "islamicStudies": "İslami İlimler",
+    "history": "Tarih",
+    "technology": "Teknoloji",
+    "environment": "Çevre"
+  },
+  "levels": {
+    "basic": "Temel",
+    "moderate": "Orta",
+    "advanced": "İleri"
+  },
+  "starter": {
+    "welcome": "Öğren — Zikr Deen",
+    "description": "Bilimsel bilgi. İslami bağlantı. Düşünme."
+  }
+}

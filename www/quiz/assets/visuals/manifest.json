@@ -1,0 +1,86 @@
+{
+  "assets": [
+    {
+      "id": "cell-structure-2d",
+      "path": "./assets/visuals/biology/cell-structure-2d.svg",
+      "format": "svg",
+      "pixel_width": 1200,
+      "pixel_height": 700,
+      "alt": "cell structure 2d",
+      "license": "Original project vector illustration",
+      "review_status": "prototype — subject-matter review required"
+    },
+    {
+      "id": "source-verification-2d",
+      "path": "./assets/visuals/history/source-verification-2d.svg",
+      "format": "svg",
+      "pixel_width": 1200,
+      "pixel_height": 700,
+      "alt": "source verification 2d",
+      "license": "Original project vector illustration",
+      "review_status": "prototype — subject-matter review required"
+    },
+    {
+      "id": "geometry-symmetry-2d",
+      "path": "./assets/visuals/mathematics/geometry-symmetry-2d.svg",
+      "format": "svg",
+      "pixel_width": 1200,
+      "pixel_height": 700,
+      "alt": "geometry symmetry 2d",
+      "license": "Original project vector illustration",
+      "review_status": "prototype — subject-matter review required"
+    },
+    {
+      "id": "earth-day-night-2d",
+      "path": "./assets/visuals/physics/earth-day-night-2d.svg",
+      "format": "svg",
+      "pixel_width": 1200,
+      "pixel_height": 700,
+      "alt": "earth day night 2d",
+      "license": "Original project vector illustration",
+      "review_status": "prototype — subject-matter review required"
+    },
+    {
+      "id": "word-study-template",
+      "path": "./assets/visuals/quran-arabic/word-study-template.svg",
+      "format": "svg",
+      "pixel_width": 1200,
+      "pixel_height": 700,
+      "alt": "word study template",
+      "license": "Original project vector illustration",
+      "review_status": "prototype — subject-matter review required"
+    },
+    {
+      "id": "ai-verification-2d",
+      "path": "./assets/visuals/technology/ai-verification-2d.svg",
+      "format": "svg",
+      "pixel_width": 1200,
+      "pixel_height": 700,
+      "alt": "ai verification 2d",
+      "license": "Original project vector illustration",
+      "review_status": "prototype — subject-matter review required"
+    },
+    {
+      "id": "brain-overview-2d",
+      "path": "./assets/visuals/biology/brain-overview-2d.svg",
+      "format": "svg",
+      "pixel_width": 900,
+      "pixel_height": 520,
+      "alt": "Simplified side-view brain diagram identifying cerebrum, cerebellum, brainstem and hippocampus",
+      "license": "Original project vector illustration",
+      "review_status": "prototype — subject-matter review required",
+      "fallback_2d": null
+    },
+    {
+      "id": "neuron-synapse-2d",
+      "path": "./assets/visuals/biology/neuron-synapse-2d.svg",
+      "format": "svg",
+      "pixel_width": 1000,
+      "pixel_height": 480,
+      "alt": "Simplified neuron diagram showing dendrites, cell body, axon, terminals and synapse",
+      "license": "Original project vector illustration",
+      "review_status": "prototype — subject-matter review required",
+      "fallback_2d": null
+    }
+  ]
+}

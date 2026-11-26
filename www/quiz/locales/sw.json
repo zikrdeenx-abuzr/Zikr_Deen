@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "sw",
+    "nativeName": "Kiswahili",
+    "englishName": "Swahili",
+    "dir": "ltr",
+    "speechLocale": "sw-TZ",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Mwanzo",
+    "categories": "Makundi",
+    "progress": "Maendeleo yangu",
+    "library": "Maktaba ya kujifunza",
+    "ask": "Uliza",
+    "chooseLanguage": "Chagua lugha",
+    "learn": "Jifunze",
+    "explore": "Chunguza",
+    "checkAnswer": "Kagua jibu",
+    "basic": "Msingi",
+    "moderate": "Wastani",
+    "advanced": "Juu",
+    "biology": "Biolojia",
+    "physics": "Fizikia",
+    "mathematics": "Hisabati",
+    "quranArabic": "Qurani na Kiarabu",
+    "islamicStudies": "Masomo ya Kiislamu",
+    "history": "Historia",
+    "technology": "Teknolojia",
+    "environment": "Mazingira",
+    "loading": "Inapakia…",
+    "retry": "Jaribu tena",
+    "scientificKnowledge": "Maarifa ya kisayansi",
+    "islamicConnection": "Uhusiano wa Kiislamu",
+    "reflection": "Tafakari",
+    "reviewRequired": "Ukaguzi unahitajika kabla ya uzinduzi wa umma"
+  },
+  "categories": {
+    "biology": "Biolojia",
+    "physics": "Fizikia",
+    "mathematics": "Hisabati",
+    "quranArabic": "Qurani na Kiarabu",
+    "islamicStudies": "Masomo ya Kiislamu",
+    "history": "Historia",
+    "technology": "Teknolojia",
+    "environment": "Mazingira"
+  },
+  "levels": {
+    "basic": "Msingi",
+    "moderate": "Wastani",
+    "advanced": "Juu"
+  },
+  "starter": {
+    "welcome": "Jifunze — Zikr Deen",
+    "description": "Maarifa ya kisayansi. Uhusiano wa Kiislamu. Tafakari."
+  }
+}

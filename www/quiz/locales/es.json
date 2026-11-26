@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "es",
+    "nativeName": "Español",
+    "englishName": "Spanish",
+    "dir": "ltr",
+    "speechLocale": "es-ES",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Inicio",
+    "categories": "Categorías",
+    "progress": "Mi progreso",
+    "library": "Biblioteca de aprendizaje",
+    "ask": "Preguntar",
+    "chooseLanguage": "Elegir idioma",
+    "learn": "Aprender",
+    "explore": "Explorar",
+    "checkAnswer": "Comprobar respuesta",
+    "basic": "Básico",
+    "moderate": "Intermedio",
+    "advanced": "Avanzado",
+    "biology": "Biología",
+    "physics": "Física",
+    "mathematics": "Matemáticas",
+    "quranArabic": "Corán y árabe",
+    "islamicStudies": "Estudios islámicos",
+    "history": "Historia",
+    "technology": "Tecnología",
+    "environment": "Medio ambiente",
+    "loading": "Cargando…",
+    "retry": "Intentar de nuevo",
+    "scientificKnowledge": "Conocimiento científico",
+    "islamicConnection": "Conexión islámica",
+    "reflection": "Reflexión",
+    "reviewRequired": "Se requiere revisión antes del lanzamiento público"
+  },
+  "categories": {
+    "biology": "Biología",
+    "physics": "Física",
+    "mathematics": "Matemáticas",
+    "quranArabic": "Corán y árabe",
+    "islamicStudies": "Estudios islámicos",
+    "history": "Historia",
+    "technology": "Tecnología",
+    "environment": "Medio ambiente"
+  },
+  "levels": {
+    "basic": "Básico",
+    "moderate": "Intermedio",
+    "advanced": "Avanzado"
+  },
+  "starter": {
+    "welcome": "Aprender — Zikr Deen",
+    "description": "Conocimiento científico. Conexión islámica. Reflexión."
+  }
+}

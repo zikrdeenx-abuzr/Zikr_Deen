@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "uz",
+    "nativeName": "Oʻzbekcha",
+    "englishName": "Uzbek",
+    "dir": "ltr",
+    "speechLocale": "uz-UZ",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Bosh sahifa",
+    "categories": "Kategoriyalar",
+    "progress": "Mening rivojlanishim",
+    "library": "O‘quv kutubxonasi",
+    "ask": "So‘rash",
+    "chooseLanguage": "Tilni tanlang",
+    "learn": "O‘rganish",
+    "explore": "Tadqiq qilish",
+    "checkAnswer": "Javobni tekshirish",
+    "basic": "Boshlang‘ich",
+    "moderate": "O‘rta",
+    "advanced": "Yuqori",
+    "biology": "Biologiya",
+    "physics": "Fizika",
+    "mathematics": "Matematika",
+    "quranArabic": "Qur’on va arab tili",
+    "islamicStudies": "Islomiy bilimlar",
+    "history": "Tarix",
+    "technology": "Texnologiya",
+    "environment": "Atrof-muhit",
+    "loading": "Yuklanmoqda…",
+    "retry": "Qayta urinib ko‘ring",
+    "scientificKnowledge": "Ilmiy bilim",
+    "islamicConnection": "Islomiy bog‘liqlik",
+    "reflection": "Tafakkur",
+    "reviewRequired": "Ommaga chiqarishdan oldin tekshiruv zarur"
+  },
+  "categories": {
+    "biology": "Biologiya",
+    "physics": "Fizika",
+    "mathematics": "Matematika",
+    "quranArabic": "Qur’on va arab tili",
+    "islamicStudies": "Islomiy bilimlar",
+    "history": "Tarix",
+    "technology": "Texnologiya",
+    "environment": "Atrof-muhit"
+  },
+  "levels": {
+    "basic": "Boshlang‘ich",
+    "moderate": "O‘rta",
+    "advanced": "Yuqori"
+  },
+  "starter": {
+    "welcome": "O‘rganish — Zikr Deen",
+    "description": "Ilmiy bilim. Islomiy bog‘liqlik. Tafakkur."
+  }
+}

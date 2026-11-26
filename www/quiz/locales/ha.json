@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "ha",
+    "nativeName": "Hausa",
+    "englishName": "Hausa",
+    "dir": "ltr",
+    "speechLocale": "ha-NG",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Gida",
+    "categories": "Rukuni",
+    "progress": "Ci gabana",
+    "library": "Laburaren koyo",
+    "ask": "Tambaya",
+    "chooseLanguage": "Zaɓi harshe",
+    "learn": "Koyi",
+    "explore": "Bincika",
+    "checkAnswer": "Duba amsa",
+    "basic": "Matakin farko",
+    "moderate": "Matsakaici",
+    "advanced": "Babba",
+    "biology": "Ilimin halittu",
+    "physics": "Kimiyyar lissafi",
+    "mathematics": "Lissafi",
+    "quranArabic": "Alƙur’ani da Larabci",
+    "islamicStudies": "Nazarin Musulunci",
+    "history": "Tarihi",
+    "technology": "Fasaha",
+    "environment": "Muhalli",
+    "loading": "Ana lodawa…",
+    "retry": "Sake gwadawa",
+    "scientificKnowledge": "Ilimin kimiyya",
+    "islamicConnection": "Haɗin Musulunci",
+    "reflection": "Tunani",
+    "reviewRequired": "Ana buƙatar tantancewa kafin sakin jama’a"
+  },
+  "categories": {
+    "biology": "Ilimin halittu",
+    "physics": "Kimiyyar lissafi",
+    "mathematics": "Lissafi",
+    "quranArabic": "Alƙur’ani da Larabci",
+    "islamicStudies": "Nazarin Musulunci",
+    "history": "Tarihi",
+    "technology": "Fasaha",
+    "environment": "Muhalli"
+  },
+  "levels": {
+    "basic": "Matakin farko",
+    "moderate": "Matsakaici",
+    "advanced": "Babba"
+  },
+  "starter": {
+    "welcome": "Koyi — Zikr Deen",
+    "description": "Ilimin kimiyya. Haɗin Musulunci. Tunani."
+  }
+}

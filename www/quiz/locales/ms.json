@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "ms",
+    "nativeName": "Bahasa Melayu",
+    "englishName": "Malay",
+    "dir": "ltr",
+    "speechLocale": "ms-MY",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Laman utama",
+    "categories": "Kategori",
+    "progress": "Kemajuan saya",
+    "library": "Perpustakaan pembelajaran",
+    "ask": "Tanya",
+    "chooseLanguage": "Pilih bahasa",
+    "learn": "Belajar",
+    "explore": "Teroka",
+    "checkAnswer": "Semak jawapan",
+    "basic": "Asas",
+    "moderate": "Sederhana",
+    "advanced": "Lanjutan",
+    "biology": "Biologi",
+    "physics": "Fizik",
+    "mathematics": "Matematik",
+    "quranArabic": "Al-Quran & Arab",
+    "islamicStudies": "Pengajian Islam",
+    "history": "Sejarah",
+    "technology": "Teknologi",
+    "environment": "Alam sekitar",
+    "loading": "Sedang dimuatkan…",
+    "retry": "Cuba lagi",
+    "scientificKnowledge": "Pengetahuan sains",
+    "islamicConnection": "Hubungan Islam",
+    "reflection": "Renungan",
+    "reviewRequired": "Semakan diperlukan sebelum pelancaran umum"
+  },
+  "categories": {
+    "biology": "Biologi",
+    "physics": "Fizik",
+    "mathematics": "Matematik",
+    "quranArabic": "Al-Quran & Arab",
+    "islamicStudies": "Pengajian Islam",
+    "history": "Sejarah",
+    "technology": "Teknologi",
+    "environment": "Alam sekitar"
+  },
+  "levels": {
+    "basic": "Asas",
+    "moderate": "Sederhana",
+    "advanced": "Lanjutan"
+  },
+  "starter": {
+    "welcome": "Belajar — Zikr Deen",
+    "description": "Pengetahuan sains. Hubungan Islam. Renungan."
+  }
+}

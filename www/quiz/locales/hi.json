@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "hi",
+    "nativeName": "हिन्दी",
+    "englishName": "Hindi",
+    "dir": "ltr",
+    "speechLocale": "hi-IN",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "होम",
+    "categories": "श्रेणियाँ",
+    "progress": "मेरी प्रगति",
+    "library": "लर्निंग लाइब्रेरी",
+    "ask": "पूछें",
+    "chooseLanguage": "भाषा चुनें",
+    "learn": "सीखें",
+    "explore": "खोजें",
+    "checkAnswer": "उत्तर जाँचें",
+    "basic": "बुनियादी",
+    "moderate": "मध्यम",
+    "advanced": "उन्नत",
+    "biology": "जीवविज्ञान",
+    "physics": "भौतिकी",
+    "mathematics": "गणित",
+    "quranArabic": "क़ुरआन और अरबी",
+    "islamicStudies": "इस्लामी अध्ययन",
+    "history": "इतिहास",
+    "technology": "प्रौद्योगिकी",
+    "environment": "पर्यावरण",
+    "loading": "लोड हो रहा है…",
+    "retry": "फिर कोशिश करें",
+    "scientificKnowledge": "वैज्ञानिक ज्ञान",
+    "islamicConnection": "इस्लामी संबंध",
+    "reflection": "चिंतन",
+    "reviewRequired": "सार्वजनिक लॉन्च से पहले समीक्षा आवश्यक है"
+  },
+  "categories": {
+    "biology": "जीवविज्ञान",
+    "physics": "भौतिकी",
+    "mathematics": "गणित",
+    "quranArabic": "क़ुरआन और अरबी",
+    "islamicStudies": "इस्लामी अध्ययन",
+    "history": "इतिहास",
+    "technology": "प्रौद्योगिकी",
+    "environment": "पर्यावरण"
+  },
+  "levels": {
+    "basic": "बुनियादी",
+    "moderate": "मध्यम",
+    "advanced": "उन्नत"
+  },
+  "starter": {
+    "welcome": "सीखें — Zikr Deen",
+    "description": "वैज्ञानिक ज्ञान. इस्लामी संबंध. चिंतन."
+  }
+}

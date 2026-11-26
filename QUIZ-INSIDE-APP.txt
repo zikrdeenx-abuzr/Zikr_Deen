@@ -1,0 +1,10 @@
+ZIKR DEEN — QUIZ AB APP KE ANDAR (v13)
+======================================
+Quiz ab www/quiz/ folder mein hai aur APK ke saath chalta hai. Alag server / Render / database nahi chahiye.
+Learn tab > "Islamic Quiz" card se khulta hai. Upar "← App" button se wapas.
+
+Chalta hai (offline): Quiz (14 categories, 3 levels), Learning Lab, Brain Master, 3D Visual Studio, 20 languages,
+  progress / streak / XP phone mein save, Ask page (internet + GEMINI_API_KEY secret), awaaz (Gemini, warna phone ki awaaz).
+Band hai (server chahiye): leaderboard, friends/community, naye shared AI questions, admin review.
+Questions: abhi quiz ke andar bane 90 sawal (www/quiz/index.html ke QUESTIONS mein). Naye sawal wahin jode jaate hain.
+Ye patch js/folders.js ko bhi badalta hai (Quiz card). Project zip badlo to ye patch dobara lagana.

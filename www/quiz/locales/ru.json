@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "ru",
+    "nativeName": "Русский",
+    "englishName": "Russian",
+    "dir": "ltr",
+    "speechLocale": "ru-RU",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Главная",
+    "categories": "Категории",
+    "progress": "Мой прогресс",
+    "library": "Библиотека обучения",
+    "ask": "Спросить",
+    "chooseLanguage": "Выберите язык",
+    "learn": "Учиться",
+    "explore": "Исследовать",
+    "checkAnswer": "Проверить ответ",
+    "basic": "Начальный",
+    "moderate": "Средний",
+    "advanced": "Продвинутый",
+    "biology": "Биология",
+    "physics": "Физика",
+    "mathematics": "Математика",
+    "quranArabic": "Коран и арабский",
+    "islamicStudies": "Исламоведение",
+    "history": "История",
+    "technology": "Технологии",
+    "environment": "Окружающая среда",
+    "loading": "Загрузка…",
+    "retry": "Повторить",
+    "scientificKnowledge": "Научные знания",
+    "islamicConnection": "Исламская связь",
+    "reflection": "Размышление",
+    "reviewRequired": "Перед публичным запуском необходима проверка"
+  },
+  "categories": {
+    "biology": "Биология",
+    "physics": "Физика",
+    "mathematics": "Математика",
+    "quranArabic": "Коран и арабский",
+    "islamicStudies": "Исламоведение",
+    "history": "История",
+    "technology": "Технологии",
+    "environment": "Окружающая среда"
+  },
+  "levels": {
+    "basic": "Начальный",
+    "moderate": "Средний",
+    "advanced": "Продвинутый"
+  },
+  "starter": {
+    "welcome": "Учиться — Zikr Deen",
+    "description": "Научные знания. Исламская связь. Размышление."
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "en",
+    "nativeName": "English",
+    "englishName": "English",
+    "dir": "ltr",
+    "speechLocale": "en-US",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Home",
+    "categories": "Categories",
+    "progress": "My progress",
+    "library": "Learning library",
+    "ask": "Ask",
+    "chooseLanguage": "Choose language",
+    "learn": "Learn",
+    "explore": "Explore",
+    "checkAnswer": "Check answer",
+    "basic": "Basic",
+    "moderate": "Moderate",
+    "advanced": "Advanced",
+    "biology": "Biology",
+    "physics": "Physics",
+    "mathematics": "Mathematics",
+    "quranArabic": "Quran & Arabic",
+    "islamicStudies": "Islamic Studies",
+    "history": "History",
+    "technology": "Technology",
+    "environment": "Environment",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "scientificKnowledge": "Scientific knowledge",
+    "islamicConnection": "Islamic connection",
+    "reflection": "Reflection",
+    "reviewRequired": "Review required before public launch"
+  },
+  "categories": {
+    "biology": "Biology",
+    "physics": "Physics",
+    "mathematics": "Mathematics",
+    "quranArabic": "Quran & Arabic",
+    "islamicStudies": "Islamic Studies",
+    "history": "History",
+    "technology": "Technology",
+    "environment": "Environment"
+  },
+  "levels": {
+    "basic": "Basic",
+    "moderate": "Moderate",
+    "advanced": "Advanced"
+  },
+  "starter": {
+    "welcome": "Learn — Zikr Deen",
+    "description": "Scientific knowledge. Islamic connection. Reflection."
+  }
+}

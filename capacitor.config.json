@@ -1,0 +1,6 @@
+{
+  "appId": "com.zikrdeen.app",
+  "appName": "Zikr Deen",
+  "webDir": "www",
+  "android": { "allowMixedContent": false }
+}

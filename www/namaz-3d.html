@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Namaz – Zikr Deen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700&family=Amiri:wght@400;700&display=swap">
+<style>
+:root{--bg:#fbf4e3;--card:#fffaf0;--ink:#3a2a22;--mut:#8a7766;--acc:#7a1f2e;--gold:#c9a24a;--line:#e6d9bd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1412;--card:#251b18;--ink:#f1e6d2;--mut:#a89684;--acc:#e0a24a;--line:#3a2c26;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1412;--card:#251b18;--ink:#f1e6d2;--mut:#a89684;--acc:#e0a24a;--line:#3a2c26;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Mukta',system-ui,sans-serif;padding-bottom:24px;-webkit-tap-highlight-color:transparent}
+header{position:relative;padding:14px 16px 6px;text-align:center}
+h1{margin:0;font-family:'Amiri',serif;font-size:25px;color:var(--acc);padding:0 74px}
+.sub{color:var(--mut);font-size:13px}
+.hd-back{position:absolute;left:12px;top:14px;padding:6px 11px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--acc);font:700 13px 'Mukta',sans-serif;text-decoration:none}
+.hd-lang{position:absolute;right:12px;top:14px;max-width:96px;padding:6px 6px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 12px 'Mukta',sans-serif}
+:root[dir="rtl"] .hd-back{left:auto;right:12px}
+:root[dir="rtl"] .hd-lang{right:auto;left:12px}
+#stage{position:relative;margin:8px auto;width:min(calc(100% - 20px),calc(62vh*.562));aspect-ratio:380/676;border-radius:18px;background:#fdfaef;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;border:1px solid var(--line);contain:layout paint}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+#vid{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fdfaef;display:none}
+#vc{position:absolute;left:8px;right:8px;bottom:8px;display:none;align-items:center;gap:8px;background:rgba(255,250,240,.93);border:1px solid var(--line);border-radius:14px;padding:5px 10px;color:var(--ink)}
+#vc button{border:0;background:none;font-size:20px;color:var(--acc);padding:2px 6px}
+#vs{flex:1;accent-color:var(--acc);min-width:0}
+#vt{font-size:12px;color:var(--mut);min-width:34px;text-align:right}
+.tag{position:absolute;left:10px;top:10px;font-size:12px;font-weight:600;color:#7a1f2e;background:#fff;border:1px solid #e6d9bd;border-radius:10px;padding:3px 9px}
+.ldr{position:absolute;right:10px;top:10px;font-size:11px;font-weight:600;color:#7a1f2e;background:rgba(255,255,255,.92);border:1px solid #e6d9bd;border-radius:10px;padding:2px 8px;display:none}
+.ldr.on{display:block}
+.hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:12px;color:#8a7766;pointer-events:none}
+.chips{display:flex;gap:8px;justify-content:center;margin:2px 10px 6px;flex-wrap:wrap}
+.chips button{padding:7px 14px;border-radius:20px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 13px 'Mukta',sans-serif;cursor:pointer}
+.panel{margin:8px 12px;padding:14px;border:1px solid var(--line);background:var(--card);border-radius:16px}
+.num{font-size:12px;color:var(--mut);font-weight:600}
+h2{margin:2px 0 6px;font-size:20px;color:var(--acc)}
+.panel p{margin:0;font-size:15px;line-height:1.5}
+.rec-list{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.rec-card{padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.rec-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.rec-lbl{font-size:13px;font-weight:700;color:var(--acc)}
+.rec-play{padding:4px 10px;border-radius:16px;border:1px solid var(--gold);background:var(--card);color:var(--ink);font:700 12px 'Mukta',sans-serif;cursor:pointer;flex:none}
+.rec-play.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.rec-ar{font-family:'Amiri',serif;font-size:22px;line-height:1.85;direction:rtl;text-align:right;color:var(--ink);margin:4px 0 6px}
+.rec-ro{font-size:14px;font-weight:600;color:var(--ink);line-height:1.45;margin:2px 0}
+.rec-hi{font-size:13px;color:var(--mut);line-height:1.45;margin:3px 0 0}
+.nav{display:flex;gap:10px;margin:8px 12px}
+.nav button{flex:1;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 15px 'Mukta',sans-serif;cursor:pointer}
+.nav .next{background:var(--acc);color:#fff;border-color:var(--acc)}
+.nav button:disabled{opacity:.4}
+.row{display:flex;gap:10px;margin:0 12px 6px}
+.row button{flex:1;padding:11px;border-radius:12px;border:1px solid var(--gold);background:var(--card);color:var(--ink);font:700 14px 'Mukta',sans-serif;cursor:pointer}
+.row button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.note{display:none;margin:4px 12px 14px;padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:13px;color:var(--mut);line-height:1.55}
+.note.show{display:block}
+.note b{color:var(--ink)}
+.note hr{border:0;border-top:1px solid var(--line);margin:8px 0}
+.astat{margin:0 12px 6px;font-size:12px;color:var(--acc);min-height:16px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <a class="hd-back" href="./index.html#/folders" onclick="if(history.length>1&&document.referrer){history.back();return false}" aria-label="Back to Zikr Deen app">← App</a>
+  <h1>Namaz ka Tareeqa</h1>
+  <div class="sub">Ungli se ghumayein</div>
+  <select id="namazLang" class="hd-lang no-i18n" aria-label="App Language"></select>
+</header>
+<div id="stage"><canvas id="cv"></canvas><video id="vid" playsinline preload="none" disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate nofullscreen" oncontextmenu="return false" draggable="false"></video><div id="vc"><button id="vp" aria-label="Play">▶</button><input id="vs" type="range" min="0" max="1000" value="0" aria-label="Seek"><span id="vt">0:00</span></div><div class="tag" id="tag"></div><div class="ldr" id="ldr">360°…</div><div class="hint" id="hint"></div></div>
+<div class="chips" id="chips"></div>
+<div class="panel">
+  <div class="num" id="num"></div>
+  <h2 id="ttl"></h2>
+  <p id="dsc"></p>
+  <div class="rec-list" id="recBox"></div>
+</div>
+<div class="nav"><button id="prev">← Pichhla</button><button id="next" class="next">Agla →</button></div>
+<div class="row"><button id="aud">▶ Audio Suno</button><button id="dal">Dalil</button></div>
+<div class="astat" id="astat"></div>
+<div class="note" id="note"></div>
+<script src="./js/ask-config.js"></script>
+<script src="./js/app-i18n.js"></script>
+<script>
+const REFS=[[["Qiyam (khade hona — Quran)", "Surah Al-Baqarah 2:238: Allah ke saamne adab se khade raho."], ["Niyyat (dil ka irada)", "Sahih al-Bukhari 1; Sahih Muslim 1907 — Aamaal ka daromadar niyyaton par hai (niyyat dil mein ki jaati hai)."], ["Qibla rukh khade hona aur itminan (Musi' as-Salat)", "Sahih al-Bukhari 757, 793, 6251; Abu Dawud 859; Ibn Majah 1060"], ["Khade hokar namaz padhna (jab qudrat ho)", "Sahih al-Bukhari 1117 — Khade hokar namaz padho; agar taaqat na ho to baith kar."], ["Nazar sajde ki jagah par", "Al-Mustadrak al-Hakim 1761; Sunan al-Kubra al-Bayhaqi (Hanafi, Shafi'i, Hanbali; Maliki maslak mein saamne dekhna mustahab)."]], [["Takbeer ('Allahu Akbar') se namaz shuru karna", "Sahih al-Bukhari 757; Abu Dawud 61; Jami at-Tirmidhi 3"], ["Haath kandhon tak uthana (Ibn Umar RA / Abu Humayd RA)", "Sahih al-Bukhari 735, 828; Sahih Muslim 390; Abu Dawud 721, 730; Jami at-Tirmidhi 255, 304; Ibn Majah 858, 1061"], ["Haath kaanon ke barabar uthana (Malik bin Huwayrith RA / Wa'il bin Hujr RA)", "Sahih Muslim 391, 401; Abu Dawud 745; Sunan an-Nasa'i 876, 880"], ["Note", "Haath kandhon tak ya kaanon ki lau tak uthana — dono sahih ahadees se sabit hain."]], [["Daayan haath baayen par rakhna (Sahl bin Sa'd RA)", "Sahih al-Bukhari 740"], ["Haath ki pusht, kalaayi aur baazu par (Wa'il bin Hujr RA)", "Sahih Muslim 401; Abu Dawud 726, 727; Sunan an-Nasa'i 889"], ["Jagah (Maslak note)", "Seene par: Ibn Khuzaymah 479; Musnad Ahmad 22313 (Shafi'i / Ahl-e-Hadith). Naaf ke neeche: Abu Dawud 756, 758 (Hanafi / Hanbali)."], ["Sana (Shuruaati dua)", "Abu Dawud 775, 776; Jami at-Tirmidhi 243; Sunan an-Nasa'i 899 (aur 'Allahumma ba'id...': Sahih al-Bukhari 744; Sahih Muslim 598)."], ["Surah Al-Fatihah (Alhamdu) lazmi hai aur Ameen", "Sahih al-Bukhari 756, 780; Sahih Muslim 394, 410"], ["Fatihah ke baad Surah milana", "Sahih al-Bukhari 757, 776; Sahih Muslim 451"]], [["Ruku mein jaate waqt Takbeer ('Allahu Akbar')", "Sahih al-Bukhari 789"], ["Ruku ki Tasbeeh ('Subhana Rabbiyal-Azim')", "Sahih Muslim 772; Abu Dawud 870; Jami at-Tirmidhi 262; Ibn Majah 888"], ["Haath ghutnon par, peeth seedhi, sar barabar (Abu Humayd RA / Aisha RA)", "Sahih al-Bukhari 828; Sahih Muslim 498; Abu Dawud 730; Jami at-Tirmidhi 304; Sunan an-Nasa'i 1038"], ["Itminan se ruku karna", "Sahih al-Bukhari 757, 793"], ["Rafa' al-Yadain (Maslak note)", "Ruku se pehle haath uthana: Sahih al-Bukhari 735, 736; Sahih Muslim 390 (Shafi'i, Hanbali, Ahl-e-Hadith). Sirf pehli takbeer par: Abu Dawud 748; Jami at-Tirmidhi 257 (Hanafi, Maliki)."]], [["Sami'Allahu liman hamidah aur Rabbana wa lakal hamd", "Sahih al-Bukhari 735, 736, 789, 795, 796; Sahih Muslim 390, 409"], ["Seedha itminan se khade hona jab tak har haddi apni jagah aa jaaye", "Sahih al-Bukhari 757, 793, 828; Abu Dawud 730"], ["Qauma mein Rafa' al-Yadain", "Sahih al-Bukhari 735, 736; Sahih Muslim 390, 391 (Hanafi maslak mein haath nahi uthaye jaate)."]], [["Sajde mein jaate waqt Takbeer ('Allahu Akbar')", "Sahih al-Bukhari 789"], ["Sajde ki Tasbeeh ('Subhana Rabbiyal-A'la')", "Sahih Muslim 772; Abu Dawud 870; Jami at-Tirmidhi 262; Ibn Majah 888"], ["Saat (7) angon par sajda: peshani+naak, dono hatheliyan, dono ghutne, dono paon ki ungliyan", "Sahih al-Bukhari 812, 815; Sahih Muslim 490; Abu Dawud 889; Jami at-Tirmidhi 273; Ibn Majah 1040"], ["Kohniyan zameen se uthi, baazu alag, paon ki ungliyan Qibla rukh", "Sahih al-Bukhari 390, 828"], ["Sajde mein dua ki fazilat (Abu Hurayrah RA)", "Sahih Muslim 482 — Banda sajde mein apne Rabb ke sabse qareeb hota hai."], ["Pehle ghutne ya pehle haath (Maslak note)", "Pehle ghutne: Abu Dawud 838; Tirmidhi 268 (Hanafi, Shafi'i, Hanbali). Pehle haath: Abu Dawud 840; Nasa'i 1091 (Maliki, Ahl-e-Hadith)."]], [["Pehle sajde se uthte waqt aur doosre sajde mein jaate waqt Takbeer", "Sahih al-Bukhari 789, 803"], ["Do sajdon ke beech ki Dua ('Rabbighfir li, Rabbighfir li')", "Abu Dawud 874; Sunan an-Nasa'i 1145; Ibn Majah 897 (aur lambi dua 'Allahummaghfir li warhamni...': Abu Dawud 850; Jami at-Tirmidhi 284)."], ["Baayan paon bichhana, daayan paon khada (Iftirash) aur itminan", "Sahih al-Bukhari 757, 793, 828; Abu Dawud 730; Sunan an-Nasa'i 1158"]], [["Attahiyyat / Tashahhud ke alfaz (Ibn Mas'ud RA)", "Sahih al-Bukhari 831, 6265; Sahih Muslim 402"], ["Shahadat ki ungli ka ishara aur haath rakhna", "Sahih Muslim 579 (Ibn Zubayr RA), 580 (Ibn Umar RA); Sunan an-Nasa'i 1267; Ibn Majah 912"], ["Durood-e-Ibrahim (Aakhiri Qa'dah mein — Ka'b bin Ujrah RA)", "Sahih al-Bukhari 3370, 4797, 6357; Sahih Muslim 406; Abu Dawud 976; Jami at-Tirmidhi 483; Ibn Majah 904"], ["Salam se pehle ki Dua (Aakhiri Qa'dah mein)", "Sahih Muslim 588 (4 cheezon se panaah); Sahih al-Bukhari 834, 835"], ["Baithak (Iftirash / Tawarruk) aur Teesri Rakaat", "Sahih al-Bukhari 828; Abu Dawud 730 (Pehli baithak mein iftirash, aakhiri mein tawarruk / Hanafi mein dono mein iftirash). Do rakaat ke baad khade hote waqt Rafa' al-Yadain: Sahih al-Bukhari 739; Abu Dawud 744."]], [["Daayen aur baayen salam, rukhsar ki safedi dikhna (Sa'd bin Abi Waqqas RA)", "Sahih Muslim 582; Sunan an-Nasa'i 1316, 1317; Ibn Majah 914"], ["Alfaz: 'Assalamu alaikum wa rahmatullah' (do baar)", "Abu Dawud 996; Jami at-Tirmidhi 295; Ibn Majah 916"], ["Salam ke baad Istighfar aur Dua", "Sahih Muslim 591 (3 baar Astaghfirullah + Allahumma antas-salam...); Ibn Majah 924"]], [["Poori Namaz ki jhalak", "Is video ke har pose ko upar ke 9 steps ke verified Hadith hawalon aur audio ke saath milakar seekhein."]]];
+const SET_COUNTS=[48, 48, 48, 36, 48, 48, 48, 9, 0];
+const VID_SRC='./assets/namaz3d/full-namaz.mp4';
+const LAB=['Aage se','Side','Peeche se','Side'];
+const STEPS=[{"setIdx": 0, "t": "1. Qiyam (Khade hona aur Niyyat)", "d": "Qibla rukh seedha khade hon, dil mein namaz ki niyyat karein, nazar sajde ki jagah par aur dono paon Qibla rukh rakhein.", "rec": [{"lbl": "Niyyat (Dil mein)", "ar": "", "ro": "Niyyat dil ka irada hai — jis waqt ki namaz padh rahe hain uska irada dil mein karein.", "hi": "Zubaan se bolna zaroori nahi; dil ka pakka irada kaafi hai."}]}, {"setIdx": 1, "t": "2. Takbeer-e-Tahreema", "d": "Dono haath kandhon ya kaanon ki lau tak uthayein, hatheliyan Qibla ki taraf rakhein, aur Takbeer kahein:", "rec": [{"lbl": "Takbeer", "ar": "اللَّهُ أَكْبَرُ", "ro": "Allahu Akbar", "hi": "Allah sabse bada hai.", "tts": "الله أكبر"}]}, {"setIdx": 2, "t": "3. Haath Bandhna aur Qira'at (Alhamdu)", "d": "Daayan haath baayen haath par baandh lein (seene par ya naaf ke neeche, maslak ke mutabiq). Phir Sana, Ta'awwuz, Bismillah, poori Surah Al-Fatihah (Alhamdu) + Ameen aur koi Surah padhein:", "rec": [{"lbl": "Sana (Pehli rakaat mein)", "ar": "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ وَتَبَارَكَ اسْمُكَ وَتَعَالَى جَدُّكَ وَلَا إِلَهَ غَيْرُكَ", "ro": "Subhanakallahumma wa bihamdika wa tabarakasmuka wa ta'ala jadduka wa la ilaha ghayruk", "hi": "Aye Allah, Tu paak hai apni tareef ke saath, Tera naam barkat wala hai, Teri shaan buland hai aur Tere siwa koi ma'bood nahi.", "tts": "سبحانك اللهم وبحمدك وتبارك اسمك وتعالى جدك ولا إله غيرك"}, {"lbl": "Ta'awwuz & Bismillah", "ar": "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ ۝ بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ", "ro": "A'uzu billahi minash-shaitanir-rajim. Bismillahir-Rahmanir-Rahim.", "hi": "Main shaitan mardood se Allah ki panaah maangta hoon. Allah ke naam se jo bada meharban, nihayat reham wala hai.", "tts": "أعوذ بالله من الشيطان الرجيم. بسم الله الرحمن الرحيم"}, {"lbl": "Surah Al-Fatihah (Alhamdu — Har rakaat mein)", "ar": "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ۝ ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ ۝ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ۝ مَٰلِكِ يَوْمِ ٱلدِّينِ ۝ إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ ۝ ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ ۝ صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ ۝ آمِين", "ro": "Al-hamdu lillahi Rabbil-'alamin. Ar-Rahmanir-Rahim. Maliki yawmid-din. Iyyaka na'budu wa iyyaka nasta'in. Ihdinas-siratal-mustaqim. Siratal-lazina an'amta 'alaihim ghairil-maghdubi 'alaihim wa lad-daallin. (Ameen)", "hi": "Tamaam tareefen Allah ke liye hain jo saare jahaanon ka Rabb hai… (Akhir mein aahista ya buland aawaz se 'Ameen' kahein).", "surah": 1, "from": 1, "to": 7}, {"lbl": "Surah milana (Misal: Surah Al-Ikhlas)", "ar": "قُلْ هُوَ ٱللَّهُ أَحَدٌ ۝ ٱللَّهُ ٱلصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌ", "ro": "Qul Huwallahu Ahad. Allahus-Samad. Lam yalid wa lam yulad. Wa lam yakul-lahu kufuwan ahad.", "hi": "Kaho: Woh Allah ek hai. Allah be-niyaz hai. Na uski koi aulaad hai aur na woh kisi se paida hua. Aur koi uske barabar nahi.", "surah": 112, "from": 1, "to": 4}]}, {"setIdx": 3, "t": "4. Ruku", "d": "Takbeer kehkar ruku mein jhukein (maslak ke mutabiq Rafa' al-Yadain karein). Dono haath ghutnon par mazbooti se rakhein, peeth seedhi aur sar peeth ke barabar rakhein:", "rec": [{"lbl": "Ruku mein jaate waqt Takbeer", "ar": "اللَّهُ أَكْبَرُ", "ro": "Allahu Akbar", "hi": "Allah sabse bada hai.", "tts": "الله أكبر"}, {"lbl": "Ruku ki Tasbeeh (kam az kam 3 baar)", "ar": "سُبْحَانَ رَبِّيَ الْعَظِيمِ", "ro": "Subhana Rabbiyal-Azim (3×)", "hi": "Paak hai mera Rabb jo bahut azmat wala hai.", "tts": "سبحان ربي العظيم، سبحان ربي العظيم، سبحان ربي العظيم"}]}, {"setIdx": 4, "t": "5. Ruku se uthna (Qauma)", "d": "Ruku se bilkul seedha khade hon jab tak har haddi apni jagah aa jaaye. Uthte waqt aur khade hokar yeh kahein:", "rec": [{"lbl": "Ruku se uthte waqt", "ar": "سَمِعَ اللَّهُ لِمَنْ حَمِدَهُ", "ro": "Sami'Allahu liman hamidah", "hi": "Allah ne uski sun li jisne Uski tareef ki.", "tts": "سمع الله لمن حمده"}, {"lbl": "Seedha khade hokar", "ar": "رَبَّنَا وَلَكَ الْحَمْدُ", "ro": "Rabbana wa lakal hamd", "hi": "Aye hamare Rabb, tamaam tareefen Tere hi liye hain.", "tts": "ربنا ولك الحمد"}]}, {"setIdx": 5, "t": "6. Sajda", "d": "Takbeer kehkar 7 angon par sajda karein: peshani + naak, dono hatheliyan, dono ghutne, aur dono paon ki ungliyan Qibla rukh. Kohniyan zameen se uthi rakhein:", "rec": [{"lbl": "Sajde mein jaate waqt Takbeer", "ar": "اللَّهُ أَكْبَرُ", "ro": "Allahu Akbar", "hi": "Allah sabse bada hai.", "tts": "الله أكبر"}, {"lbl": "Sajde ki Tasbeeh (kam az kam 3 baar)", "ar": "سُبْحَانَ رَبِّيَ الْأَعْلَى", "ro": "Subhana Rabbiyal-A'la (3×)", "hi": "Paak hai mera Rabb jo sabse buland hai.", "tts": "سبحان ربي الأعلى، سبحان ربي الأعلى، سبحان ربي الأعلى"}]}, {"setIdx": 6, "t": "7. Do Sajdon ke beech baithna (Jalsa)", "d": "Takbeer kehkar sajde se uthein, baayan paon bichha kar baithein aur daayan paon khada rakhein (Iftirash). Dua padhein, phir 'Allahu Akbar' kehkar doosra sajda karein:", "rec": [{"lbl": "Sajde se uthte waqt Takbeer", "ar": "اللَّهُ أَكْبَرُ", "ro": "Allahu Akbar", "hi": "Allah sabse bada hai.", "tts": "الله أكبر"}, {"lbl": "Jalsa ki Dua (2 baar)", "ar": "رَبِّ اغْفِرْ لِي ، رَبِّ اغْفِرْ لِي", "ro": "Rabbighfir li, Rabbighfir li", "hi": "Aye mere Rabb, mujhe maaf farma, mujhe maaf farma.", "tts": "رب اغفر لي، رب اغفر لي"}, {"lbl": "Doosre sajde ke liye Takbeer", "ar": "اللَّهُ أَكْبَرُ", "ro": "Allahu Akbar (phir doosra sajda karein)", "hi": "Doosra sajda karke 3 baar Subhana Rabbiyal-A'la padhein.", "tts": "الله أكبر"}]}, {"setIdx": 6, "t": "8. Qa'dah — Attahiyyat, Durood aur Dua", "d": "Doosre sajde se 'Allahu Akbar' kehkar baith jayein. Dono haath ranon/ghutnon par rakhein, daayen haath ki shahadat ki ungli se ishara karein. Pehli baithak mein sirf Attahiyyat (phir 3rd rakaat ke liye khade hon); aakhiri baithak mein Attahiyyat + Durood-e-Ibrahim + Dua padhein:", "rec": [{"lbl": "Attahiyyat (Tashahhud — Pehli aur Aakhiri dono baithak mein)", "ar": "التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللَّهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلَهَ إِلَّا اللَّهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ", "ro": "At-tahiyyatu lillahi was-salawatu wat-tayyibat, as-salamu 'alaika ayyuhan-Nabiyyu wa rahmatullahi wa barakatuh, as-salamu 'alaina wa 'ala 'ibadillahis-salihin. Ash-hadu an la ilaha illallahu wa ash-hadu anna Muhammadan 'abduhu wa rasuluh.", "hi": "Tamaam qawli, badani aur maali ibaadatein Allah ke liye hain. Aye Nabi ﷺ, aap par salam, Allah ki rehmat aur barkatein hon. Hum par aur Allah ke nek bandon par salam ho. Main gawahi deta hoon ki Allah ke siwa koi ma'bood nahi aur Muhammad ﷺ Uske bande aur Rasool hain.", "tts": "التحيات لله والصلوات والطيبات، السلام عليك أيها النبي ورحمة الله وبركاته، السلام علينا وعلى عباد الله الصالحين، أشهد أن لا إله إلا الله وأشهد أن محمداً عبده ورسوله"}, {"lbl": "Durood-e-Ibrahim (Aakhiri Qa'dah mein)", "ar": "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ، اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ", "ro": "Allahumma salli 'ala Muhammadin wa 'ala aali Muhammadin kama sallaita 'ala Ibrahima wa 'ala aali Ibrahima innaka Hamidum-Majid. Allahumma barik 'ala Muhammadin wa 'ala aali Muhammadin kama barakta 'ala Ibrahima wa 'ala aali Ibrahima innaka Hamidum-Majid.", "hi": "Aye Allah, Muhammad ﷺ aur unki aal par rehmat nazil farma jaise Tune Ibrahim (AS) aur unki aal par farmai, beshak Tu tareef wala aur buzurgi wala hai. Aur Muhammad ﷺ aur unki aal par barkat nazil farma jaise Tune Ibrahim (AS) aur unki aal par farmai.", "tts": "اللهم صل على محمد وعلى آل محمد كما صليت على إبراهيم وعلى آل إبراهيم إنك حميد مجيد، اللهم بارك على محمد وعلى آل محمد كما باركت على إبراهيم وعلى آل إبراهيم إنك حميد مجيد"}, {"lbl": "Salam se pehle ki Dua (Aakhiri Qa'dah mein)", "ar": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ جَهَنَّمَ، وَمِنْ عَذَابِ الْقَبْرِ، وَمِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ، وَمِنْ شَرِّ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ", "ro": "Allahumma inni a'uzu bika min 'azabi jahannam, wa min 'azabil-qabr, wa min fitnatil-mahya wal-mamat, wa min sharri fitnatil-masihid-dajjal.", "hi": "Aye Allah, main Jahannam ke azaab se, qabr ke azaab se, zindagi aur maut ke fitne se, aur Masih Dajjal ke fitne ke sharr se Teri panaah maangta hoon.", "tts": "اللهم إني أعوذ بك من عذاب جهنم، ومن عذاب القبر، ومن فتنة المحيا والممات، ومن شر فتنة المسيح الدجال"}]}, {"setIdx": 7, "t": "9. Salam Pherna", "d": "Pehle daayen kandhe ki taraf, phir baayen kandhe ki taraf gardan ghumayein (nazar kandhe par, badan seedha) aur Salam kahein. Phir Istighfar aur salam ke baad ki dua padhein:", "scrub": 1, "sens": 0.035, "labs": ["Seedha", "Seedha", "Daayen taraf salam", "Daayen taraf salam", "Daayen taraf salam", "Seedha", "Baayen taraf salam", "Baayen taraf salam", "Baayen taraf salam"], "chips": [[0, "Seedha"], [4, "Daayen salam"], [8, "Baayen salam"]], "rec": [{"lbl": "Daayen aur Baayen Salam (2 baar)", "ar": "السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ", "ro": "Assalamu 'alaikum wa rahmatullah", "hi": "Tum par salamati ho aur Allah ki rehmat ho.", "tts": "السلام عليكم ورحمة الله، السلام عليكم ورحمة الله"}, {"lbl": "Salam ke baad ka Zikr", "ar": "أَسْتَغْفِرُ اللَّهَ (٣×) — اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ", "ro": "Astaghfirullah (3×) — Allahumma antas-salam wa minkas-salam tabarakta ya zal-jalali wal-ikram", "hi": "Main Allah se maafi maangta hoon (3 baar). Aye Allah, Tu hi salamati wala hai aur Tujh hi se salamati hai, Tu bahut barkat wala hai aye azmat aur izzat wale.", "tts": "أستغفر الله، أستغفر الله، أستغفر الله. اللهم أنت السلام ومنك السلام تباركت يا ذا الجلال والإكرام"}]}, {"setIdx": 8, "t": "10. Poori Namaz (Video)", "d": "Qiyam se Takbeer, Qira'at, Ruku, Sajda, Attahiyyat aur Salam tak poori namaz ek nazar mein. Har step ko 360° mein audio aur dalil ke saath dekhne ke liye pichhle steps kholein.", "video": 1, "rec": []}];
+const $=id=>document.getElementById(id),cv=$('cv'),cx=cv.getContext('2d',{alpha:false});
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- Smart Lazy-Loaded 360° Frame Cache (keeps RAM ~85% lower on budget phones) ---------- */
+const IMS=SET_COUNTS.map(()=>null);
+function frameUrl(setIdx,fIdx){return './assets/namaz3d/s'+setIdx+'/'+String(fIdx).padStart(2,'0')+'.webp'}
+function ensureSet(setIdx,priority){
+  const N=SET_COUNTS[setIdx]||0;
+  if(!N)return [];
+  if(IMS[setIdx])return IMS[setIdx];
+  const arr=new Array(N);
+  let loaded=0;
+  const ldr=$('ldr');
+  if(priority&&ldr){ldr.textContent='360°…';ldr.classList.add('on')}
+  const order=[],seen=new Set();
+  const add=i=>{i=((i%N)+N)%N;if(!seen.has(i)){seen.add(i);order.push(i)}};
+  [0,Math.floor(N/4),Math.floor(N/2),Math.floor(3*N/4)].forEach(add);
+  for(let i=0;i<N;i+=2)add(i);
+  for(let i=1;i<N;i+=2)add(i);
+  for(let i=0;i<N;i++)arr[i]=null;
+  IMS[setIdx]=arr;
+  let cursor=0;
+  const batch=()=>{
+    if(IMS[setIdx]!==arr)return;
+    const step=priority?8:4;
+    for(let c=0;c<step&&cursor<order.length;c++){
+      const idx=order[cursor++];
+      const im=new Image();
+      im.decoding='async';
+      im.onload=()=>{
+        loaded++;
+        if(STEPS[si].setIdx===setIdx){
+          if(idx===0||loaded===N||loaded%4===0)draw();
+          if(loaded>=N&&ldr)ldr.classList.remove('on');
+        }
+      };
+      im.onerror=()=>{loaded++;if(STEPS[si].setIdx===setIdx&&loaded>=N&&ldr)ldr.classList.remove('on')};
+      im.src=frameUrl(setIdx,idx);
+      arr[idx]=im;
+    }
+    if(cursor<order.length)requestAnimationFrame(batch);
+  };
+  batch();
+  if(priority){
+    for(let k=0;k<IMS.length;k++){
+      if(IMS[k]&&Math.abs(k-setIdx)>1){
+        IMS[k].forEach(im=>{if(im){im.onload=null;im.onerror=null;im.src=''}});
+        IMS[k]=null;
+      }
+    }
+  }
+  return arr;
+}
+
+let si=0,pos=STEPS.map(()=>0),dx=null,vel=0,raf=0;
+
+/* ---------- Sync 20-language selector ---------- */
+(function(){
+  const sel=$('namazLang'),I=window.ZD_I18N;
+  if(sel&&I){
+    sel.innerHTML=I.optionsHTML();
+    sel.addEventListener('change',()=>I.set(sel.value));
+    document.addEventListener('zikr:languagechange',()=>{sel.value=I.get();I.apply()});
+  }
+})();
+
+/* ---------- Audio Engine: Real Qari MP3 (Surah Al-Fatihah & Ikhlas) + 3-tier Arabic TTS ---------- */
+const AUD=(function(){
+  let runId=0,playing=false,activeIdx=-1,curEl=null,actx=null,curSrc=null;
+  const pad3=n=>String(n).padStart(3,'0');
+  const getReciter=()=>{try{const s=JSON.parse(localStorage.getItem('zdApp_v1')||'{}');return (s.prefs&&s.prefs.reciter)||'Alafasy_128kbps'}catch(e){return'Alafasy_128kbps'}};
+  const NT=()=>window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.TextToSpeech;
+  const setStat=m=>{$('astat').textContent=m||''};
+  const paintBtns=()=>{
+    const I=window.ZD_I18N,t=k=>I?I.t(k):k;
+    const ab=$('aud');
+    ab.textContent=playing?t('⏹ Audio Rokein'):t('▶ Audio Suno');
+    ab.classList.toggle('on',playing);
+    document.querySelectorAll('.rec-play').forEach((b,idx)=>{
+      const on=playing&&activeIdx===idx;
+      b.classList.toggle('on',on);
+      b.textContent=on?'⏹':'▶';
+    });
+  };
+  function stop(){
+    runId++;playing=false;activeIdx=-1;
+    if(curEl){try{curEl.pause();curEl.src=''}catch(e){}curEl=null}
+    if(curSrc){try{curSrc.stop()}catch(e){}curSrc=null}
+    try{if(NT())NT().stop()}catch(e){}
+    if('speechSynthesis' in window)try{speechSynthesis.cancel()}catch(e){}
+    setStat('');paintBtns();
+  }
+  function playMp3(url,id){
+    return new Promise((res,rej)=>{
+      if(id!==runId)return res();
+      const a=new Audio(url);curEl=a;
+      a.onended=()=>{curEl=null;res()};
+      a.onerror=()=>{curEl=null;rej(new Error('mp3'))};
+      a.play().catch(e=>{curEl=null;rej(e)});
+    });
+  }
+  async function playSurah(surah,from,to,id){
+    const rec=getReciter();
+    for(let ay=from;ay<=to;ay++){
+      if(id!==runId)return;
+      setStat('Tilawat: Surah '+surah+':'+ay+' / '+to);
+      const url='https://everyayah.com/data/'+rec+'/'+pad3(surah)+pad3(ay)+'.mp3';
+      try{await playMp3(url,id)}
+      catch(e){
+        if(id!==runId)return;
+        if(rec!=='Alafasy_128kbps'){
+          await playMp3('https://everyayah.com/data/Alafasy_128kbps/'+pad3(surah)+pad3(ay)+'.mp3',id);
+        }else throw e;
+      }
+    }
+  }
+  async function geminiTts(text,id){
+    const CFG=window.ZD_ASK||{};
+    const proxy=String(CFG.proxy||'').trim();
+    const key=(CFG.key&&String(CFG.key).indexOf('__')!==0)?String(CFG.key):'';
+    if(!proxy&&!key)throw new Error('no-gemini');
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)throw new Error('no-ac');
+    if(!actx)actx=new AC();if(actx.state==='suspended')await actx.resume();
+    const model=CFG.voiceModel||'gemini-2.5-flash-preview-tts';
+    const body={contents:[{parts:[{text:'Recite this Islamic prayer phrase clearly in classical Arabic: '+text}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:'Charon'}}}}};
+    const headers={'Content-Type':'application/json'};
+    let url;
+    if(proxy){url=proxy;body.model=model}
+    else{url='https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent';headers['x-goog-api-key']=key}
+    const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
+    try{
+      const r=await fetch(url,{method:'POST',headers,body:JSON.stringify(body),signal:ctl.signal});
+      if(!r.ok)throw new Error('tts '+r.status);
+      const j=await r.json();
+      if(id!==runId)return;
+      const parts=(((j.candidates||[])[0]||{}).content||{}).parts||[];
+      const d=(parts.find(x=>x.inlineData&&x.inlineData.data)||{}).inlineData;
+      if(!d)throw new Error('empty');
+      const bin=atob(d.data),n=bin.length,u8=new Uint8Array(n);
+      for(let i=0;i<n;i++)u8[i]=bin.charCodeAt(i);
+      const mt=String(d.mimeType||'');
+      let buf;
+      if(!mt||/L16|pcm/i.test(mt)){
+        const rate=+((mt.match(/rate=(\d+)/)||[])[1])||24000,len=n>>1;
+        buf=actx.createBuffer(1,len,rate);const ch=buf.getChannelData(0),dv=new DataView(u8.buffer);
+        for(let i=0;i<len;i++)ch[i]=dv.getInt16(i*2,true)/32768;
+      }else buf=await actx.decodeAudioData(u8.buffer.slice(0));
+      if(id!==runId)return;
+      await new Promise(res=>{
+        const src=actx.createBufferSource();src.buffer=buf;src.connect(actx.destination);
+        curSrc=src;src.onended=()=>{curSrc=null;res()};src.start();
+      });
+    }finally{clearTimeout(to)}
+  }
+  async function speakArabic(text,id){
+    if(!text||id!==runId)return;
+    try{await geminiTts(text,id);return}catch(_){}
+    if(id!==runId)return;
+    const T=NT();
+    if(T){
+      try{await T.speak({text,lang:'ar-SA',rate:0.85,pitch:1,volume:1});return}
+      catch(_){try{await T.speak({text,lang:'ar',rate:0.85,pitch:1,volume:1});return}catch(__){}}
+    }
+    if(id!==runId)return;
+    if('speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='undefined'){
+      await new Promise(res=>{
+        const u=new SpeechSynthesisUtterance(text);u.lang='ar-SA';u.rate=0.85;
+        u.onend=res;u.onerror=res;speechSynthesis.speak(u);
+      });
+      return;
+    }
+    throw new Error('no-tts');
+  }
+  async function playItems(items,startIdx){
+    stop();
+    const id=++runId;playing=true;paintBtns();
+    try{
+      for(let i=0;i<items.length;i++){
+        if(id!==runId)return;
+        const item=items[i];
+        activeIdx=startIdx>=0?startIdx:i;
+        paintBtns();
+        if(item.surah){
+          try{await playSurah(item.surah,item.from,item.to,id)}
+          catch(_){if(item.ar)await speakArabic(item.ar,id)}
+        }else if(item.tts||item.ar){
+          setStat('Playing: '+item.lbl);
+          await speakArabic(item.tts||item.ar,id);
+        }
+      }
+    }catch(e){
+      if(id===runId)setStat('Audio ke liye internet ya phone TTS (Arabic voice) chalu karein.');
+    }finally{
+      if(id===runId){playing=false;activeIdx=-1;paintBtns();if(!$('astat').textContent.startsWith('Audio ke liye'))setStat('')}
+    }
+  }
+  return{
+    stop,
+    isPlaying:()=>playing,
+    playStep(){
+      const s=STEPS[si],list=(s.rec||[]).filter(r=>r.surah||r.tts||r.ar);
+      if(s.video){const v=$('vid');if(v)v.paused?v.play():v.pause();return}
+      if(!list.length){setStat('Is step mein sirf dil mein niyyat aur khade hone ka tareeqa hai.');return}
+      if(playing){stop();return}
+      playItems(list,-1);
+    },
+    playOne(idx){
+      const s=STEPS[si],item=(s.rec||[])[idx];
+      if(!item)return;
+      if(playing&&activeIdx===idx){stop();return}
+      playItems([item],idx);
+    },
+    paintBtns
+  };
+})();
+window.addEventListener('pagehide',()=>AUD.stop());
+document.addEventListener('visibilitychange',()=>{if(document.hidden)AUD.stop()});
+
+function pickReady(A,idx){
+  const N=A.length;
+  if(A[idx]&&A[idx].complete&&A[idx].naturalWidth)return A[idx];
+  for(let d=1;d<=N/2;d++){
+    const a=A[(idx+d)%N],b=A[(idx-d+N)%N];
+    if(a&&a.complete&&a.naturalWidth)return a;
+    if(b&&b.complete&&b.naturalWidth)return b;
+  }
+  return null;
+}
+
+function draw(){
+ if(STEPS[si].video)return;
+ const w=cv.clientWidth,h=cv.clientHeight,r=Math.min(devicePixelRatio||1,2.5);
+ if(cv.width!==Math.round(w*r)||cv.height!==Math.round(h*r)){cv.width=Math.round(w*r);cv.height=Math.round(h*r)}
+ cx.setTransform(r,0,0,r,0,0);cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';
+ cx.fillStyle='#fdf8ea';cx.fillRect(0,0,w,h);
+ const setIdx=STEPS[si].setIdx,A=IMS[setIdx];
+ if(!A||!A.length)return;
+ const N=A.length,sc=STEPS[si].scrub;
+ if(sc&&(pos[si]<0||pos[si]>N-1)){pos[si]=Math.min(Math.max(pos[si],0),N-1);vel=0}
+ const p=sc?pos[si]:((pos[si]%N)+N)%N;
+ const idx=sc?Math.floor(p):Math.round(p)%N;
+ const i=pickReady(A,idx);
+ if(!i)return;
+ const k=Math.max(w/i.naturalWidth,h/i.naturalHeight),iw=i.naturalWidth*k,ih=i.naturalHeight*k;
+ cx.drawImage(i,(w-iw)/2,(h-ih)/2,iw,ih);
+ if(sc){const f=p-Math.floor(p),j=A[Math.min(Math.floor(p)+1,N-1)];if(f>.001&&j&&j.complete&&j.naturalWidth){cx.globalAlpha=f;cx.drawImage(j,(w-iw)/2,(h-ih)/2,iw,ih);cx.globalAlpha=1}}
+ $('tag').textContent=sc?(STEPS[si].labs?STEPS[si].labs[Math.round(p)]:(p<N*.1?'Seedha':'Salam')):LAB[Math.floor(p/(N/4)+.5)%4];
+}
+function spin(){cancelAnimationFrame(raf);(function s(){if(dx!==null)return;vel*=.94;pos[si]+=vel;draw();if(Math.abs(vel)>.01)raf=requestAnimationFrame(s)})()}
+new ResizeObserver(draw).observe(cv);
+
+function renderRecs(s){
+  const list=s.rec||[];
+  $('recBox').innerHTML=list.map((r,idx)=>{
+    const hasAud=!!(r.surah||r.tts||r.ar);
+    return '<div class="rec-card"><div class="rec-head"><span class="rec-lbl">'+esc(r.lbl)+'</span>'+(hasAud?'<button type="button" class="rec-play" data-rplay="'+idx+'" aria-label="Play audio">▶</button>':'')+'</div>'+
+      (r.ar?'<div class="rec-ar" lang="ar">'+esc(r.ar)+'</div>':'')+
+      (r.ro?'<div class="rec-ro">'+esc(r.ro)+'</div>':'')+
+      (r.hi?'<div class="rec-hi">'+esc(r.hi)+'</div>':'')+'</div>';
+  }).join('');
+}
+$('recBox').addEventListener('click',e=>{
+  const b=e.target.closest('[data-rplay]');
+  if(b)AUD.playOne(Number(b.dataset.rplay));
+});
+
+function ui(){
+ AUD.stop();
+ const s=STEPS[si];$('note').classList.remove('show');
+ $('num').textContent='Step '+(si+1)+' / '+STEPS.length;
+ $('ttl').textContent=s.t;$('dsc').textContent=s.d;
+ renderRecs(s);
+ $('prev').disabled=si===0;$('next').disabled=si===STEPS.length-1;
+ $('hint').textContent=s.scrub?'← ungli se gardan ghumayein →':'← ungli se 360° ghumayein →';
+ $('chips').innerHTML=s.scrub?s.chips.map(c=>'<button data-a="'+c[0]+'">'+c[1]+'</button>').join(''):[[0,'Aage'],[90,'Side'],[180,'Peeche'],[270,'Side']].map(c=>'<button data-a="'+c[0]+'">'+c[1]+'</button>').join('');
+ cancelAnimationFrame(raf);pos[si]=0;
+ if(!s.video){
+   ensureSet(s.setIdx,true);
+   const nx=STEPS[si+1];
+   if(nx&&!nx.video&&nx.setIdx!==s.setIdx)setTimeout(()=>{if(STEPS[si]===s)ensureSet(nx.setIdx,false)},450);
+ }else{$('ldr').classList.remove('on')}
+ draw();showVid(!!s.video);
+ AUD.paintBtns();
+ if(window.ZD_I18N)window.ZD_I18N.apply();
+}
+function showVid(on){
+  const v=$('vid');
+  v.style.display=on?'block':'none';cv.style.display=on?'none':'block';
+  $('tag').style.display=on?'none':'block';$('hint').style.display=on?'none':'block';
+  $('vc').style.display=on?'flex':'none';$('stage').style.touchAction=on?'auto':'none';
+  if(on){
+    $('chips').innerHTML='';
+    if(!v.getAttribute('src')){v.src=VID_SRC;v.preload='metadata'}
+  }else{v.pause()}
+}
+const st=$('stage');
+st.addEventListener('pointerdown',e=>{if(STEPS[si].video)return;cancelAnimationFrame(raf);vel=0;st.setPointerCapture(e.pointerId);dx=e.clientX});
+st.addEventListener('pointermove',e=>{if(dx===null)return;const d=-(e.clientX-dx)*(STEPS[si].sens||.12);vel=d;pos[si]+=d;dx=e.clientX;draw()});
+['pointerup','pointercancel'].forEach(t=>st.addEventListener(t,()=>{if(dx===null)return;dx=null;spin()}));
+$('chips').onclick=e=>{const b=e.target.closest('button');if(!b)return;cancelAnimationFrame(raf);if(STEPS[si].scrub){const to=+b.dataset.a;(function g(){const d=to-pos[si];if(Math.abs(d)<.03){pos[si]=to;draw();return}pos[si]+=d*.14;draw();raf=requestAnimationFrame(g)})();return}const N=SET_COUNTS[STEPS[si].setIdx]||1,to=+b.dataset.a/360*N;
+ (function g(){const d=((to-pos[si]%N+N*1.5)%N)-N/2;if(Math.abs(d)<.4){pos[si]=to;draw();return}pos[si]+=d*.18;draw();raf=requestAnimationFrame(g)})()};
+$('prev').onclick=()=>{if(si>0){si--;ui()}};
+$('next').onclick=()=>{if(si<STEPS.length-1){si++;ui()}};
+$('dal').onclick=()=>{const n=$('note'),r=REFS[si]||[];n.innerHTML=r.map(x=>'<b>'+esc(x[0])+'</b><br>'+esc(x[1])).join('<hr>')+'<hr><i>Sabhi Hadith hawale Sunnah.com numbering ke mutabiq step-wise verify kiye gaye hain. Ikhtilafi masail mein mukhtalif masalik ke dalaail saath diye gaye hain.</i>';n.classList.toggle('show')};
+$('aud').onclick=()=>AUD.playStep();
+(function(){const v=$('vid'),vp=$('vp'),vs=$('vs'),vt=$('vt');
+const f=s=>{s=Math.floor(s||0);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const tog=()=>{v.paused?v.play():v.pause()};
+vp.onclick=tog;v.onclick=tog;
+v.addEventListener('play',()=>vp.textContent='⏸');v.addEventListener('pause',()=>vp.textContent='▶');
+v.addEventListener('timeupdate',()=>{if(v.duration)vs.value=v.currentTime/v.duration*1000;vt.textContent=f(v.currentTime)});
+vs.oninput=()=>{if(v.duration)v.currentTime=v.duration*vs.value/1000};
+v.addEventListener('contextmenu',e=>e.preventDefault());
+})();
+try{const _q=new URLSearchParams(location.search).get('step');if(_q!==null){const _n=parseInt(_q,10);if(!isNaN(_n)&&_n>=0&&_n<STEPS.length)si=_n;}}catch(_){}
+ui();
+</script>
+</body>
+</html>

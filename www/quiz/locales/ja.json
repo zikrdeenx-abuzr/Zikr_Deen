@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "ja",
+    "nativeName": "日本語",
+    "englishName": "Japanese",
+    "dir": "ltr",
+    "speechLocale": "ja-JP",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "ホーム",
+    "categories": "カテゴリー",
+    "progress": "学習の進捗",
+    "library": "学習ライブラリ",
+    "ask": "質問する",
+    "chooseLanguage": "言語を選択",
+    "learn": "学ぶ",
+    "explore": "探究する",
+    "checkAnswer": "答えを確認",
+    "basic": "初級",
+    "moderate": "中級",
+    "advanced": "上級",
+    "biology": "生物学",
+    "physics": "物理",
+    "mathematics": "数学",
+    "quranArabic": "クルアーンとアラビア語",
+    "islamicStudies": "イスラーム研究",
+    "history": "歴史",
+    "technology": "テクノロジー",
+    "environment": "環境",
+    "loading": "読み込み中…",
+    "retry": "再試行",
+    "scientificKnowledge": "科学的知識",
+    "islamicConnection": "イスラームとの関連",
+    "reflection": "振り返り",
+    "reviewRequired": "一般公開前にレビューが必要"
+  },
+  "categories": {
+    "biology": "生物学",
+    "physics": "物理",
+    "mathematics": "数学",
+    "quranArabic": "クルアーンとアラビア語",
+    "islamicStudies": "イスラーム研究",
+    "history": "歴史",
+    "technology": "テクノロジー",
+    "environment": "環境"
+  },
+  "levels": {
+    "basic": "初級",
+    "moderate": "中級",
+    "advanced": "上級"
+  },
+  "starter": {
+    "welcome": "学ぶ — Zikr Deen",
+    "description": "科学的知識. イスラームとの関連. 振り返り."
+  }
+}

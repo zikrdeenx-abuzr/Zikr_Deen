@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "bn",
+    "nativeName": "বাংলা",
+    "englishName": "Bengali",
+    "dir": "ltr",
+    "speechLocale": "bn-BD",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "হোম",
+    "categories": "বিভাগসমূহ",
+    "progress": "আমার অগ্রগতি",
+    "library": "শিক্ষা লাইব্রেরি",
+    "ask": "জিজ্ঞাসা করুন",
+    "chooseLanguage": "ভাষা নির্বাচন করুন",
+    "learn": "শিখুন",
+    "explore": "অন্বেষণ করুন",
+    "checkAnswer": "উত্তর যাচাই করুন",
+    "basic": "প্রাথমিক",
+    "moderate": "মধ্যম",
+    "advanced": "উন্নত",
+    "biology": "জীববিজ্ঞান",
+    "physics": "পদার্থবিজ্ঞান",
+    "mathematics": "গণিত",
+    "quranArabic": "কুরআন ও আরবি",
+    "islamicStudies": "ইসলামিক শিক্ষা",
+    "history": "ইতিহাস",
+    "technology": "প্রযুক্তি",
+    "environment": "পরিবেশ",
+    "loading": "লোড হচ্ছে…",
+    "retry": "আবার চেষ্টা করুন",
+    "scientificKnowledge": "বৈজ্ঞানিক জ্ঞান",
+    "islamicConnection": "ইসলামিক সংযোগ",
+    "reflection": "ভাবনা",
+    "reviewRequired": "সর্বসাধারণের জন্য চালুর আগে পর্যালোচনা আবশ্যক"
+  },
+  "categories": {
+    "biology": "জীববিজ্ঞান",
+    "physics": "পদার্থবিজ্ঞান",
+    "mathematics": "গণিত",
+    "quranArabic": "কুরআন ও আরবি",
+    "islamicStudies": "ইসলামিক শিক্ষা",
+    "history": "ইতিহাস",
+    "technology": "প্রযুক্তি",
+    "environment": "পরিবেশ"
+  },
+  "levels": {
+    "basic": "প্রাথমিক",
+    "moderate": "মধ্যম",
+    "advanced": "উন্নত"
+  },
+  "starter": {
+    "welcome": "শিখুন — Zikr Deen",
+    "description": "বৈজ্ঞানিক জ্ঞান. ইসলামিক সংযোগ. ভাবনা."
+  }
+}

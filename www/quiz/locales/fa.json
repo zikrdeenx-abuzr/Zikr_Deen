@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "fa",
+    "nativeName": "فارسی",
+    "englishName": "Persian",
+    "dir": "rtl",
+    "speechLocale": "fa-IR",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "خانه",
+    "categories": "دسته‌بندی‌ها",
+    "progress": "پیشرفت من",
+    "library": "کتابخانه یادگیری",
+    "ask": "بپرسید",
+    "chooseLanguage": "انتخاب زبان",
+    "learn": "یاد بگیرید",
+    "explore": "کاوش کنید",
+    "checkAnswer": "پاسخ را بررسی کنید",
+    "basic": "پایه",
+    "moderate": "متوسط",
+    "advanced": "پیشرفته",
+    "biology": "زیست‌شناسی",
+    "physics": "فیزیک",
+    "mathematics": "ریاضی",
+    "quranArabic": "قرآن و عربی",
+    "islamicStudies": "مطالعات اسلامی",
+    "history": "تاریخ",
+    "technology": "فناوری",
+    "environment": "محیط زیست",
+    "loading": "در حال بارگذاری…",
+    "retry": "دوباره تلاش کنید",
+    "scientificKnowledge": "دانش علمی",
+    "islamicConnection": "پیوند اسلامی",
+    "reflection": "اندیشه",
+    "reviewRequired": "پیش از انتشار عمومی بازبینی لازم است"
+  },
+  "categories": {
+    "biology": "زیست‌شناسی",
+    "physics": "فیزیک",
+    "mathematics": "ریاضی",
+    "quranArabic": "قرآن و عربی",
+    "islamicStudies": "مطالعات اسلامی",
+    "history": "تاریخ",
+    "technology": "فناوری",
+    "environment": "محیط زیست"
+  },
+  "levels": {
+    "basic": "پایه",
+    "moderate": "متوسط",
+    "advanced": "پیشرفته"
+  },
+  "starter": {
+    "welcome": "یاد بگیرید — Zikr Deen",
+    "description": "دانش علمی. پیوند اسلامی. اندیشه."
+  }
+}

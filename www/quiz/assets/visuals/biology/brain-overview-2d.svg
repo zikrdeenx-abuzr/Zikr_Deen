@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+<title id="title">Simplified lateral brain learning diagram</title><desc id="desc">A stylized side-view brain with labeled cerebrum, cerebellum, brainstem and hippocampus. Not to scale and not for medical diagnosis.</desc>
+<defs><linearGradient id="cerebrum" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a8d9c1"/><stop offset="1" stop-color="#387c65"/></linearGradient><linearGradient id="cerebellum" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e8c87b"/><stop offset="1" stop-color="#a77a38"/></linearGradient></defs>
+<rect width="900" height="520" rx="26" fill="#0b1d17"/>
+<path d="M155 265 C115 190 163 103 260 85 C310 32 397 62 427 82 C510 50 603 91 623 150 C703 166 736 239 696 294 C688 344 625 372 565 354 C512 404 427 390 391 359 C302 389 218 352 204 310 C172 305 151 290 155 265Z" fill="url(#cerebrum)" stroke="#d7f0df" stroke-width="7"/>
+<g fill="none" stroke="#d8f0e0" stroke-width="8" opacity=".72" stroke-linecap="round"><path d="M230 139q-42 40 4 68t-8 76M320 99q-36 42 9 68t-5 81M414 92q-32 37 8 68t-7 86M520 108q-34 40 5 71t-9 80M608 158q-30 34 7 64t-9 63"/></g>
+<path d="M567 300 C590 254 657 245 694 278 C730 313 703 371 658 385 C617 399 566 370 567 300Z" fill="url(#cerebellum)" stroke="#ffe7aa" stroke-width="6"/>
+<g fill="none" stroke="#fff0c2" stroke-width="4" opacity=".8"><path d="M589 299q42 20 93-2M584 318q48 20 105 0M594 339q43 17 82 1M613 359q29 9 51-2"/></g>
+<path d="M490 327 C485 363 503 397 527 414 L545 451 Q559 468 577 455 L584 426 Q568 392 570 355" fill="#c78d69" stroke="#f0c6a7" stroke-width="6"/>
+<path d="M445 279q56-47 103-6q-9 42-48 52q-44-1-55-46Z" fill="#b38bd0" stroke="#ead4fa" stroke-width="5"/>
+<g font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#f5f4e9"><text x="60" y="52">CEREBRUM</text><text x="690" y="214">CEREBELLUM</text><text x="610" y="480">BRAINSTEM</text><text x="70" y="450">HIPPOCAMPUS</text></g>
+<g stroke="#f5f4e9" stroke-width="3" fill="none"><path d="M215 62L300 118"/><path d="M686 228L678 277"/><path d="M608 452L570 420"/><path d="M260 432L458 310"/></g>
+<text x="450" y="505" text-anchor="middle" fill="#b8c9bf" font-family="Arial,sans-serif" font-size="16">Simplified educational illustration · not to scale · not a medical scan</text>
+</svg>

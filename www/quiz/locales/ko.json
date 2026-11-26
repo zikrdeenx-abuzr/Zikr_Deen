@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "ko",
+    "nativeName": "한국어",
+    "englishName": "Korean",
+    "dir": "ltr",
+    "speechLocale": "ko-KR",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "홈",
+    "categories": "카테고리",
+    "progress": "내 학습 진행",
+    "library": "학습 라이브러리",
+    "ask": "질문하기",
+    "chooseLanguage": "언어 선택",
+    "learn": "학습하기",
+    "explore": "탐색하기",
+    "checkAnswer": "답 확인",
+    "basic": "기초",
+    "moderate": "중급",
+    "advanced": "고급",
+    "biology": "생물학",
+    "physics": "물리학",
+    "mathematics": "수학",
+    "quranArabic": "꾸란과 아랍어",
+    "islamicStudies": "이슬람 연구",
+    "history": "역사",
+    "technology": "기술",
+    "environment": "환경",
+    "loading": "불러오는 중…",
+    "retry": "다시 시도",
+    "scientificKnowledge": "과학 지식",
+    "islamicConnection": "이슬람적 연관성",
+    "reflection": "성찰",
+    "reviewRequired": "공개 출시 전 검토 필요"
+  },
+  "categories": {
+    "biology": "생물학",
+    "physics": "물리학",
+    "mathematics": "수학",
+    "quranArabic": "꾸란과 아랍어",
+    "islamicStudies": "이슬람 연구",
+    "history": "역사",
+    "technology": "기술",
+    "environment": "환경"
+  },
+  "levels": {
+    "basic": "기초",
+    "moderate": "중급",
+    "advanced": "고급"
+  },
+  "starter": {
+    "welcome": "학습하기 — Zikr Deen",
+    "description": "과학 지식. 이슬람적 연관성. 성찰."
+  }
+}

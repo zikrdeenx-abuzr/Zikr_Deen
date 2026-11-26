@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "id",
+    "nativeName": "Bahasa Indonesia",
+    "englishName": "Indonesian",
+    "dir": "ltr",
+    "speechLocale": "id-ID",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Beranda",
+    "categories": "Kategori",
+    "progress": "Progres saya",
+    "library": "Pustaka belajar",
+    "ask": "Tanya",
+    "chooseLanguage": "Pilih bahasa",
+    "learn": "Belajar",
+    "explore": "Jelajahi",
+    "checkAnswer": "Periksa jawaban",
+    "basic": "Dasar",
+    "moderate": "Menengah",
+    "advanced": "Lanjutan",
+    "biology": "Biologi",
+    "physics": "Fisika",
+    "mathematics": "Matematika",
+    "quranArabic": "Al-Qur’an & Arab",
+    "islamicStudies": "Studi Islam",
+    "history": "Sejarah",
+    "technology": "Teknologi",
+    "environment": "Lingkungan",
+    "loading": "Memuat…",
+    "retry": "Coba lagi",
+    "scientificKnowledge": "Pengetahuan ilmiah",
+    "islamicConnection": "Kaitan Islam",
+    "reflection": "Refleksi",
+    "reviewRequired": "Perlu ditinjau sebelum peluncuran publik"
+  },
+  "categories": {
+    "biology": "Biologi",
+    "physics": "Fisika",
+    "mathematics": "Matematika",
+    "quranArabic": "Al-Qur’an & Arab",
+    "islamicStudies": "Studi Islam",
+    "history": "Sejarah",
+    "technology": "Teknologi",
+    "environment": "Lingkungan"
+  },
+  "levels": {
+    "basic": "Dasar",
+    "moderate": "Menengah",
+    "advanced": "Lanjutan"
+  },
+  "starter": {
+    "welcome": "Belajar — Zikr Deen",
+    "description": "Pengetahuan ilmiah. Kaitan Islam. Refleksi."
+  }
+}

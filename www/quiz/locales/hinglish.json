@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "hinglish",
+    "nativeName": "Hinglish",
+    "englishName": "Hinglish",
+    "dir": "ltr",
+    "speechLocale": "en-IN",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "Home",
+    "categories": "Categories",
+    "progress": "Meri progress",
+    "library": "Learning library",
+    "ask": "Poochhein",
+    "chooseLanguage": "Language choose karein",
+    "learn": "Seekhein",
+    "explore": "Explore karein",
+    "checkAnswer": "Answer check karein",
+    "basic": "Basic",
+    "moderate": "Moderate",
+    "advanced": "Advanced",
+    "biology": "Biology",
+    "physics": "Physics",
+    "mathematics": "Mathematics",
+    "quranArabic": "Quran & Arabic",
+    "islamicStudies": "Islamic Studies",
+    "history": "History",
+    "technology": "Technology",
+    "environment": "Environment",
+    "loading": "Loading…",
+    "retry": "Dobara try karein",
+    "scientificKnowledge": "Scientific knowledge",
+    "islamicConnection": "Islamic connection",
+    "reflection": "Reflection",
+    "reviewRequired": "Public launch se pehle review zaroori hai"
+  },
+  "categories": {
+    "biology": "Biology",
+    "physics": "Physics",
+    "mathematics": "Mathematics",
+    "quranArabic": "Quran & Arabic",
+    "islamicStudies": "Islamic Studies",
+    "history": "History",
+    "technology": "Technology",
+    "environment": "Environment"
+  },
+  "levels": {
+    "basic": "Basic",
+    "moderate": "Moderate",
+    "advanced": "Advanced"
+  },
+  "starter": {
+    "welcome": "Seekhein — Zikr Deen",
+    "description": "Scientific knowledge. Islamic connection. Reflection."
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "default": "en",
+  "storageKey": "zdLang",
+  "fallback": "en",
+  "languages": [
+    {
+      "code": "en",
+      "nativeName": "English",
+      "englishName": "English",
+      "region": "International",
+      "dir": "ltr",
+      "speechLocale": "en-US"
+    },
+    {
+      "code": "ar",
+      "nativeName": "العربية",
+      "englishName": "Arabic",
+      "region": "Middle East",
+      "dir": "rtl",
+      "speechLocale": "ar-SA"
+    },
+    {
+      "code": "id",
+      "nativeName": "Bahasa Indonesia",
+      "englishName": "Indonesian",
+      "region": "Southeast Asia",
+      "dir": "ltr",
+      "speechLocale": "id-ID"
+    },
+    {
+      "code": "ur",
+      "nativeName": "اردو",
+      "englishName": "Urdu",
+      "region": "South Asia",
+      "dir": "rtl",
+      "speechLocale": "ur-PK"
+    },
+    {
+      "code": "hi",
+      "nativeName": "हिन्दी",
+      "englishName": "Hindi",
+      "region": "South Asia",
+      "dir": "ltr",
+      "speechLocale": "hi-IN"
+    },
+    {
+      "code": "hinglish",
+      "nativeName": "Hinglish",
+      "englishName": "Hinglish",
+      "region": "South Asia",
+      "dir": "ltr",
+      "speechLocale": "en-IN"
+    },
+    {
+      "code": "bn",
+      "nativeName": "বাংলা",
+      "englishName": "Bengali",
+      "region": "South Asia",
+      "dir": "ltr",
+      "speechLocale": "bn-BD"
+    },
+    {
+      "code": "ms",
+      "nativeName": "Bahasa Melayu",
+      "englishName": "Malay",
+      "region": "Southeast Asia",
+      "dir": "ltr",
+      "speechLocale": "ms-MY"
+    },
+    {
+      "code": "fa",
+      "nativeName": "فارسی",
+      "englishName": "Persian",
+      "region": "West Asia",
+      "dir": "rtl",
+      "speechLocale": "fa-IR"
+    },
+    {
+      "code": "tr",
+      "nativeName": "Türkçe",
+      "englishName": "Turkish",
+      "region": "West Asia",
+      "dir": "ltr",
+      "speechLocale": "tr-TR"
+    },
+    {
+      "code": "uz",
+      "nativeName": "Oʻzbekcha",
+      "englishName": "Uzbek",
+      "region": "Central Asia",
+      "dir": "ltr",
+      "speechLocale": "uz-UZ"
+    },
+    {
+      "code": "fr",
+      "nativeName": "Français",
+      "englishName": "French",
+      "region": "Europe/Africa",
+      "dir": "ltr",
+      "speechLocale": "fr-FR"
+    },
+    {
+      "code": "ru",
+      "nativeName": "Русский",
+      "englishName": "Russian",
+      "region": "Eastern Europe/Central Asia",
+      "dir": "ltr",
+      "speechLocale": "ru-RU"
+    },
+    {
+      "code": "ha",
+      "nativeName": "Hausa",
+      "englishName": "Hausa",
+      "region": "West Africa",
+      "dir": "ltr",
+      "speechLocale": "ha-NG"
+    },
+    {
+      "code": "sw",
+      "nativeName": "Kiswahili",
+      "englishName": "Swahili",
+      "region": "East Africa",
+      "dir": "ltr",
+      "speechLocale": "sw-TZ"
+    },
+    {
+      "code": "de",
+      "nativeName": "Deutsch",
+      "englishName": "German",
+      "region": "Europe",
+      "dir": "ltr",
+      "speechLocale": "de-DE"
+    },
+    {
+      "code": "es",
+      "nativeName": "Español",
+      "englishName": "Spanish",
+      "region": "Global",
+      "dir": "ltr",
+      "speechLocale": "es-ES"
+    },
+    {
+      "code": "zh",
+      "nativeName": "简体中文",
+      "englishName": "Chinese (Simplified)",
+      "region": "East Asia",
+      "dir": "ltr",
+      "speechLocale": "zh-CN"
+    },
+    {
+      "code": "ko",
+      "nativeName": "한국어",
+      "englishName": "Korean",
+      "region": "East Asia",
+      "dir": "ltr",
+      "speechLocale": "ko-KR"
+    },
+    {
+      "code": "ja",
+      "nativeName": "日本語",
+      "englishName": "Japanese",
+      "region": "East Asia",
+      "dir": "ltr",
+      "speechLocale": "ja-JP"
+    }
+  ],
+  "schemaVersion": 1,
+  "fallbackUi": {
+    "home": "Home",
+    "categories": "Categories",
+    "progress": "My progress",
+    "library": "Learning library",
+    "ask": "Ask",
+    "chooseLanguage": "Choose language",
+    "learn": "Learn",
+    "explore": "Explore",
+    "checkAnswer": "Check answer",
+    "basic": "Basic",
+    "moderate": "Moderate",
+    "advanced": "Advanced",
+    "biology": "Biology",
+    "physics": "Physics",
+    "mathematics": "Mathematics",
+    "quranArabic": "Quran & Arabic",
+    "islamicStudies": "Islamic Studies",
+    "history": "History",
+    "technology": "Technology",
+    "environment": "Environment",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "scientificKnowledge": "Scientific knowledge",
+    "islamicConnection": "Islamic connection",
+    "reflection": "Reflection",
+    "reviewRequired": "Review required before public launch"
+  },
+  "fallbackCategories": {
+    "biology": "Biology",
+    "physics": "Physics",
+    "mathematics": "Mathematics",
+    "quranArabic": "Quran & Arabic",
+    "islamicStudies": "Islamic Studies",
+    "history": "History",
+    "technology": "Technology",
+    "environment": "Environment"
+  },
+  "fallbackLevels": {
+    "basic": "Basic",
+    "moderate": "Moderate",
+    "advanced": "Advanced"
+  },
+  "fallbackStarter": {
+    "welcome": "Learn — Zikr Deen",
+    "description": "Scientific knowledge. Islamic connection. Reflection."
+  }
+}

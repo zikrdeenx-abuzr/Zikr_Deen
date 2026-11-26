@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "ur",
+    "nativeName": "اردو",
+    "englishName": "Urdu",
+    "dir": "rtl",
+    "speechLocale": "ur-PK",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "ہوم",
+    "categories": "اقسام",
+    "progress": "میری پیش رفت",
+    "library": "تعلیمی لائبریری",
+    "ask": "پوچھیں",
+    "chooseLanguage": "زبان منتخب کریں",
+    "learn": "سیکھیں",
+    "explore": "دریافت کریں",
+    "checkAnswer": "جواب چیک کریں",
+    "basic": "بنیادی",
+    "moderate": "درمیانی",
+    "advanced": "اعلیٰ",
+    "biology": "حیاتیات",
+    "physics": "طبیعیات",
+    "mathematics": "ریاضی",
+    "quranArabic": "قرآن و عربی",
+    "islamicStudies": "اسلامی علوم",
+    "history": "تاریخ",
+    "technology": "ٹیکنالوجی",
+    "environment": "ماحولیات",
+    "loading": "لوڈ ہو رہا ہے…",
+    "retry": "دوبارہ کوشش کریں",
+    "scientificKnowledge": "سائنسی علم",
+    "islamicConnection": "اسلامی تعلق",
+    "reflection": "غور و فکر",
+    "reviewRequired": "عوامی اجرا سے پہلے جائزہ ضروری ہے"
+  },
+  "categories": {
+    "biology": "حیاتیات",
+    "physics": "طبیعیات",
+    "mathematics": "ریاضی",
+    "quranArabic": "قرآن و عربی",
+    "islamicStudies": "اسلامی علوم",
+    "history": "تاریخ",
+    "technology": "ٹیکنالوجی",
+    "environment": "ماحولیات"
+  },
+  "levels": {
+    "basic": "بنیادی",
+    "moderate": "درمیانی",
+    "advanced": "اعلیٰ"
+  },
+  "starter": {
+    "welcome": "سیکھیں — Zikr Deen",
+    "description": "سائنسی علم. اسلامی تعلق. غور و فکر."
+  }
+}

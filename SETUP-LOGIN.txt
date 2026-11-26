@@ -1,0 +1,47 @@
+ZIKR DEEN — GOOGLE LOGIN + STATS: EK BAAR KA SETUP
+===================================================
+
+Ye sab sirf ek baar karna hai. Iske baad har build me login apne aap chalu ho jaata hai.
+
+A) FIREBASE
+ 1. console.firebase.google.com me apna project kholein (ya naya banayein).
+ 2. Project settings > "Add app" > Android. Package name bilkul ye:   com.zikrdeen.app
+ 3. SHA-1 certificate fingerprint me ye daalein (app ki fixed key ka hai, har build me wahi rehti hai):
+        15:7A:1C:19:AB:4A:75:45:53:E7:FD:C0:ED:09:1F:D0:24:AA:4C:D0
+ 4. Build > Authentication > Get started > Sign-in method > Google > Enable > Save.
+ 5. Build > Firestore Database > Create database > (location koi bhi) > Production mode.
+ 6. Firestore > Rules tab: is zip ki firestore.rules file ka poora text paste karein.
+    "OWNER_EMAIL@gmail.com" ki jagah apni Gmail likhein (chhote akshar me). Publish dabayein.
+ 7. Authentication aur SHA-1 save hone ke BAAD Project settings se google-services.json dobara download karein
+    (zaroori — purani file me Google login ka "web client" nahi hota).
+
+B) GITHUB (repo > Settings > Secrets and variables > Actions > New repository secret)
+    GOOGLE_SERVICES_JSON  = google-services.json file ka POORA text
+    OWNER_EMAIL           = aapki Gmail (wahi jo rules me likhi)
+    GEMINI_API_KEY        = pehle se laga hai
+
+C) BUILD
+ 1. Sabse nayi zd-patch-v44*.zip ko repo me upload karein (purani zd-patch zip hata dein ya ye nayi rakhein — sabse nayi wali use hoti hai).
+ 2. build_final_v43.yml ko .github/workflows me rakhein (purani build_3.yml hata dein).
+ 3. Actions > Build APK > Run workflow.
+ 4. Log me ye lines dikhni chahiye:
+        Firebase login plugin installed
+        Firebase files OK
+        Firebase Google login config is inside the APK
+    Agar "Google login / stats stay OFF" dikhe to GOOGLE_SERVICES_JSON secret check karein.
+
+D) APP ME
+ - More tab ke upar "Account" card aayega. Wahan Google se login.
+ - Owner (aap): login karne par Account page me "Owner dashboard" dikhega —
+   total phones, sirf guest, login users, aaj/7 din active, Ask AI sawal.
+ - Ask Zikr Deen: guest roz 5 sawal, Google login wale 25, owner unlimited (ye default hain; asli limits js/account-config.js me dekhein).
+   Badalne ke liye js/account-config.js me  limits:{guest:5,user:25}.
+ - Login ke baad Account page se Cloud backup / restore, Logout, Account delete.
+
+ZARURI BAATEN
+ - Limit phone ke andar ginti se chalti hai. Koi technical aadmi app data clear karke guest limit dobara pa sakta hai.
+   Login wale users ki ginti cloud me bhi rehti hai, isliye unka reset nahi hota.
+ - Aap jo email OWNER_EMAIL me daalte hain wahi dashboard dekh sakti hai (Firestore rules bhi wahi check karte hain).
+ - Sawalon ka text kahin save nahi hota, sirf ginti.
+
+FIRESTORE RULES (naya): classroom ka read ab alag rule hai (pehle read fail hota tha). Nayi firestore.rules paste karke Publish karein.

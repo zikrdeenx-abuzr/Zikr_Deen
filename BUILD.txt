@@ -1,0 +1,2 @@
+Extract this archive into the GitHub repository root, including .github/. Run Build Zikr Deen debug APK manually in Actions. Source is used directly. Optional GEMINI_PROXY_URL points to your HTTPS AI backend; keep provider keys on that backend.
+Local setup: npm run setup. Build: cd android and run ./gradlew assembleDebug.

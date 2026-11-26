@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "title": "Zikr Deen 3D Visual Studio",
+  "renderer": "native-webgl1",
+  "models": [
+    {"id":"cell","title":"Animal Cell","topic":"Biology","description":"A simplified educational cell model with membrane, nucleus and organelle-like forms.","asset_type":"procedural-webgl","fallback":"./assets/visuals/biology/cell-structure-2d.svg","review_status":"prototype — subject-matter review required","alt":"Simplified 3D animal cell teaching model"},
+    {"id":"dna","title":"DNA Double Helix","topic":"Biology","description":"A stylised double helix showing two backbones and paired rungs; not an atomic-scale molecular model.","asset_type":"procedural-webgl","fallback":"./assets/visuals/biology/cell-structure-2d.svg","review_status":"prototype — subject-matter review required","alt":"Stylised 3D DNA double helix"},
+    {"id":"brain","title":"Brain Overview","topic":"Biology","description":"A simplified cluster model for orientation only; it does not show precise anatomy or scale.","asset_type":"procedural-webgl","fallback":"./assets/visuals/biology/brain-overview-2d.svg","review_status":"prototype — subject-matter review required","alt":"Simplified 3D brain-region teaching model"},
+    {"id":"solar","title":"Solar System","topic":"Astronomy","description":"A non-scale orbital-order illustration. Distances and planet sizes are not to scale.","asset_type":"procedural-webgl","fallback":"./assets/visuals/physics/earth-day-night-2d.svg","review_status":"prototype — subject-matter review required","alt":"Non-scale 3D solar system model"},
+    {"id":"geometry","title":"Geometry Solids","topic":"Mathematics","description":"A rotating group of simple solids for shape recognition; proportions are illustrative.","asset_type":"procedural-webgl","fallback":"./assets/visuals/mathematics/geometry-symmetry-2d.svg","review_status":"prototype — subject-matter review required","alt":"3D geometry solids teaching model"},
+    {"id":"network","title":"AI Verification Network","topic":"Technology","description":"An abstract node network showing connections and a verification hub; not a real AI system diagram.","asset_type":"procedural-webgl","fallback":"./assets/visuals/technology/ai-verification-2d.svg","review_status":"prototype — subject-matter review required","alt":"Abstract 3D connected-node verification model"}
+  ]
+}

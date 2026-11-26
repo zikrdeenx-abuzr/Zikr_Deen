@@ -1,0 +1,59 @@
+{
+  "meta": {
+    "code": "ar",
+    "nativeName": "العربية",
+    "englishName": "Arabic",
+    "dir": "rtl",
+    "speechLocale": "ar-SA",
+    "translationStatus": "machine-assisted-draft",
+    "reviewStatus": "pending-native-speaker-and-qualified-scholar-review",
+    "reviewNote": "UI translations are draft quality. Religious text, translations, tafsir and hadith content must be independently checked by a qualified reviewer and a native speaker before public launch. This pack is not scholar-verified."
+  },
+  "ui": {
+    "home": "الرئيسية",
+    "categories": "الفئات",
+    "progress": "تقدمي",
+    "library": "مكتبة التعلم",
+    "ask": "اسأل",
+    "chooseLanguage": "اختر اللغة",
+    "learn": "تعلّم",
+    "explore": "استكشف",
+    "checkAnswer": "تحقق من الإجابة",
+    "basic": "أساسي",
+    "moderate": "متوسط",
+    "advanced": "متقدم",
+    "biology": "الأحياء",
+    "physics": "الفيزياء",
+    "mathematics": "الرياضيات",
+    "quranArabic": "القرآن والعربية",
+    "islamicStudies": "الدراسات الإسلامية",
+    "history": "التاريخ",
+    "technology": "التقنية",
+    "environment": "البيئة",
+    "loading": "جارٍ التحميل…",
+    "retry": "حاول مرة أخرى",
+    "scientificKnowledge": "المعرفة العلمية",
+    "islamicConnection": "الصلة الإسلامية",
+    "reflection": "التأمل",
+    "reviewRequired": "تجب المراجعة قبل الإطلاق العام"
+  },
+  "categories": {
+    "biology": "الأحياء",
+    "physics": "الفيزياء",
+    "mathematics": "الرياضيات",
+    "quranArabic": "القرآن والعربية",
+    "islamicStudies": "الدراسات الإسلامية",
+    "history": "التاريخ",
+    "technology": "التقنية",
+    "environment": "البيئة"
+  },
+  "levels": {
+    "basic": "أساسي",
+    "moderate": "متوسط",
+    "advanced": "متقدم"
+  },
+  "starter": {
+    "welcome": "تعلّم — Zikr Deen",
+    "description": "المعرفة العلمية. الصلة الإسلامية. التأمل."
+  }
+}
