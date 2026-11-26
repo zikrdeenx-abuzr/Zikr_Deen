@@ -1,0 +1,18 @@
+name: Unzip v46
+on: workflow_dispatch
+permissions:
+  contents: write
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          unzip -o -q Zikr_Deen_v46_Final_Source.zip -x ".github/*"
+          rm -f Zikr_Deen_v46_Final_Source.zip
+          git rm -f --ignore-unmatch "Zikr_Deen (1).zip" zd-patch*.zip
+          git config user.name "bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy v46"
+          git push
