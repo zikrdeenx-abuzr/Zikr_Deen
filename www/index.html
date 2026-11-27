@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.googleusercontent.com; font-src 'self'; media-src 'self' https: blob:; connect-src 'self' https:; frame-src 'self'; manifest-src 'self'; worker-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Zikr Deen — Quran, Hifz & Surah Al-Mulk</title>
+<meta name="color-scheme" content="light dark">
+<meta name="format-detection" content="telephone=no">
+<title>Zikr Deen — Quran, Hifz &amp; Surah Al-Mulk</title>
 <meta name="description" content="Read, listen to and memorise the Quran. All 114 surahs, Surah Al-Mulk Hifz lab, offline audio, bookmarks and daily goals.">
 <meta name="theme-color" content="#faf7f0">
 <link rel="manifest" href="./manifest.webmanifest">
@@ -19,7 +21,7 @@
 <body class="no-mini">
 <div id="splash" aria-hidden="true"><canvas id="bsCanvas" width="1100" height="266" role="img" aria-label="Bismillah"></canvas></div>
 
-<button id="sndBtn" class="snd" aria-label="Intro sound" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-vol"/></svg><span>Sound</span></button>
+<button type="button" id="sndBtn" class="snd" aria-label="Intro sound" aria-pressed="false" hidden><svg aria-hidden="true"><use href="#i-vol"/></svg><span>Sound</span></button>
 <iframe id="intro" title="Zikr Deen introduction" tabindex="-1" hidden></iframe>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
@@ -61,23 +63,23 @@
 
 <div class="mini" id="mini" hidden>
   <div class="mini-row">
-    <button class="mini-txt" id="miniOpen" aria-label="Open playing surah"><div class="mini-title" id="miniTitle"></div><div class="mini-sub" id="miniSub"></div></button>
-    <button class="ibtn" id="miniPrev" aria-label="Previous ayah"><svg><use href="#i-prev"/></svg></button>
-    <button class="pbtn" id="miniPlay" aria-label="Play or pause"><svg><use href="#i-play"/></svg></button>
-    <button class="ibtn" id="miniNext" aria-label="Next ayah"><svg><use href="#i-next"/></svg></button>
-    <button class="ibtn" id="miniFull" aria-label="Full Waveform Player" style="font-size:17px">🎧</button>
-    <button class="ibtn" id="miniSet" aria-label="Playback settings"><svg><use href="#i-repeat"/></svg></button>
+    <button type="button" class="mini-txt" id="miniOpen" aria-label="Open playing surah"><div class="mini-title" id="miniTitle"></div><div class="mini-sub" id="miniSub"></div></button>
+    <button type="button" class="ibtn" id="miniPrev" aria-label="Previous ayah"><svg aria-hidden="true"><use href="#i-prev"/></svg></button>
+    <button type="button" class="pbtn" id="miniPlay" aria-label="Play or pause"><svg aria-hidden="true"><use href="#i-play"/></svg></button>
+    <button type="button" class="ibtn" id="miniNext" aria-label="Next ayah"><svg aria-hidden="true"><use href="#i-next"/></svg></button>
+    <button type="button" class="ibtn" id="miniFull" aria-label="Full Waveform Player" style="font-size:17px">🎧</button>
+    <button type="button" class="ibtn" id="miniSet" aria-label="Playback settings"><svg aria-hidden="true"><use href="#i-repeat"/></svg></button>
   </div>
   <div class="mini-bar"><i id="miniFill"></i></div>
 </div>
 
 <nav class="nav" aria-label="Main"><div class="nav-in">
-  <a href="#/home" data-nav="home"><svg><use href="#i-home"/></svg>Home</a>
-  <a href="#/surahs" data-nav="surahs"><svg><use href="#i-book"/></svg>Quran</a>
-  <a href="#/folders" data-nav="folders"><svg><use href="#i-folders"/></svg>Learn</a>
-  <a href="#/mulk" data-nav="mulk"><svg><use href="#i-moon"/></svg>Al-Mulk</a>
-  <a href="#/ask" data-nav="ask"><svg><use href="#i-ask"/></svg>Ask AI</a>
-  <a href="#/more" data-nav="more"><svg><use href="#i-more"/></svg>More</a>
+  <a href="#/home" data-nav="home"><svg aria-hidden="true"><use href="#i-home"/></svg>Home</a>
+  <a href="#/surahs" data-nav="surahs"><svg aria-hidden="true"><use href="#i-book"/></svg>Quran</a>
+  <a href="#/folders" data-nav="folders"><svg aria-hidden="true"><use href="#i-folders"/></svg>Learn</a>
+  <a href="#/mulk" data-nav="mulk"><svg aria-hidden="true"><use href="#i-moon"/></svg>Al-Mulk</a>
+  <a href="#/ask" data-nav="ask"><svg aria-hidden="true"><use href="#i-ask"/></svg>Ask AI</a>
+  <a href="#/more" data-nav="more"><svg aria-hidden="true"><use href="#i-more"/></svg>More</a>
 </div></nav>
 
 <div class="scrim" id="scrim"></div>
