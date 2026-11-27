@@ -1,4 +1,3 @@
-/* Zikr Deen App — core: state, storage, helpers, Quran text loading (offline-first). */
 (function(){'use strict';
 const ZD=window.ZD={};
 const $=(s,r)=>(r||document).querySelector(s);
@@ -10,18 +9,16 @@ ZD.pad3=n=>String(n).padStart(3,'0');
 ZD.today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
 ZD.addDays=(iso,n)=>{const [y,m,d]=iso.split('-').map(Number),x=new Date(y,m-1,d,12);x.setDate(x.getDate()+n);return [x.getFullYear(),String(x.getMonth()+1).padStart(2,'0'),String(x.getDate()).padStart(2,'0')].join('-')};
 
-/* ---------- metadata helpers ---------- */
 const S=window.ZD_SURAHS,J=window.ZD_JUZ;
 const CUM=[0];for(let i=0;i<114;i++)CUM.push(CUM[i]+S[i][4]);
 ZD.surah=n=>{const r=S[n-1];return r?{n:r[0],en:r[1],ar:r[2],mean:r[3],count:r[4],type:r[5]==='M'?'Medinan':'Meccan'}:null};
 ZD.surahs=()=>S.map(r=>ZD.surah(r[0]));
 ZD.juzList=()=>J.map((r,i)=>({n:i+1,s:r[0],a:r[1],name:r[2]}));
-ZD.globalAyah=(s,a)=>CUM[s-1]+a;            // 1..6236
+ZD.globalAyah=(s,a)=>CUM[s-1]+a;
 ZD.juzOf=(s,a)=>{let j=1;for(let i=0;i<30;i++){if(J[i][0]<s||(J[i][0]===s&&J[i][1]<=a))j=i+1;else break}return j};
 ZD.validRef=(s,a)=>Number.isInteger(s)&&s>=1&&s<=114&&Number.isInteger(a)&&a>=1&&a<=S[s-1][4];
 ZD.TOTAL=6236;
 
-/* ---------- state ---------- */
 const KEY='zdApp_v1';
 const defaults=()=>({v:1,
   prefs:{theme:'milk',arSize:34,trSize:16,langs:{en:true,ur:false,hi:true,roman:false,hinglish:false},
@@ -63,7 +60,6 @@ ZD.applyPrefs=function(){
   const m=document.querySelector('meta[name="theme-color"]');if(m)m.content={'cream-green':'#f2f6ef','cream-yellow':'#fbf5df','brown-white':'#f8f5f1','dark-brown':'#18100c','bw':'#09090b',milk:'#faf7f0',grey:'#eceef1',night:'#010f45',day:'#f6f2e6',oled:'#000000'}[p.theme]||'#f2f6ef';if(ZD.ambientBg)ZD.ambientBg.setEnabled(p.bgMotion!==false);r.dataset.glowMotion=p.glowMotion===false?'off':'on';if(ZD.interactiveMotion)ZD.interactiveMotion.setEnabled(p.glowMotion!==false);
 };
 
-/* ---------- activity: daily log, streak, bookmarks ---------- */
 const keyOf=(s,a)=>s+':'+a;
 ZD.isRead=(s,a)=>(state.log[ZD.today()]||[]).includes(keyOf(s,a));
 ZD.toggleRead=function(s,a){const d=ZD.today(),k=keyOf(s,a),l=state.log[d]||(state.log[d]=[]),i=l.indexOf(k);let on;if(i>=0){l.splice(i,1);on=false}else{l.push(k);on=true}
@@ -75,23 +71,20 @@ ZD.isBookmarked=(s,a)=>state.bookmarks.some(b=>b.s===s&&b.a===a);
 ZD.toggleBookmark=function(s,a){const i=state.bookmarks.findIndex(b=>b.s===s&&b.a===a);let on;if(i>=0){state.bookmarks.splice(i,1);on=false}else{state.bookmarks.unshift({s,a,t:Date.now()});on=true}ZD.save();return on};
 ZD.setLast=function(s,a){state.last={s,a,t:Date.now()};ZD.save()};
 
-/* ---------- UI helpers: toast, sheet ---------- */
 let toastT=0;
-ZD.toast=function(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600)};
-ZD.openSheet=function(html,onOpen){const old=$('#sheet'),sh=old.cloneNode(false);sh.className='sheet';sh.innerHTML='<div class="grab"></div>'+html;old.replaceWith(sh);$('#scrim').classList.add('open');void sh.offsetHeight;sh.classList.add('open');if(onOpen)onOpen(sh);const f=sh.querySelector('button,select,input');if(f)f.focus({preventScroll:true})};
+ZD.toast=function(msg){const t=$('#toast');if(!t)return;const txt=ZD.i18n&&typeof ZD.i18n.t==='function'?ZD.i18n.t(msg):msg;t.textContent=txt;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600)};
+ZD.openSheet=function(html,onOpen){const old=$('#sheet'),sh=old.cloneNode(false);sh.className='sheet';sh.innerHTML='<div class="grab"></div>'+html;old.replaceWith(sh);$('#scrim').classList.add('open');void sh.offsetHeight;sh.classList.add('open');if(ZD.i18n&&typeof ZD.i18n.applyTree==='function')ZD.i18n.applyTree(sh);if(onOpen)onOpen(sh);const f=sh.querySelector('button,select,input');if(f)f.focus({preventScroll:true})};
 ZD.closeSheet=function(){$('#sheet').classList.remove('open');$('#scrim').classList.remove('open')};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')ZD.closeSheet()});
 ZD.copy=async function(text){try{await navigator.clipboard.writeText(text);ZD.toast('Copied');}catch(e){const t=document.createElement('textarea');t.value=text;t.style.position='fixed';t.style.opacity='0';document.body.append(t);t.select();try{document.execCommand('copy');ZD.toast('Copied')}catch(_){ZD.toast('Could not copy')}t.remove()}};
 ZD.download=function(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)};
 
-/* ---------- IndexedDB helper ---------- */
 ZD.idb=function(name,store,keyPath){let p=null;
   const open=()=>p||(p=new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error('IndexedDB unavailable'));const r=indexedDB.open(name,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(store))r.result.createObjectStore(store,{keyPath})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
   const tx=async(mode,fn)=>{const db=await open();return new Promise((res,rej)=>{const t=db.transaction(store,mode),o=t.objectStore(store);const rq=fn(o);t.oncomplete=()=>res(rq&&rq.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error||new Error('aborted'))})};
   return{get:k=>tx('readonly',o=>o.get(k)),put:v=>tx('readwrite',o=>o.put(v)),del:k=>tx('readwrite',o=>o.delete(k)),keys:()=>tx('readonly',o=>o.getAllKeys()),clear:()=>tx('readwrite',o=>o.clear())}};
 const textDB=ZD.idb('zikrDeenAppTextV1','surahs','n');
 
-/* ---------- Quran text: baked file -> IndexedDB -> live API -> (Al-Mulk) embedded ---------- */
 const EDS={ar:'quran-uthmani',en:'en.sahih',ur:'ur.jalandhry',hi:'hi.hindi'};
 const strip=t=>t.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g,'').replace(/[\u0671\u0623\u0625\u0622]/g,'\u0627');
 ZD.stripBismillah=function(t){const w=String(t).trim().split(/\s+/);if(w.length>4&&strip(w[0])==='بسم'&&strip(w[1])==='الله'&&strip(w[2])==='الرحمن'&&strip(w[3])==='الرحيم')return w.slice(4).join(' ');return t};
