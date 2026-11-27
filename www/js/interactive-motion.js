@@ -1,112 +1,104 @@
-/* Zikr Deen App — v42 Interactive Colorful Thin Glow Border & Subtle Touch Spring
-   Zero layout shift, zero ::after conflicts, auto-adapts to boxes, cards, pills, and circular buttons/balls. */
 (function () {
   'use strict';
   const ZD = window.ZD || (window.ZD = {});
   const SELECTOR = [
-    '.card', '.folder', '.btn', '.qa-it', '.qr-card', '.th-card',
-    '.ibtn', '.pbtn', '.row', '.pathrow', '.lr-card', '.ask-card',
-    '.ring', '.m3d-card', '.nm-card', '.seg button', '.nav a',
-    '.t-orb', '.tasbih-ring', '.tasbih-btn', '.pill', '[data-glow]'
+    '.qr-card', '.btn', '.qa-it', '.th-card', '.folder', '.ibtn', '.pbtn',
+    '.row', '.pathrow', '.pill', '.nav a', '.seg button', '.tb-chip',
+    '.va-tab', '.va-root-chip', '.va-opt-btn', '.sm-opt', '.sb-chip',
+    '.n3-card', '.n3-mini', '.pg-tile', '.lr-btn', '.ask-chip',
+    '.ask-card', '.pz-card', '.tb-home-card', '.km-li', '.zd-badge-card',
+    '.m3d-card', '.nm-card', '.t-orb', '.tasbih-ring', '.tasbih-btn',
+    '.wp-play', '[data-glow]'
   ].join(',');
 
   let enabled = true;
-  let ringEl = null;
   let activeEl = null;
-  let hideTimer = null;
-  let springTimer = null;
-  let rafId = 0;
+  let activeId = null;
+  let startX = 0;
+  let startY = 0;
+  let fadeTimer = 0;
+  let downAt = 0;
 
-  function ensureRing() {
-    if (ringEl && ringEl.parentNode) return ringEl;
-    ringEl = document.getElementById('zdGlowRing');
-    if (!ringEl) {
-      ringEl = document.createElement('div');
-      ringEl.id = 'zdGlowRing';
-      ringEl.setAttribute('aria-hidden', 'true');
-      document.body.appendChild(ringEl);
-    }
-    return ringEl;
+  function removeLegacyRing() {
+    const old = document.getElementById('zdGlowRing');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
   }
 
-  function clearRing() {
-    clearTimeout(hideTimer);
-    if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  function clearTap(immediate) {
+    clearTimeout(fadeTimer);
+    fadeTimer = 0;
+    const el = activeEl;
     activeEl = null;
-    if (ringEl) ringEl.classList.remove('on');
-  }
-
-  function syncRingRect() {
-    if (!activeEl || !ringEl || !enabled) return;
-    if (!document.body.contains(activeEl)) { clearRing(); return; }
-    const rect = activeEl.getBoundingClientRect();
-    if (rect.width < 12 || rect.height < 12 || rect.bottom < 0 || rect.top > window.innerHeight) {
-      clearRing();
+    activeId = null;
+    if (!el) return;
+    if (immediate) {
+      el.classList.remove('zd-tap-active');
       return;
     }
-    const cs = window.getComputedStyle(activeEl);
-    ringEl.style.left = rect.left.toFixed(1) + 'px';
-    ringEl.style.top = rect.top.toFixed(1) + 'px';
-    ringEl.style.width = rect.width.toFixed(1) + 'px';
-    ringEl.style.height = rect.height.toFixed(1) + 'px';
-    ringEl.style.borderRadius = cs.borderRadius || '16px';
-  }
-
-  function scheduleSync() {
-    if (!activeEl || rafId) return;
-    rafId = requestAnimationFrame(() => {
-      rafId = 0;
-      syncRingRect();
-    });
-  }
-
-  function highlightTarget(target) {
-    if (!enabled || !target) return;
-    const el = target.closest(SELECTOR);
-    if (!el) return;
-    // Skip full-page containers or hidden nodes
-    const rect = el.getBoundingClientRect();
-    if (rect.width < 14 || rect.height < 14 || rect.height > window.innerHeight * 0.92) return;
-
-    ensureRing();
-    activeEl = el;
-    syncRingRect();
-    ringEl.classList.add('on');
-
-    // Subtle tactile spring press (only if element has no inline transform to preserve custom transforms)
-    if (!el.style.transform && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
-      el.classList.add('zd-tap-spring');
-      clearTimeout(springTimer);
-      springTimer = setTimeout(() => {
-        try { el.classList.remove('zd-tap-spring'); } catch (_) {}
-      }, 160);
+    const elapsed = performance.now() - downAt;
+    const wait = elapsed < 85 ? 85 - elapsed : 0;
+    if (wait > 0) {
+      fadeTimer = setTimeout(() => {
+        el.classList.remove('zd-tap-active');
+      }, wait);
+    } else {
+      el.classList.remove('zd-tap-active');
     }
-
-    clearTimeout(hideTimer);
-    hideTimer = setTimeout(clearRing, 2400);
   }
 
-  document.addEventListener('pointerdown', e => {
+  function onPointerDown(e) {
     if (!enabled) return;
     if (e.button && e.button !== 0) return;
-    highlightTarget(e.target);
-  }, { passive: true });
+    const target = e.target;
+    if (!target || typeof target.closest !== 'function') return;
+    if (target.closest('[data-no-tap]')) return;
+    const el = target.closest(SELECTOR);
+    if (!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  window.addEventListener('scroll', scheduleSync, { passive: true, capture: true });
-  window.addEventListener('resize', scheduleSync, { passive: true });
-  window.addEventListener('hashchange', clearRing);
+    clearTap(true);
+    activeEl = el;
+    activeId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    downAt = performance.now();
+    el.classList.add('zd-tap-active');
+    fadeTimer = setTimeout(() => clearTap(true), 420);
+  }
+
+  function onPointerMove(e) {
+    if (!activeEl || e.pointerId !== activeId) return;
+    const dx = Math.abs(e.clientX - startX);
+    const dy = Math.abs(e.clientY - startY);
+    if (dx > 8 || dy > 8) clearTap(true);
+  }
+
+  function onPointerUp(e) {
+    if (!activeEl) return;
+    if (activeId !== null && e.pointerId !== activeId) return;
+    clearTap(false);
+  }
+
+  removeLegacyRing();
+
+  document.addEventListener('pointerdown', onPointerDown, { passive: true });
+  document.addEventListener('pointermove', onPointerMove, { passive: true });
+  document.addEventListener('pointerup', onPointerUp, { passive: true });
+  document.addEventListener('pointercancel', () => clearTap(true), { passive: true });
+  window.addEventListener('scroll', () => clearTap(true), { passive: true, capture: true });
+  window.addEventListener('hashchange', () => clearTap(true));
+  window.addEventListener('blur', () => clearTap(true));
 
   ZD.interactiveMotion = {
     setEnabled(on) {
       enabled = Boolean(on);
       document.documentElement.dataset.glowMotion = enabled ? 'on' : 'off';
-      if (!enabled) clearRing();
+      if (!enabled) clearTap(true);
     },
     isEnabled: () => enabled,
-    clear: clearRing
+    clear: () => clearTap(true)
   };
 
-  // Sync initial preference if ZD.prefs() is already available
   try {
     const p = ZD.prefs ? ZD.prefs() : {};
     ZD.interactiveMotion.setEnabled(p.glowMotion !== false);
