@@ -1,7 +1,8 @@
-/* Zikr Deen App — "Ask Zikr Deen": Islamic Q&A chatbot (Gemini + Google Search). */
 (function(){'use strict';
 const ZD=window.ZD,$=ZD.$,esc=ZD.esc,icon=ZD.icon,R=ZD.R;
-const CFG=window.ZD_ASK||{};if(CFG.proxy&&String(CFG.proxy).indexOf('__')===0)CFG.proxy='';
+const CFG=window.ZD_ASK||{};
+if(CFG.proxy&&String(CFG.proxy).indexOf('__')===0)CFG.proxy='';
+if(CFG.key&&String(CFG.key).indexOf('__')===0)CFG.key='';
 const HKEY='zdAskChat';
 const SYSTEM=`You are "Ask Zikr Deen", a careful Islamic knowledge assistant inside the Zikr Deen app.
 
@@ -48,17 +49,20 @@ const STARTERS=['App me Hadith kahan milegi?','Wudu ka tareeqa app me kahan hai?
 
 function load(){try{return JSON.parse(localStorage.getItem(HKEY)||'[]')}catch(e){return[]}}
 function save(h){try{localStorage.setItem(HKEY,JSON.stringify(h.slice(-40)))}catch(e){}}
+function hasBackend(){return !!(CFG.proxy||(CFG.key&&CFG.key.indexOf('__')!==0))}
 
-/* ---------- tiny markdown -> safe HTML ---------- */
 function md(t){
   let s=esc(t);
   s=s.replace(/\[([^\]\n]{1,80})\]\((#\/[a-z0-9\/_-]*)\)/gi,'<a class="ask-link" href="$2">$1</a>').replace(/\[([^\]\n]{1,80})\]\((https:\/\/[^\s)]+)\)/gi,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
   s=s.replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<i>$2</i>');
-  s=s.replace(/([\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\s\u064B-\u0652\u06D6-\u06ED،؟.]*)/g,m=>{const t=m.trim(),hk=(t.match(/[\u064B-\u0652]/g)||[]).length;
-    if(hk>=3)return'<span class="ar ask-ar" lang="ar">'+t+'</span> ';
-    if(t.replace(/[\s.,،؟]/g,'').length<=3)return'<span class="ar" lang="ar" style="font-size:1.25em;color:var(--gold-soft)">'+t+'</span> ';
-    return'<span lang="ur" dir="rtl" style="unicode-bidi:isolate;font-size:1.05em">'+t+'</span> '});
-  const lines=s.split('\n'),out=[];let inList=false;
+  s=s.replace(/([\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\s\u064B-\u0652\u06D6-\u06ED،؟.]*)/g,m=>{
+    const x=m.trim(),hk=(x.match(/[\u064B-\u0652]/g)||[]).length;
+    if(hk>=3)return'<span class="ar ask-ar" lang="ar">'+x+'</span> ';
+    if(x.replace(/[\s.,،؟]/g,'').length<=3)return'<span class="ar" lang="ar" style="font-size:1.25em;color:var(--gold-soft)">'+x+'</span> ';
+    return'<span lang="ur" dir="rtl" style="unicode-bidi:isolate;font-size:1.05em">'+x+'</span> ';
+  });
+  const lines=s.split('\n'),out=[];
+  let inList=false;
   for(const ln of lines){
     const m=ln.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)$/);
     if(m){if(!inList){out.push('<ul>');inList=true}out.push('<li>'+m[1]+'</li>')}
@@ -68,22 +72,23 @@ function md(t){
   return out.join('');
 }
 
-/* ---------- Voice: speaks the answer while it is being written ----------
-   🔊 natural : Gemini TTS (free tier, natural voice). If it fails or the free limit is over -> automatically the phone's own voice for 5 minutes, then it tries Gemini again.
-   📱 phone   : the phone's built-in text-to-speech (always free, works offline).
-   🔇 off.     Tap the speaker button in the header to switch between the three. */
-const NT=()=>window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.TextToSpeech; /* the phone's own Android voice (plugin inside the APK) */
+const NT=()=>window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.TextToSpeech;
 const TTS_OK=('speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='undefined')||!!NT();
 const AC=window.AudioContext||window.webkitAudioContext;
 const VOICE_OK=TTS_OK||!!AC;
-const VMODEL=CFG.voiceModel||'gemini-2.5-flash-preview-tts';
-const VKEY='zdAskVoiceMode',VO={sp:0,pend:'',first:false,said:0}; /* sp = characters of the current answer already handed to the speaker */
+const BASE='https://generativelanguage.googleapis.com/v1beta/models/';
+const VMODEL=CFG.voiceModel||'gemini-3.8-flash-tts';
+const VKEY='zdAskVoiceMode',VO={sp:0,pend:'',first:false,said:0};
 const GT={ctx:null,gen:0,tail:Promise.resolve(),t:0,src:[],failUntil:0};
-function voiceMode(){let m='n';try{m=localStorage.getItem(VKEY)||'n'}catch(e){}
+
+function voiceMode(){
+  let m='n';
+  try{m=localStorage.getItem(VKEY)||'n'}catch(e){}
   if(m!=='n'&&m!=='p'&&m!=='x')m='n';
   if(m==='n'&&!AC)m=TTS_OK?'p':'x';
   if(m==='p'&&!TTS_OK)m=AC?'n':'x';
-  return m}
+  return m;
+}
 function setVoiceMode(m){try{localStorage.setItem(VKEY,m)}catch(e){}}
 const VNAME_KEY='zdAskVoiceName',VRATE_KEY='zdAskVoiceRate',AMOD_KEY='zdAskModelMode';
 const VOICE_STYLES=[['Charon','Charon · गंभीर और शांत'],['Kore','Kore · साफ़ और सौम्य'],['Puck','Puck · तेज़ और फ्रेंडली'],['Fenrir','Fenrir · गहरी आवाज़'],['Aoede','Aoede · मधुर आवाज़']];
@@ -93,21 +98,30 @@ function voiceRate(){try{const r=parseFloat(localStorage.getItem(VRATE_KEY)||'1'
 function setVoiceRate(r){try{localStorage.setItem(VRATE_KEY,String(r))}catch(e){}}
 function aiModelMode(){try{return localStorage.getItem(AMOD_KEY)==='lite'?'lite':'auto'}catch(e){return 'auto'}}
 function setAiModelMode(m){try{localStorage.setItem(AMOD_KEY,m==='lite'?'lite':'auto')}catch(e){}}
-function voiceUnlock(){if(!AC)return;try{if(!GT.ctx)GT.ctx=new AC();if(GT.ctx.state==='suspended')GT.ctx.resume()}catch(e){}} /* must run inside a tap/keypress */
+
+function voiceUnlock(){
+  if(!AC)return;
+  try{
+    if(!GT.ctx||GT.ctx.state==='closed')GT.ctx=new AC();
+    if(GT.ctx.state==='suspended')GT.ctx.resume().catch(()=>{});
+  }catch(e){}
+}
 function voiceStop(){
   VO.sp=0;VO.pend='';VO.first=false;VO.said=0;GT.gen++;GT.tail=Promise.resolve();
   GT.src.forEach(x=>{try{x.stop()}catch(e){}});GT.src=[];GT.t=0;
   try{if(NT())NT().stop()}catch(e){}
-  if(TTS_OK)try{speechSynthesis.cancel()}catch(e){}
+  if('speechSynthesis' in window)try{speechSynthesis.cancel()}catch(e){}
 }
-const AR_RUN=/[؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿][؀-ۿݐ-ݿﭐ-﷿ﹰ-﻿\sً-ْۖ-ۭ،؟.]*/g;
+
+const AR_RUN=/[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\s\u064B-\u0652\u06D6-\u06ED،؟.]*/g;
 function speakClean(t){
   return t.replace(/\[([^\]\n]*)\]\((?:#\/|https?:)[^)]*\)/g,'$1')
-    .replace(AR_RUN,m=>(m.match(/[ً-ْ]/g)||[]).length>=2?' ':m) /* Quran / dua with harakat is NOT read by a synthetic voice (mispronunciation risk) - only normal text (Hindi/Urdu/English) is */
+    .replace(AR_RUN,m=>(m.match(/[\u064B-\u0652]/g)||[]).length>=2?' ':m)
     .replace(/[*_`#>]+/g,'').replace(/^\s*[-•]\s+/gm,'').replace(/\(\s*\)/g,'')
-    .replace(/[\u{1F300}-\u{1FAFF}☀-➿]/gu,'').replace(/\s+/g,' ').trim();
+    .replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,'').replace(/\s+/g,' ').trim();
 }
-function langOf(s){return /[ऀ-ॿ]/.test(s)?'hi-IN':/[؀-ۿ]/.test(s)?'ur-PK':'en-IN'}
+function langOf(s){return /[\u0900-\u097F]/.test(s)?'hi-IN':/[\u0600-\u06FF]/.test(s)?'ur-PK':'en-IN'}
+
 let NTAIL=Promise.resolve();
 function nativeSay(s,gen){
   const T=NT();if(!T)return false;
@@ -123,37 +137,56 @@ function nativeSay(s,gen){
 }
 function deviceSay(s,gen){
   if(!TTS_OK)return;
-  const wait=GT.ctx?Math.max(0,(GT.t-GT.ctx.currentTime))*1000:0; /* let any Gemini audio already queued finish first */
+  const wait=GT.ctx?Math.max(0,(GT.t-GT.ctx.currentTime))*1000:0;
   if(NT()){if(wait>50)setTimeout(()=>{if(gen===GT.gen)nativeSay(s,gen)},wait);else nativeSay(s,gen);return}
-  const run=()=>{if(gen!==GT.gen)return;try{
-    if(!speechSynthesis.getVoices().length&&!deviceSay.warned){deviceSay.warned=1;setTimeout(()=>{if(!speechSynthesis.getVoices().length)vtoast('Is phone me Text-to-speech awaaz nahi mili — Phone Settings > Text-to-speech me Google voice install karein')},1500)}
-    const u=new SpeechSynthesisUtterance(s);u.lang=langOf(s);u.rate=voiceRate();u.onerror=()=>vtoast('Phone ki awaaz nahi chal saki');speechSynthesis.speak(u)}catch(e){}};
+  const run=()=>{
+    if(gen!==GT.gen)return;
+    try{
+      if(!speechSynthesis.getVoices().length&&!deviceSay.warned){deviceSay.warned=1;setTimeout(()=>{if(!speechSynthesis.getVoices().length)vtoast('Is phone me Text-to-speech awaaz nahi mili — Phone Settings > Text-to-speech me Google voice install karein')},1500)}
+      const u=new SpeechSynthesisUtterance(s);u.lang=langOf(s);u.rate=voiceRate();u.onerror=()=>vtoast('Phone ki awaaz nahi chal saki');speechSynthesis.speak(u);
+    }catch(e){}
+  };
   if(wait>50)setTimeout(run,wait);else run();
 }
-/* Every Gemini voice model has its OWN free quota. When one is used up (429) the next one is tried; only when all are used up the phone's voice takes over. */
-const VMODELS=[...new Set([...(Array.isArray(CFG.voiceModels)?CFG.voiceModels:[]),VMODEL,'gemini-2.5-flash-preview-tts','gemini-2.5-pro-preview-tts'])],VCOOL={};
+
+function loadCool(k){try{return JSON.parse(sessionStorage.getItem(k)||'{}')}catch(e){return{}}}
+function saveCool(k,o){try{sessionStorage.setItem(k,JSON.stringify(o))}catch(e){}}
+
+const VMODELS=[...new Set([...(Array.isArray(CFG.voiceModels)?CFG.voiceModels:[]),VMODEL])];
+const VCOOL=loadCool('zdAskVCool');
 async function geminiVoice(text){
-  let last;
-  for(const m of VMODELS){
-    if((VCOOL[m]||0)>Date.now())continue;
+  if(!hasBackend()){const e=new Error('tts nokey');e.nokey=true;throw e}
+  let last=null,saw429=false;
+  const now=Date.now();
+  const active=VMODELS.filter(m=>(VCOOL[m]||0)<=now);
+  const order=active.length?active:VMODELS;
+  for(const m of order){
     try{return await geminiVoice1(text,m)}
-    catch(e){last=e;const msg=String(e.message||'');
-      if(/429/.test(msg)){VCOOL[m]=Date.now()+20*60*1000;continue}
-      if(/ (400|403|404)$/.test(msg)){VCOOL[m]=Date.now()+60*60*1000;continue}
-      throw e}
+    catch(e){
+      last=e;
+      const st=e.status||0,msg=String(e.message||'');
+      if(st===429||/429/.test(msg)){saw429=true;VCOOL[m]=Date.now()+10*60*1000;saveCool('zdAskVCool',VCOOL);continue}
+      if(st===400||st===403||st===404||/ (400|403|404)$/.test(msg)){VCOOL[m]=Date.now()+6*60*60*1000;saveCool('zdAskVCool',VCOOL);continue}
+      if(st===401)throw e;
+      VCOOL[m]=Date.now()+60*1000;saveCool('zdAskVCool',VCOOL);
+      continue;
+    }
   }
-  throw last||new Error('tts 429');
+  const err=last||new Error(saw429?'tts 429':'tts failed');
+  if(saw429&&!err.status)err.status=429;
+  throw err;
 }
-async function geminiVoice1(text,VMODEL){
+async function geminiVoice1(text,model){
   const body={contents:[{parts:[{text}]}],generationConfig:{responseModalities:['AUDIO'],speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:voiceName()}}}}};
-  const headers={'Content-Type':'application/json'};let url;
-  if(CFG.proxy){url=CFG.proxy;body.model=VMODEL}
-  else{url=BASE+VMODEL+':generateContent';headers['x-goog-api-key']=CFG.key}
-  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),15000);
+  const headers={'Content-Type':'application/json'};
+  let url;
+  if(CFG.proxy){url=CFG.proxy;body.model=model}
+  else{url=BASE+model+':generateContent';headers['x-goog-api-key']=CFG.key}
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),16000);
   try{
     const r=await fetch(url,{method:'POST',headers,body:JSON.stringify(body),signal:ctl.signal});
     const j=await r.json().catch(()=>({}));
-    if(!r.ok)throw new Error('tts '+r.status);
+    if(!r.ok){const e=new Error('tts '+r.status);e.status=r.status;throw e}
     const parts=(((j.candidates||[])[0]||{}).content||{}).parts||[];
     const d=(parts.find(x=>x.inlineData&&x.inlineData.data)||{}).inlineData;
     if(!d)throw new Error('tts empty');
@@ -164,14 +197,15 @@ async function toBuffer(d){
   const ctx=GT.ctx,bin=atob(d.data),n=bin.length,u8=new Uint8Array(n);
   for(let i=0;i<n;i++)u8[i]=bin.charCodeAt(i);
   const mt=String(d.mimeType||'');
-  if(!mt||/L16|pcm/i.test(mt)){ /* raw 16-bit mono PCM (Gemini default, usually 24 kHz) */
+  if(!mt||/L16|pcm/i.test(mt)){
     const rate=+((mt.match(/rate=(\d+)/)||[])[1])||24000,len=n>>1,buf=ctx.createBuffer(1,len,rate),ch=buf.getChannelData(0),dv=new DataView(u8.buffer);
     for(let i=0;i<len;i++)ch[i]=dv.getInt16(i*2,true)/32768;
     return buf;
   }
   return await ctx.decodeAudioData(u8.buffer.slice(0));
 }
-const VCAP=1100; /* characters read aloud per answer - the rest stays on screen (saves the free voice limit) */
+
+const VCAP=1600;
 function vtoast(m){try{ZD.toast(m)}catch(e){}}
 function speakUnit(raw){
   let s=speakClean(raw);if(!s||!/[\p{L}\p{N}]/u.test(s))return;
@@ -179,7 +213,7 @@ function speakUnit(raw){
   if(VO.said+s.length>VCAP){s=s.slice(0,VCAP-VO.said);const k=Math.max(s.lastIndexOf('. '),s.lastIndexOf('। '));if(k>200)s=s.slice(0,k+1)}
   VO.said+=s.length;
   const gen=GT.gen;
-  if(voiceMode()==='p'||!GT.ctx||Date.now()<GT.failUntil){deviceSay(s,gen);return}
+  if(voiceMode()==='p'||!hasBackend()||!GT.ctx||Date.now()<GT.failUntil){deviceSay(s,gen);return}
   GT.tail=GT.tail.then(async()=>{
     if(gen!==GT.gen)return;
     if(Date.now()<GT.failUntil){deviceSay(s,gen);return}
@@ -194,9 +228,9 @@ function speakUnit(raw){
       GT.src.push(src);src.onended=()=>{GT.src=GT.src.filter(x=>x!==src)};
     }catch(e){
       if(gen!==GT.gen)return;
-      console.warn('Gemini voice failed - using the phone voice for a while',e);
-      const lim=/429/.test(e.message||'');GT.failUntil=Date.now()+(lim?30:5)*60*1000;
-      vtoast(lim?'Natural awaaz ki free limit poori — kuch der phone ki awaaz chalegi':'Natural awaaz nahi chali — phone ki awaaz se padh raha hoon');
+      const lim=e.status===429||/429/.test(e.message||'');
+      GT.failUntil=Date.now()+(lim?15:2)*60*1000;
+      vtoast(lim?'सभी Gemini वॉइस मॉडल की फ्री लिमिट पूरी — अभी फोन की आवाज़ चल रही है':'Gemini आवाज़ उपलब्ध नहीं — फोन की आवाज़ चल रही है');
       deviceSay(s,gen);
     }
   });
@@ -204,14 +238,13 @@ function speakUnit(raw){
 function flushPend(){const t=VO.pend;VO.pend='';VO.first=true;if(t)speakUnit(t)}
 function emit(txt,final){
   if(voiceMode()!=='n'){speakUnit(txt);return}
-  /* Gemini mode: first sentence goes out at once (fast start), the rest are grouped (~160 chars) to save the free quota */
   VO.pend+=(VO.pend?' ':'')+txt;
   if(final||!VO.first||VO.pend.length>=450)flushPend();
 }
 function voiceFeed(full,final){
   if(!VOICE_OK||voiceMode()==='x'||!document.getElementById('askList'))return;
   full=full.replace(/^\s+/,'');
-  if(full.length<VO.sp)voiceStop(); /* the answer restarted (fallback model) */
+  if(full.length<VO.sp)voiceStop();
   const rest=full.slice(VO.sp);let cut=-1,m;const re=/[.!?।]+(?=\s)|\n/g;
   while((m=re.exec(rest)))cut=m.index+m[0].length;
   if(final)cut=rest.length;
@@ -220,17 +253,13 @@ function voiceFeed(full,final){
 }
 window.addEventListener('hashchange',voiceStop);
 
-/* ---------- Gemini call ---------- */
 function toContents(h){return h.filter(m=>m.t&&!m.l).slice(-12).map(m=>({role:m.r==='u'?'user':'model',parts:[{text:m.t}]}))}
-const BASE='https://generativelanguage.googleapis.com/v1beta/models/';
-/* Model order = fastest first. gemini-2.5-flash is being retired by Google so it is not used any more. Only model names that exist are listed (a wrong name wastes a round-trip).
-   If a model hangs or errors, the next one is tried automatically. */
-const MODELS=(Array.isArray(CFG.models)&&CFG.models.length)?CFG.models:['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.0-flash'];
-const PREF=MODELS[0];
-let SEARCH_OFF=false; /* set when Google Search is refused on this key/plan, so we stop paying a failed round-trip on every question */
-const THK={}; /* model -> index of the thinking setting that worked (remembered, so a rejected one is not retried every time) */
-/* Thinking is the biggest hidden delay. 2.5 models use thinkingBudget:0; Gemini 3.x use thinkingLevel:'low'. If a model rejects it we fall back to the next option. */
+const MODELS=(Array.isArray(CFG.models)&&CFG.models.length)?CFG.models:['gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash-lite','gemini-3.1-flash-lite','gemini-2.5-flash','gemini-2.5-flash-lite'];
+const MCOOL=loadCool('zdAskMCool');
+let SEARCH_OFF=false;
+const THK={};
 function thinkVariants(model){return /2\.5/.test(model)?[{thinkingBudget:0},null]:[{thinkingLevel:'minimal'},{thinkingLevel:'low'},{thinkingBudget:0},null]}
+
 async function callGemini(model,contents,grounded,sys,opts){
   const vs=thinkVariants(model);let last;
   for(let i=THK[model]||0;i<vs.length;i++){
@@ -241,19 +270,19 @@ async function callGemini(model,contents,grounded,sys,opts){
 }
 async function callOnce(model,contents,grounded,sys,opts,th){
   opts=opts||{};
-  const gc={temperature:.3,maxOutputTokens:opts.onDelta?2000:3000};
+  const gc={temperature:.3,maxOutputTokens:opts.maxTokens||8192};
   if(th)gc.thinkingConfig=th;
   const body={systemInstruction:{parts:[{text:sys||SYSTEM}]},contents,generationConfig:gc};
   if(grounded)body.tools=[{google_search:{}}];
   const headers={'Content-Type':'application/json'};
-  /* streaming: first words appear in ~1-3s instead of waiting for the full answer */
   const stream=!!opts.onDelta&&!CFG.proxy&&typeof TextDecoder!=='undefined'&&typeof ReadableStream!=='undefined';
   let url;
   if(CFG.proxy){url=CFG.proxy;body.model=model}
   else{url=BASE+model+(stream?':streamGenerateContent?alt=sse':':generateContent');headers['x-goog-api-key']=CFG.key}
   const ctl=new AbortController();let to;
+  const baseMs=opts.timeoutMs||(stream?(grounded?28000:22000):(grounded?35000:28000));
   const arm=ms=>{clearTimeout(to);to=setTimeout(()=>ctl.abort(),ms)};
-  arm(stream?(grounded?25000:20000):(grounded?30000:25000));
+  arm(baseMs);
   try{
     const r=await fetch(url,{method:'POST',headers,body:JSON.stringify(body),signal:ctl.signal});
     if(!r.ok){const j=await r.json().catch(()=>({}));const e=new Error((j.error&&j.error.message)||('HTTP '+r.status));e.status=r.status;throw e}
@@ -273,12 +302,12 @@ async function callOnce(model,contents,grounded,sys,opts,th){
     try{
       for(;;){
         const x=await rd.read();if(x.done)break;
-        arm(25000);
+        arm(28000);
         buf+=dec.decode(x.value,{stream:true});
         let k;while((k=buf.indexOf('\n'))>=0){eat(buf.slice(0,k).replace(/\r$/,''));buf=buf.slice(k+1)}
       }
       if(buf)eat(buf.replace(/\r$/,''));
-    }catch(e){if(!text.trim())throw e} /* if the connection drops mid-answer, keep what already arrived */
+    }catch(e){if(text.trim().length<40)throw e}
     return{candidates:[{content:{parts:[{text}]},groundingMetadata:meta||undefined}]};
   }finally{clearTimeout(to)}
 }
@@ -290,18 +319,30 @@ function parse(j){
   (((c.groundingMetadata||{}).groundingChunks)||[]).forEach(g=>{const w=g.web;if(w&&w.uri&&!seen[w.uri]){seen[w.uri]=1;src.push({u:w.uri,t:w.title||w.uri})}});
   return{text,src:src.slice(0,5)};
 }
+function orderedModels(){
+  if(aiModelMode()==='lite'){
+    const lites=MODELS.filter(x=>/lite/i.test(x));
+    const rest=MODELS.filter(x=>!/lite/i.test(x));
+    return [...lites,...rest];
+  }
+  return MODELS;
+}
 async function ask(history,noSearch,sys,opts){
   opts=opts||{};
-  if(!CFG.proxy&&(!CFG.key||CFG.key.indexOf('__')===0)){const e=new Error('nokey');e.nokey=true;throw e}
+  if(!hasBackend()){const e=new Error('nokey');e.nokey=true;throw e}
   const contents=toContents(history);let last;
   const t0=Date.now();let skipSearch=false;
-  const mOrd=aiModelMode()==='lite'?['gemini-2.5-flash-lite',...MODELS.filter(x=>x!=='gemini-2.5-flash-lite')]:MODELS;
-  for(const model of (opts.fast?mOrd.slice(0,2):mOrd)){
-    if(last&&Date.now()-t0>40000)break;
+  const mOrd=orderedModels();
+  const live=mOrd.filter(m=>(MCOOL[m]||0)<=Date.now()),list=live.length?live:mOrd;
+  for(const model of (opts.fast?list.slice(0,3):list)){
+    if(last&&Date.now()-t0>65000)break;
     for(const grounded of ((noSearch||SEARCH_OFF||skipSearch)?[false]:[true,false])){
       try{return parse(await callGemini(model,contents,grounded,sys,opts))}
-      catch(e){e.model=model;e.ms=Date.now()-t0;last=e;
-        if(grounded&&(e.status===400||e.status===403)&&/ground|search|tool/i.test(e.message||''))SEARCH_OFF=true;
+      catch(e){
+        e.model=model;e.ms=Date.now()-t0;last=e;
+        if(e.status===404){MCOOL[model]=Date.now()+6*3600*1000;saveCool('zdAskMCool',MCOOL);break}
+        if(e.status===429){MCOOL[model]=Date.now()+5*60*1000;saveCool('zdAskMCool',MCOOL);break}
+        if(grounded&&(e.status===400||e.status===403)&&/ground|search|tool/i.test(e.message||'')){SEARCH_OFF=true;continue}
         if(e.status===401)throw e;
         if(e.name==='AbortError'||/Failed to fetch|NetworkError|Load failed/i.test(e.message||'')){e.offline=true;if(grounded){skipSearch=true;continue}break}
       }
@@ -314,20 +355,17 @@ function friendly(e){
   return friendly0(e)+(e.nokey?'':dbg);
 }
 function friendly0(e){
-  if(e.nokey)return'AI abhi set nahi hai. Build workflow me GEMINI_PROXY_URL aur backend par GEMINI_API_KEY configure hona chahiye.';
+  if(e.nokey)return'AI abhi set nahi hai. Build workflow me GEMINI_PROXY_URL ya GEMINI_API_KEY configure hona chahiye.';
   if(e.offline)return'Internet nahi mil raha ya jawab aane me der lagi. Connection check karke dobara try karein.';
   if(e.status===429)return'Abhi bahut zyada sawal aa rahe hain (free limit). Thodi der baad dobara try karein.';
   if(e.status===400||e.status===401||e.status===403)return'AI key me masla hai. App banane wale se kahein ki Gemini API key check karein.';
   return'Jawab nahi mil saka. Thodi der baad dobara try karein.';
 }
 
-/* Greetings and "app me kahan hai" questions don't need Google Search (that round-trip is what made even "Assalamu alaikum" slow). */
 const GREET=/^\s*(असल|अस्सल|सलाम|वालेकुम|assalam|as-salam|salam|salaam|wa\s?alaikum|walaikum|السلام|سلام|hello|hi\b|hey|namaste|shukr|jazak|thank)/i;
 const APPQ=/\b(app|apps|features?)\b|kah+an\s+(hai|hain|milt\w*|mil\w*)|kidhar\s+(hai|hain)/i;
-const SRC=/hadees|hadith|hadis|ahadees|hawal|reference|source|sanad|fatw|hukm|hukum|masl|kitab|bukhari|muslim|tirmidhi|dawud|nasai|majah|ayat|ayah|surah|surat|dalil|daleel|jaiz|jayaz|haram|halal|fazilat|हदीस|हवाला|फतवा|मसला|हुक्म|आयत|सूरह|حدیث|آیت|سورہ|فتو|مسئل/i;
 function simpleQ(q){q=(q||'').trim();if(q.length<=25&&GREET.test(q))return true;return APPQ.test(q)&&q.length<=120}
 
-/* Pure greetings / thanks are answered on the phone at once - no internet call, so no waiting. */
 function localReply(q){
   q=(q||'').trim();if(q.length>28||/\?|؟/.test(q))return'';
   const dev=/[\u0900-\u097F]/.test(q),urd=/[\u0600-\u06FF]/.test(q);
@@ -339,16 +377,14 @@ function localReply(q){
 
 ZD.askOnce=async function(prompt,sys){const a=await ask([{r:'u',t:prompt}],true,sys);return a.text};
 
-/* ---------- Voice INPUT: mic -> text (for people who cannot type) ----------
-   The phone records the voice, it is turned into a small 16 kHz mono WAV (Gemini always accepts WAV),
-   Gemini writes down what was said, and that text goes into the chat exactly like a typed question. */
-const REC_MAX=60; /* seconds, then it stops by itself */
+const REC_MAX=60;
 const MIC_OK=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)&&typeof MediaRecorder!=='undefined';
 const TR_SYS='You are a speech-to-text engine inside an Islamic Q&A app. Write down exactly what the speaker says and nothing else. Keep the speaker\'s own language: Hindi in Devanagari script, Urdu in Urdu script, English in English. If the speaker mixes Hindi or Urdu with English words, keep them as spoken. Quran or dua words in Arabic: write them in Arabic script. Do NOT answer the question, do NOT translate, do NOT add quotes, labels or notes. If there is no clear human speech, output exactly: NO_SPEECH';
+
 function readAB(b){return b.arrayBuffer?b.arrayBuffer():new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error);r.readAsArrayBuffer(b)})}
 function pcmToWav(mono,sr){
   const T=16000,ratio=sr/T,n=Math.max(1,Math.floor(mono.length/ratio)),out=new Int16Array(n);
-  for(let i=0;i<n;i++){ /* average each window = simple low-pass while down-sampling */
+  for(let i=0;i<n;i++){
     const a=Math.floor(i*ratio),b=Math.min(mono.length,Math.max(a+1,Math.floor((i+1)*ratio)));
     let v=0;for(let k=a;k<b;k++)v+=mono[k];v/=(b-a);
     v=Math.max(-1,Math.min(1,v));out[i]=v<0?v*0x8000:v*0x7FFF;
@@ -370,41 +406,43 @@ async function audioPart(blob){
       const len=buf.length,mono=new Float32Array(len),ch=buf.numberOfChannels;
       for(let c=0;c<ch;c++){const d=buf.getChannelData(c);for(let i=0;i<len;i++)mono[i]+=d[i]/ch}
       return{inlineData:{mimeType:'audio/wav',data:b64(pcmToWav(mono,buf.sampleRate))}};
-    }catch(e){console.warn('WAV convert failed, sending the recording as it is',e)}
+    }catch(e){}
     finally{try{ctx&&ctx.close&&ctx.close()}catch(_){}}
   }
   return{inlineData:{mimeType:(blob.type||'audio/webm').split(';')[0],data:b64(new Uint8Array(ab))}};
 }
 async function transcribe(blob){
-  if(!CFG.proxy&&(!CFG.key||CFG.key.indexOf('__')===0)){const e=new Error('nokey');e.nokey=true;throw e}
+  if(!hasBackend()){const e=new Error('nokey');e.nokey=true;throw e}
   const part=await audioPart(blob);
   const contents=[{role:'user',parts:[part,{text:'Write down exactly what was said in this audio.'}]}];
-  const models=MODELS.slice();
+  const mOrd=orderedModels();
+  const live=mOrd.filter(m=>(MCOOL[m]||0)<=Date.now()),list=live.length?live:mOrd;
   let last;
-  for(const model of models){
+  for(const model of list){
     try{
-      const t=parse(await callGemini(model,contents,false,TR_SYS,{})).text.replace(/^["'“”\s]+|["'“”\s]+$/g,'');
+      const t=parse(await callGemini(model,contents,false,TR_SYS,{timeoutMs:35000,maxTokens:1024})).text.replace(/^["'“”\s]+|["'“”\s]+$/g,'');
       return /^NO_SPEECH\b/i.test(t)?'':t;
     }catch(e){
       if(e.message==='empty')return '';
-      last=e;
-      if(e.status===401||e.status===429)throw e;
+      e.model=model;last=e;
+      if(e.status===404){MCOOL[model]=Date.now()+6*3600*1000;saveCool('zdAskMCool',MCOOL);continue}
+      if(e.status===429){MCOOL[model]=Date.now()+5*60*1000;saveCool('zdAskMCool',MCOOL);continue}
+      if(e.status===401)throw e;
       if(e.name==='AbortError'||/Failed to fetch|NetworkError|Load failed/i.test(e.message||'')){e.offline=true;continue}
     }
   }
   throw last;
 }
 
-/* ---------- view ---------- */
-function bubble(m){
+function bubble(m,idx){
   if(m.r==='u')return'<div class="ask-m u"><div class="ask-b">'+esc(m.t).replace(/\n/g,'<br>')+'</div></div>';
   const src=(m.s&&m.s.length)?'<div class="ask-src"><span>Sources</span>'+m.s.map(x=>'<a href="'+esc(x.u)+'" target="_blank" rel="noopener noreferrer">'+esc(x.t)+'</a>').join('')+'</div>':'';
-  /* Trust badges: shown from facts we can check on-device (sources present? Arabic text present?). AI answers are never presented as fatwa. */
   const hasAr=!m.e&&/[\u0600-\u06FF]{3,}/.test(m.t||'');
   const trust=m.e?'':'<div class="ask-trust"><span class="tb '+((m.s&&m.s.length)?'ok':'warn')+'">'+((m.s&&m.s.length)?'🔗 Web sources diye gaye — khud bhi check karein':'⚠️ Koi source link nahi mila — verify karein')+'</span><span class="tb">🤖 AI jawab · fatwa nahi</span>'+(hasAr?'<span class="tb warn">📖 Arabic text AI ne likha ho sakta hai — mushaf/asli kitab se milayein</span>':'')+'</div>';
-  return'<div class="ask-m a"><div class="ask-b'+(m.e?' err':'')+'">'+(m.e?esc(m.t):md(m.t))+src+trust+
+  return'<div class="ask-m a" data-idx="'+idx+'"><div class="ask-b'+(m.e?' err':'')+'"><div class="ask-txt">'+(m.e?esc(m.t):md(m.t))+'</div>'+src+trust+
     (m.e?'':'<div class="ask-acts">'+(VOICE_OK?'<button class="ask-ab" data-say aria-label="Listen answer" title="सुनें">🔊</button>':'')+'<button class="ask-ab" data-cp aria-label="Copy answer" title="कॉपी करें">'+icon('copy')+'</button></div>')+'</div></div>';
 }
+
 R.ask=async function(){
   let hist=load(),busy=false;
   const v=$('#view');
@@ -412,12 +450,12 @@ R.ask=async function(){
    '<span style="display:flex;gap:4px;align-items:center">'+(VOICE_OK?'<button class="ibtn" id="askVoice" type="button" aria-label="Voice on/off" style="font-size:18px"></button>':'')+'<button class="ibtn" id="askCfgBtn" type="button" aria-label="AI & Voice settings">'+icon('gear')+'</button><button class="ibtn" id="askClr" aria-label="Clear chat">'+icon('trash')+'</button></span></header>'+
    '<main class="ask"><div id="askList"></div>'+
    '<p class="ask-note">AI se galti ho sakti hai. Zaroori masail me kisi aalim se zaroor poochein.'+(ZD.acct?esc(ZD.acct.note()):'')+'</p>'+
-   '<form class="ask-bar" id="askForm"><textarea id="askIn" rows="1" placeholder="Apna sawal likhein…" aria-label="Your question" maxlength="800"></textarea>'+
-   (MIC_OK?'<button class="ask-mic-x" id="askMicX" type="button" aria-label="Recording cancel" title="Cancel" hidden>✕</button><button class="ask-mic" id="askMic" type="button" aria-label="Bolkar sawal poochein" title="Bolkar sawal poochein">🎙️</button>':'')+'<button class="ask-send" id="askSend" aria-label="Send" type="submit">'+icon('send')+'</button></form></main>';
+   '<form class="ask-bar" id="askForm"><canvas id="askWave" class="ask-wave" hidden></canvas><textarea id="askIn" rows="1" placeholder="Apna sawal likhein…" aria-label="Your question" maxlength="2000"></textarea>'+
+   (MIC_OK?'<button class="ask-mic-x" id="askMicX" type="button" aria-label="Recording cancel" title="Cancel" hidden>✕</button><button class="ask-mic" id="askMic" type="button" aria-label="Bolkar sawal poochein" title="Bolkar sawal poochein"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>':'')+'<button class="ask-send" id="askSend" aria-label="Send" type="submit">'+icon('send')+'</button></form></main>';
   const list=$('#askList'),inp=$('#askIn'),send=$('#askSend');
   const draw=()=>{
     if(!hist.length){list.innerHTML='<div class="ask-hello card"><div class="ask-logo">'+icon('ask')+'</div><h2 class="h2" style="margin:0 0 4px">Assalamu Alaikum 👋</h2><p class="muted small" style="margin:0 0 12px">Islam, Quran, Hadith, namaz, roza, zakat — koi bhi sawal poochein. Jawab Quran, sahih Hadith aur bharosemand websites se check karke diya jata hai.</p><div class="ask-chips">'+STARTERS.map(s=>'<button type="button" class="ask-chip" data-q="'+esc(s)+'">'+esc(s)+'</button>').join('')+'</div></div>'}
-    else list.innerHTML=hist.map(bubble).join('');
+    else list.innerHTML=hist.map((m,i)=>bubble(m,i)).join('');
   };
   const down=(instant)=>{
     const goBottom=()=>{
@@ -445,112 +483,208 @@ R.ask=async function(){
     };
     try{const a=await ask(hist,simple,undefined,{fast:simple,onDelta});voiceFeed(a.text,true);hist.push({r:'a',t:a.text,s:a.src});if(ZD.acct)ZD.acct.countAsk()}
     catch(e){console.error(e);hist.push({r:'a',t:friendly(e),e:1})}
-    save(hist.filter(m=>!m.e));busy=false;send.disabled=false;if(!$('#askList'))return;draw();down();{const nt=document.querySelector('.ask-note');if(nt&&ZD.acct)nt.textContent='AI se galti ho sakti hai. Zaroori masail me kisi aalim se zaroor poochein.'+ZD.acct.note()}
+    save(hist.filter(m=>!m.e));busy=false;send.disabled=false;if(!$('#askList'))return;draw();down();
+    const nt=document.querySelector('.ask-note');if(nt&&ZD.acct)nt.textContent='AI se galti ho sakti hai. Zaroori masail me kisi aalim se zaroor poochein.'+ZD.acct.note();
   }
-  $('#askForm').addEventListener('submit',e=>{e.preventDefault();go(inp.value)});
+  $('#askForm').addEventListener('submit',e=>{e.preventDefault();voiceUnlock();go(inp.value)});
   inp.addEventListener('input',fit);
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!/Android|iPhone/i.test(navigator.userAgent)){e.preventDefault();go(inp.value)}});
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!/Android|iPhone/i.test(navigator.userAgent)){e.preventDefault();voiceUnlock();go(inp.value)}});
   list.addEventListener('click',e=>{
-    const c=e.target.closest('[data-q]');if(c){go(c.dataset.q);return}
+    const c=e.target.closest('[data-q]');if(c){voiceUnlock();go(c.dataset.q);return}
     const sy=e.target.closest('[data-say]');
     if(sy){
-      const b=sy.closest('.ask-b');
-      const txt=b.innerText.replace(/\n?Sources[\s\S]*$/,'').replace(/🔊/g,'').trim();
-      if(txt){voiceStop();voiceUnlock();if(voiceMode()==='x')setVoiceMode(AC?'n':'p');const vb0=$('#askVoice');if(vb0)vb0.textContent=voiceMode()==='n'?'🔊':'📱';voiceFeed(txt,true);try{ZD.toast('जवाब पढ़कर सुनाया जा रहा है…')}catch(_){}}
+      const row=sy.closest('[data-idx]'),idx=row?parseInt(row.dataset.idx,10):-1;
+      const tb=sy.closest('.ask-b').querySelector('.ask-txt');
+      const txt=(idx>=0&&hist[idx]&&hist[idx].t)?hist[idx].t:(tb?tb.innerText.trim():'');
+      if(txt){
+        voiceStop();voiceUnlock();
+        if(voiceMode()==='x')setVoiceMode(AC?'n':'p');
+        if(voiceMode()==='n')GT.failUntil=0;
+        const vb0=$('#askVoice');if(vb0)vb0.textContent=voiceMode()==='n'?'🔊':'📱';
+        voiceFeed(txt,true);
+        try{ZD.toast('जवाब पढ़कर सुनाया जा रहा है…')}catch(_){}
+      }
       return;
     }
-    const cp=e.target.closest('[data-cp]');if(cp){const b=cp.closest('.ask-b');ZD.copy(b.innerText.replace(/\n?Sources[\s\S]*$/,'').replace(/🔊/g,'').trim())}
+    const cp=e.target.closest('[data-cp]');
+    if(cp){
+      const row=cp.closest('[data-idx]'),idx=row?parseInt(row.dataset.idx,10):-1;
+      const tb=cp.closest('.ask-b').querySelector('.ask-txt');
+      const txt=(idx>=0&&hist[idx]&&hist[idx].t)?hist[idx].t:(tb?tb.innerText.trim():'');
+      if(txt)ZD.copy(txt);
+    }
   });
   $('#askClr').addEventListener('click',()=>{if(!hist.length)return;if(confirm('Poori chat saaf kar dein?')){voiceStop();hist=[];save(hist);draw()}});
   const vb=$('#askVoice');
-  if(vb){const NAME={n:['🔊','Natural awaaz (Gemini)'],p:['📱','Phone ki awaaz'],x:['🔇','Awaaz band']};
+  if(vb){
+    const NAME={n:['🔊','Natural awaaz (Gemini)'],p:['📱','Phone ki awaaz'],x:['🔇','Awaaz band']};
     const paint=()=>{const m=voiceMode();vb.textContent=NAME[m][0];vb.title=NAME[m][1];vb.setAttribute('aria-label','Voice: '+NAME[m][1])};paint();
     vb.addEventListener('click',()=>{
       const order=[AC?'n':null,TTS_OK?'p':null,'x'].filter(Boolean),nx=order[(order.indexOf(voiceMode())+1)%order.length];
-      setVoiceMode(nx);voiceStop();voiceUnlock();paint();try{ZD.toast(NAME[nx][1])}catch(e){}
-    })}
+      setVoiceMode(nx);if(nx==='n')GT.failUntil=0;voiceStop();voiceUnlock();paint();try{ZD.toast(NAME[nx][1])}catch(e){}
+    });
+  }
   const cfgBtn=$('#askCfgBtn');
   if(cfgBtn&&ZD.openSheet){
     cfgBtn.addEventListener('click',()=>{
       const sheetHtml='<h3>AI &amp; Voice सेटिंग्स</h3>'+
-        '<div class="field"><label for="asMod">AI मॉडल मोड</label><select id="asMod"><option value="auto">Auto (Smart · Gemini 2.5 Flash)</option><option value="lite">Fast Lite (तेज़ · ज़्यादा फ्री लिमिट)</option></select></div>'+
+        '<div class="field"><label for="asMod">AI मॉडल मोड</label><select id="asMod"><option value="auto">Auto (Smart · Gemini 3.8 Flash)</option><option value="lite">Fast Lite (तेज़ · ज़्यादा फ्री लिमिट)</option></select></div>'+
         (VOICE_OK?'<div class="field"><label for="asVM">वॉइस मोड</label><select id="asVM">'+(AC?'<option value="n">🔊 Natural AI आवाज़ (Gemini TTS)</option>':'')+(TTS_OK?'<option value="p">📱 Phone ऑफलाइन आवाज़</option>':'')+'<option value="x">🔇 आवाज़ बंद</option></select></div>'+
         (AC?'<div class="field"><label for="asVN">Gemini आवाज़ चुनें</label><select id="asVN">'+VOICE_STYLES.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('')+'</select></div>':'')+
         '<div class="field"><label for="asVR">बोलने की स्पीड</label><select id="asVR"><option value="0.85">0.85× (धीरे)</option><option value="1">1.0× (सामान्य)</option><option value="1.15">1.15× (थोड़ा तेज़)</option><option value="1.3">1.3× (तेज़)</option></select></div>':'')+
-        '<p class="muted small" style="margin:8px 2px 0">अगर एक Gemini वॉइस मॉडल की फ्री लिमिट पूरी हो जाए, तो ऐप अपने आप दूसरे Gemini वॉइस मॉडल या फोन की ऑफलाइन आवाज़ पर स्विच हो जाता है।</p>';
+        '<p class="muted small" style="margin:8px 2px 0">पहले सभी फ्री Gemini वॉइस मॉडल क्रम से चलते हैं। जब सबकी लिमिट पूरी हो जाए, तभी फोन की ऑफलाइन आवाज़ चलती है।</p>';
       ZD.openSheet(sheetHtml,sh=>{
         $('#asMod',sh).value=aiModelMode();
         $('#asMod',sh).addEventListener('change',e=>{setAiModelMode(e.target.value);ZD.toast('AI मॉडल अपडेट हो गया')});
-        const vm=$('#asVM',sh);if(vm){vm.value=voiceMode();vm.addEventListener('change',e=>{setVoiceMode(e.target.value);voiceStop();voiceUnlock();if(vb){const NAME2={n:'🔊',p:'📱',x:'🔇'};vb.textContent=NAME2[voiceMode()]||'🔊'}ZD.toast('वॉइस मोड सेव हो गया')})}
+        const vm=$('#asVM',sh);if(vm){vm.value=voiceMode();vm.addEventListener('change',e=>{setVoiceMode(e.target.value);if(e.target.value==='n')GT.failUntil=0;voiceStop();voiceUnlock();if(vb){const NAME2={n:'🔊',p:'📱',x:'🔇'};vb.textContent=NAME2[voiceMode()]||'🔊'}ZD.toast('वॉइस मोड सेव हो गया')})}
         const vn=$('#asVN',sh);if(vn){vn.value=voiceName();vn.addEventListener('change',e=>{setVoiceName(e.target.value);voiceStop();ZD.toast('आवाज़: '+e.target.value)})}
         const vr=$('#asVR',sh);if(vr){vr.value=String(voiceRate());vr.addEventListener('change',e=>{setVoiceRate(parseFloat(e.target.value)||1);voiceStop();ZD.toast('स्पीड: '+e.target.value+'×')})}
       });
     });
   }
-  /* ----- mic button: tap = start, tap again = stop and send ----- */
   const mic=$('#askMic'),micX=$('#askMicX');
   if(mic){
-    if(!document.getElementById('askMicCss')){const st=document.createElement('style');st.id='askMicCss';
-      st.textContent='.ask-mic,.ask-mic-x{flex:none;align-self:flex-end;width:44px;height:44px;border-radius:50%;border:1px solid rgba(128,128,128,.4);background:transparent;color:inherit;font-size:20px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}.ask-mic-x{font-size:16px}.ask-mic-x[hidden]{display:none}.ask-mic[disabled]{opacity:.5}.ask-mic.rec{background:#d93025;border-color:#d93025;color:#fff;animation:askPulse 1.1s ease-in-out infinite}@keyframes askPulse{0%,100%{box-shadow:0 0 0 0 rgba(217,48,37,.5)}50%{box-shadow:0 0 0 8px rgba(217,48,37,0)}}';
-      document.head.appendChild(st)}
-    const AUTOSEND=CFG.micAutoSend!==false; /* true: what you said is sent at once. Set micAutoSend:false in ask-config.js to only fill the box. */
-    const ph0=inp.placeholder;let rec=null,stream=null,chunks=[],tmr=0,t0=0,cancelled=false;
+    if(!document.getElementById('askMicCss')){
+      const st=document.createElement('style');st.id='askMicCss';
+      st.textContent='.ask-mic,.ask-mic-x{flex:none;align-self:flex-end;width:44px;height:44px;border-radius:50%;border:0;padding:0;background:rgba(128,128,128,.16);color:inherit;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .15s ease,background .15s ease;-webkit-tap-highlight-color:transparent}.ask-mic:active,.ask-mic-x:active{transform:scale(.94)}.ask-mic-x{font-size:16px}.ask-mic-x[hidden],.ask-wave[hidden]{display:none}.ask-mic[disabled]{opacity:.5}.ask-mic.rec{background:#111;color:#fff}.ask-wave{flex:1;min-width:0;height:44px;align-self:flex-end;color:inherit}';
+      document.head.appendChild(st);
+    }
+    const AUTOSEND=CFG.micAutoSend!==false;
+    const ph0=inp.placeholder;
+    let rec=null,stream=null,chunks=[],tmr=0,t0=0,cancelled=false;
     const mm=n=>Math.floor(n/60)+':'+('0'+(n%60)).slice(-2);
     const note=m=>{hist.push({r:'a',t:m,e:1});draw();down()};
     const toast=m=>{try{ZD.toast(m)}catch(_){note(m)}};
-    const idle=()=>{clearInterval(tmr);tmr=0;if(ZD.voiceOrb)ZD.voiceOrb.close();mic.classList.remove('rec');mic.disabled=false;mic.textContent='🎙️';micX.hidden=true;inp.disabled=false;inp.placeholder=ph0;send.disabled=busy};
+    const wave=$('#askWave'),MICSVG=mic.innerHTML,STOPSVG='<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>';
+    let actx=null,an=null,wbuf=null,raf=0,lv=[],lastPush=0,smooth=0,peak=0.18,starting=false;
+    const idle=()=>{clearInterval(tmr);tmr=0;stopWave();mic.classList.remove('rec');mic.disabled=false;mic.innerHTML=MICSVG;micX.hidden=true;inp.hidden=false;inp.disabled=false;inp.placeholder=ph0;send.disabled=busy};
+    function drawPill(c,x,y,w,h){
+      const r=Math.min(w/2,h/2);
+      c.beginPath();
+      c.moveTo(x+r,y);
+      c.lineTo(x+w-r,y);
+      c.quadraticCurveTo(x+w,y,x+w,y+r);
+      c.lineTo(x+w,y+h-r);
+      c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+      c.lineTo(x+r,y+h);
+      c.quadraticCurveTo(x,y+h,x,y+h-r);
+      c.lineTo(x,y+r);
+      c.quadraticCurveTo(x,y,x+r,y);
+      c.closePath();
+      c.fill();
+    }
+    function startDraw(){
+      if(!wave)return;
+      stopWave(true);wave.hidden=false;
+      const col=getComputedStyle(wave).color||'#111';
+      lv=[];smooth=0;peak=0.18;lastPush=0;
+      const frame=ts=>{
+        raf=requestAnimationFrame(frame);
+        const dpr=window.devicePixelRatio||1,cw=wave.clientWidth||220,ch=44;
+        const tw=Math.round(cw*dpr),th=Math.round(ch*dpr);
+        if(wave.width!==tw||wave.height!==th){wave.width=tw;wave.height=th}
+        let lvl=0;
+        if(an){
+          an.getByteTimeDomainData(wbuf);
+          let sum=0;
+          for(let i=0;i<wbuf.length;i++){const x=(wbuf[i]-128)/128;sum+=x*x}
+          const rms=Math.sqrt(sum/wbuf.length);
+          peak=Math.max(0.14,peak*0.992,rms*1.15);
+          lvl=Math.min(1,Math.pow(rms/peak,0.75));
+        }else{
+          lvl=0.12+0.08*Math.sin(ts/140);
+        }
+        smooth+=(lvl-smooth)*(lvl>smooth?0.65:0.22);
+        if(ts-lastPush>48){lastPush=ts;lv.push(smooth);if(lv.length>600)lv.splice(0,300)}
+        const c=wave.getContext('2d'),W=wave.width,H=wave.height;
+        c.clearRect(0,0,W,H);
+        c.fillStyle=col;
+        c.font=(13*dpr)+'px sans-serif';
+        c.textBaseline='middle';
+        c.fillText(mm(Math.floor((Date.now()-t0)/1000)),2*dpr,H/2);
+        const bw=3*dpr,gap=3*dpr,x0=46*dpr,n=Math.max(1,Math.floor((W-x0)/(bw+gap)));
+        for(let i=0;i<n;i++){
+          const k=lv.length-n+i,v=k>=0?lv[k]:0,bh=Math.max(4*dpr,v*H*0.88);
+          c.globalAlpha=k>=0?(0.35+0.65*Math.min(1,v+0.25)):0.18;
+          drawPill(c,x0+i*(bw+gap),(H-bh)/2,bw,bh);
+        }
+        c.globalAlpha=1;
+      };
+      raf=requestAnimationFrame(frame);
+    }
+    function attachWave(st){
+      try{
+        const A=window.AudioContext||window.webkitAudioContext;
+        actx=new A();an=actx.createAnalyser();an.fftSize=512;an.smoothingTimeConstant=0.45;
+        wbuf=new Uint8Array(an.fftSize);
+        actx.createMediaStreamSource(st).connect(an);
+        if(actx.state==='suspended')actx.resume().catch(()=>{});
+      }catch(_){an=null}
+    }
+    function stopWave(keepShown){
+      if(raf){cancelAnimationFrame(raf);raf=0}
+      try{actx&&actx.close()}catch(_){}
+      actx=null;an=null;
+      if(wave&&!keepShown)wave.hidden=true;
+    }
     const release=()=>{try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(_){}stream=null};
     async function start(){
-      if(busy||rec)return;
-      voiceStop(); /* the app's own voice must not be recorded */
-      try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}
+      if(busy||rec||starting)return;
+      starting=true;
+      voiceStop();voiceUnlock();
+      t0=Date.now();cancelled=false;
+      mic.classList.add('rec');mic.innerHTML=STOPSVG;micX.hidden=false;inp.hidden=true;send.disabled=true;
+      startDraw();
+      try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}})}
       catch(e){
+        starting=false;idle();
         const n=(e&&e.name||'')+' '+(e&&e.message||'');
         note(/NotAllowed|Permission|Security/i.test(n)?'Mic ki ijazat nahi mili. Phone Settings > Apps > Zikr Deen > Permissions > Microphone me "Allow" karein, phir dobara try karein.'
           :/NotFound|Devices/i.test(n)?'Is phone me mic nahi mila.':'Mic shuru nahi ho saka ['+(e&&e.name||'error')+'].');
-        return}
+        return;
+      }
+      if(!$('#askList')||cancelled){starting=false;release();idle();return}
       let mime='';try{mime=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'].find(t=>MediaRecorder.isTypeSupported(t))||''}catch(_){}
       try{rec=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream)}
-      catch(e){release();rec=null;note('Recording shuru nahi ho saki ['+(e&&e.name||'error')+'].');return}
-      chunks=[];cancelled=false;
+      catch(e){starting=false;release();rec=null;idle();note('Recording shuru nahi ho saki ['+(e&&e.name||'error')+'].');return}
+      chunks=[];
       rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
       rec.onstop=onStop;
-      rec.start();t0=Date.now();
-      mic.classList.add('rec');mic.textContent='⏹';micX.hidden=false;inp.disabled=true;send.disabled=true;
-      if(ZD.voiceOrb)ZD.voiceOrb.open({stream,onStop:stop,onCancel:()=>{cancelled=true;stop()}});
+      try{rec.start(250)}catch(_){rec.start()}
+      t0=Date.now();starting=false;
+      attachWave(stream);
       const tick=()=>{
-        if(!$('#askList')){cancelled=true;stop();return} /* user left this screen */
-        const n=Math.floor((Date.now()-t0)/1000);
-        inp.placeholder='🎙️ Boliye… '+mm(n)+'  (bhejne ke liye ⏹ dabayein)';
-        if(ZD.voiceOrb)ZD.voiceOrb.setTime(mm(n));
-        if(n>=REC_MAX)stop();
+        if(!$('#askList')){cancelled=true;stop();return}
+        if(Math.floor((Date.now()-t0)/1000)>=REC_MAX)stop();
       };
       tick();tmr=setInterval(tick,250);
     }
-    function stop(){if(rec&&rec.state!=='inactive'){try{rec.stop()}catch(_){onStop()}}}
+    function stop(){
+      if(rec&&rec.state!=='inactive'){try{rec.stop()}catch(_){onStop()}}
+      else if(starting){cancelled=true;idle()}
+    }
     async function onStop(){
       const r=rec;if(!r)return;rec=null;clearInterval(tmr);tmr=0;release();
       const secs=(Date.now()-t0)/1000,blob=new Blob(chunks,{type:r.mimeType||'audio/webm'});chunks=[];
       if(cancelled||!$('#askList')){idle();return}
-      if(secs<0.8||blob.size<1500){idle();toast('Awaaz bahut chhoti thi. Mic dabakar poora sawal boliye.');return}
-      mic.disabled=true;mic.textContent='⏳';micX.hidden=true;inp.placeholder='Aapki awaaz samajh raha hoon…';if(ZD.voiceOrb)ZD.voiceOrb.setState('Processing…','आपकी आवाज़ समझ रहा हूँ…');
+      if(secs<0.45||blob.size<600){idle();toast('Awaaz bahut chhoti thi. Mic dabakar poora sawal boliye.');return}
+      stopWave();mic.classList.remove('rec');mic.disabled=true;mic.textContent='⏳';micX.hidden=true;inp.hidden=false;inp.disabled=true;inp.placeholder='Aapki awaaz samajh raha hoon…';
       let txt='';
       try{txt=await transcribe(blob)}
       catch(e){console.error(e);if(!$('#askList'))return;idle();note(friendly(e));return}
       if(!$('#askList'))return;
       idle();
       if(!txt){toast('Awaaz samajh nahi aayi. Thoda qareeb se, saaf boliye.');return}
-      inp.value=txt.slice(0,800);fit();
+      inp.value=txt.slice(0,2000);fit();
       if(AUTOSEND)go(inp.value);else inp.focus();
     }
-    mic.addEventListener('click',()=>{rec?stop():start()});
+    mic.addEventListener('click',()=>{voiceUnlock();if(rec)stop();else if(starting){cancelled=true;idle()}else start()});
     micX.addEventListener('click',()=>{cancelled=true;stop()});
   }
   draw();if(hist.length)down(true);
   try{const pre=sessionStorage.getItem('zdAskPre');if(pre){sessionStorage.removeItem('zdAskPre');inp.value=pre;fit();inp.focus()}}catch(_){}
 };
 
-/* home screen card */
 ZD.askHTML=()=>'<section class="block"><a class="card ask-card" href="#/ask">'+
   '<div class="ask-logo">'+icon('ask')+'</div><div style="flex:1;min-width:0"><div style="font-size:19px;font-weight:600">Ask Zikr Deen</div>'+
   '<div class="muted small">Islam, Quran ya Hadith ka koi bhi sawal — AI se poochein</div></div>'+icon('back','ask-arr')+'</a></section>';
