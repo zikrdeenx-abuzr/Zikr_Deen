@@ -2,9 +2,14 @@ name: Build Zikr Deen debug APK
 on:
   workflow_dispatch:
 
+concurrency:
+  group: zikr-deen-android-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,28 +24,47 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
       - name: Select Android source
         run: |
-          test -f capacitor.config.json
+          test -f capacitor.config.json || { echo "ERROR: capacitor.config.json not found in repo root"; exit 1; }
           echo 'PROJECT=.' >> "$GITHUB_ENV"
 
       - name: Run prayer regression tests
         run: node tests/prayer.test.cjs
 
-      - name: Verify app assets
+      - name: Verify app assets and JS syntax
         run: |
-          test "$(wc -c < www/intro.html)" -eq 175997
-          # Verify core + v40 + v41 + v42 + v43 modules
+          INTRO_BYTES=$(wc -c < www/intro.html | tr -d ' ')
+          if [ "$INTRO_BYTES" -ne 175997 ]; then
+            echo "ERROR: www/intro.html size mismatch (expected 175997, got $INTRO_BYTES)"
+            exit 1
+          fi
           for F in qibla.js account.js ar-mode.js classroom.js learning-hub.js whatsapp-config.js whatsapp-hub.js interactive-motion.js visual-academy.js; do
             test -f "$PROJECT/www/js/$F" || { echo "ERROR: www/js/$F missing"; exit 1; }
             grep -q "$F" "$PROJECT/www/index.html" || { echo "ERROR: $F not linked in index.html"; exit 1; }
+            node --check "$PROJECT/www/js/$F"
+          done
+          for F in ask-config.js ask.js; do
+            if [ -f "$PROJECT/www/js/$F" ]; then
+              node --check "$PROJECT/www/js/$F"
+            fi
           done
           test -f "$PROJECT/www/quiz/index.html" || { echo "ERROR: Quiz (www/quiz) missing"; exit 1; }
           test -f "$PROJECT/www/quiz/offline-api.js" || { echo "ERROR: quiz offline-api.js missing"; exit 1; }
           grep -q "quiz/index.html" "$PROJECT/www/js/folders.js" || { echo "ERROR: Quiz card not linked in folders.js"; exit 1; }
           grep -q "#/whatsapp" "$PROJECT/www/js/folders.js" || { echo "ERROR: WhatsApp AI card not linked in folders.js"; exit 1; }
           test -f "$PROJECT/www/img/visuals/badge-silsila.webp" || { echo "ERROR: v43 visual assets missing"; exit 1; }
-          echo "All v43 modules, visuals & intro.html verified OK"
+          echo "All v43 modules, JS syntax, visuals & intro.html verified OK"
 
       - name: Configure Ask Zikr Deen AI (Proxy-First Secure Mode)
         env:
@@ -50,27 +74,45 @@ jobs:
           node << 'NODE_EOF'
           const fs = require("fs");
           const file = process.env.PROJECT + "/www/js/ask-config.js";
-          let src = fs.readFileSync(file, "utf8");
+          if (!fs.existsSync(file)) {
+            console.error("ERROR: www/js/ask-config.js missing");
+            process.exit(1);
+          }
+          const src = fs.readFileSync(file, "utf8");
           const proxy = (process.env.GEMINI_PROXY_URL || "").trim();
+          const key = (process.env.GEMINI_API_KEY || "").trim();
 
           if (proxy) {
             if (!/^https:\/\/[^\s]+$/.test(proxy)) {
               console.error("ERROR: GEMINI_PROXY_URL must be a valid https:// URL");
               process.exit(1);
             }
-            src = src.replace(/proxy:\s*['"][^'"]*['"]/, "proxy:" + JSON.stringify(proxy));
-            fs.writeFileSync(file, src);
+            const rx = /(["']?proxy["']?\s*:\s*)(['"][^'"]*['"]|null)/;
+            if (!rx.test(src)) {
+              console.error("ERROR: proxy field not found in www/js/ask-config.js");
+              process.exit(1);
+            }
+            const next = src.replace(rx, (_, prefix) => prefix + JSON.stringify(proxy));
+            fs.writeFileSync(file, next);
             console.log("Secure server-side GEMINI_PROXY_URL configured (API key NOT embedded in APK)");
-          } else if ((process.env.GEMINI_API_KEY || "").trim()) {
-            const k = process.env.GEMINI_API_KEY.trim();
-            if (!/^[A-Za-z0-9_\-]{20,}$/.test(k)) { console.error("ERROR: GEMINI_API_KEY looks invalid"); process.exit(1); }
-            src = src.replace(/key:\s*['"][^'"]*['"]/, "key:" + JSON.stringify(k));
-            fs.writeFileSync(file, src);
+          } else if (key) {
+            if (!/^[A-Za-z0-9_\-]{20,}$/.test(key)) {
+              console.error("ERROR: GEMINI_API_KEY looks invalid");
+              process.exit(1);
+            }
+            const rx = /(["']?key["']?\s*:\s*)(['"][^'"]*['"]|null)/;
+            if (!rx.test(src)) {
+              console.error("ERROR: key field not found in www/js/ask-config.js");
+              process.exit(1);
+            }
+            const next = src.replace(rx, (_, prefix) => prefix + JSON.stringify(key));
+            fs.writeFileSync(file, next);
             console.log("TEST MODE: GEMINI_API_KEY embedded in this APK (use only for your own testing)");
           } else {
-            console.log("AI proxy is not configured");
+            console.log("::warning::Neither GEMINI_PROXY_URL nor GEMINI_API_KEY is configured");
           }
           NODE_EOF
+          node --check "$PROJECT/www/js/ask-config.js"
 
       - name: Configure Public WhatsApp AI & Community Links (Optional)
         env:
@@ -81,19 +123,22 @@ jobs:
           node << 'NODE_EOF'
           const fs = require("fs");
           const file = process.env.PROJECT + "/www/js/whatsapp-config.js";
+          if (!fs.existsSync(file)) {
+            console.error("ERROR: www/js/whatsapp-config.js missing");
+            process.exit(1);
+          }
           let src = fs.readFileSync(file, "utf8");
           const num = (process.env.WA_ASSISTANT_NUMBER || "").replace(/\D/g, "");
           const inv = (process.env.WA_COMMUNITY_URL || "").trim();
           const pg  = (process.env.WA_COMMUNITY_PAGE_URL || "").trim();
-          if (num) src = src.replace("__WA_ASSISTANT_NUMBER__", num);
-          if (inv) src = src.replace("__WA_COMMUNITY_URL__", inv);
-          if (pg)  src = src.replace("__WA_COMMUNITY_PAGE_URL__", pg);
+          if (num) src = src.replaceAll("__WA_ASSISTANT_NUMBER__", num);
+          if (inv) src = src.replaceAll("__WA_COMMUNITY_URL__", inv);
+          if (pg)  src = src.replaceAll("__WA_COMMUNITY_PAGE_URL__", pg);
           fs.writeFileSync(file, src);
           console.log("WhatsApp public config -> number:", Boolean(num), "| invite:", Boolean(inv), "| page:", Boolean(pg));
           NODE_EOF
+          node --check "$PROJECT/www/js/whatsapp-config.js"
 
-      # Google login + usage stats (Firebase). Switches ON only if GOOGLE_SERVICES_JSON secret exists.
-      # Must run BEFORE "Setup project" so plugin is included in "cap sync".
       - name: Firebase - check secret and install login plugin
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
@@ -101,12 +146,12 @@ jobs:
         run: |
           if [ -z "$GOOGLE_SERVICES_JSON" ]; then
             echo "WARNING: GOOGLE_SERVICES_JSON secret not set - Google login / stats stay OFF (app works as before)"
-            echo "FIREBASE=off" >> $GITHUB_ENV
+            echo "FIREBASE=off" >> "$GITHUB_ENV"
             exit 0
           fi
           if [ ! -f "$PROJECT/www/js/account.js" ]; then
             echo "WARNING: account.js not found - Firebase skipped"
-            echo "FIREBASE=off" >> $GITHUB_ENV
+            echo "FIREBASE=off" >> "$GITHUB_ENV"
             exit 0
           fi
           printf '%s' "$GOOGLE_SERVICES_JSON" > "$RUNNER_TEMP/google-services.json"
@@ -115,25 +160,34 @@ jobs:
           const f = process.env.RUNNER_TEMP + "/google-services.json";
           let j;
           try { j = JSON.parse(fs.readFileSync(f, "utf8")); }
-          catch (e) { console.log("ERROR: GOOGLE_SERVICES_JSON secret is not valid JSON - paste the whole google-services.json file"); process.exit(1); }
+          catch (e) { console.error("ERROR: GOOGLE_SERVICES_JSON secret is not valid JSON"); process.exit(1); }
           const id = j.project_info && j.project_info.project_id;
-          if (!id) { console.log("ERROR: project_id missing in google-services.json"); process.exit(1); }
+          if (!id) { console.error("ERROR: project_id missing in google-services.json"); process.exit(1); }
           const c = (j.client || []).find(x => x.client_info && x.client_info.android_client_info && x.client_info.android_client_info.package_name === "com.zikrdeen.app");
-          if (!c) { console.log("ERROR: Android app com.zikrdeen.app is not in this google-services.json"); process.exit(1); }
+          if (!c) { console.error("ERROR: Android app com.zikrdeen.app is not in this google-services.json"); process.exit(1); }
           const web = (c.oauth_client || []).some(o => o.client_type === 3);
           console.log("Firebase project:", id, "| Web client (needed for Google login):", web);
-          if (!web) console.log("::warning::No Web client in google-services.json. In Firebase: add the SHA-1, enable Google sign-in, then download google-services.json again and update the secret.");
+          if (!web) console.log("::warning::No Web client in google-services.json. Add SHA-1 in Firebase, enable Google sign-in, and re-download google-services.json.");
           fs.writeFileSync(process.env.RUNNER_TEMP + "/fb_project_id.txt", id);
+
+          const cfgPath = process.env.PROJECT + "/www/js/account-config.js";
+          if (!fs.existsSync(cfgPath)) {
+            console.error("ERROR: www/js/account-config.js missing");
+            process.exit(1);
+          }
+          let cfg = fs.readFileSync(cfgPath, "utf8");
+          cfg = cfg.replaceAll("__FIREBASE_PROJECT_ID__", id);
+          const owner = (process.env.OWNER_EMAIL || "").trim();
+          if (owner) {
+            cfg = cfg.replaceAll("__OWNER_EMAIL__", owner);
+          } else {
+            console.log("NOTE: OWNER_EMAIL secret not set - owner dashboard stays hidden");
+          }
+          fs.writeFileSync(cfgPath, cfg);
           NODE_EOF
-          PID="$(cat "$RUNNER_TEMP/fb_project_id.txt")"
           cd "$PROJECT"
-          sed -i "s|__FIREBASE_PROJECT_ID__|$PID|" www/js/account-config.js
-          if [ -n "$OWNER_EMAIL" ]; then
-            sed -i "s|__OWNER_EMAIL__|$OWNER_EMAIL|" www/js/account-config.js
-          else
-            echo "NOTE: OWNER_EMAIL secret not set - owner dashboard stays hidden"
-          fi
-          npm install --save --no-audit --no-fund @capacitor-firebase/authentication@6.3.1 firebase@^11.0.0
+          node --check www/js/account-config.js
+          npm install --save --no-audit --no-fund --legacy-peer-deps @capacitor-firebase/authentication@6.3.1 firebase@^11.0.0
           node << 'NODE_EOF'
           const fs = require("fs");
           const p = "capacitor.config.json";
@@ -142,12 +196,11 @@ jobs:
           c.plugins.FirebaseAuthentication = { skipNativeAuth: false, providers: ["google.com"] };
           fs.writeFileSync(p, JSON.stringify(c, null, 2));
           NODE_EOF
-          echo "FIREBASE=on" >> $GITHUB_ENV
+          echo "FIREBASE=on" >> "$GITHUB_ENV"
           echo "Firebase login plugin installed"
 
-      # Phone's own voice (Android Text-to-Speech) fallback for Ask Zikr Deen.
       - name: Install phone voice plugin
-        run: cd "$PROJECT" && npm install --save --no-audit --no-fund @capacitor-community/text-to-speech@5.1.0
+        run: cd "$PROJECT" && npm install --save --no-audit --no-fund --legacy-peer-deps @capacitor-community/text-to-speech@5.1.0
 
       - name: Setup project
         run: cd "$PROJECT" && node scripts/setup.js
@@ -183,38 +236,75 @@ jobs:
           grep -q "FirebaseAuthentication" "$PROJECT/android/app/src/main/assets/capacitor.config.json" || { echo "ERROR: plugin config missing in capacitor.config.json"; exit 1; }
           echo "Firebase files OK"
 
-      - name: Ensure Android permissions (camera, mic, location, notifications, exact alarm)
+      - name: Ensure Android permissions (internet, camera, mic, location, notifications, exact alarm)
         run: |
-          MF="$PROJECT/android/app/src/main/AndroidManifest.xml"
-          if [ ! -f "$MF" ]; then echo "ERROR: AndroidManifest.xml not found"; exit 1; fi
-          for P in CAMERA RECORD_AUDIO MODIFY_AUDIO_SETTINGS ACCESS_COARSE_LOCATION ACCESS_FINE_LOCATION POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM; do
-            grep -q "android.permission.$P" "$MF" || sed -i "s|<application|<uses-permission android:name=\"android.permission.$P\" />\n    <application|" "$MF"
-          done
-          echo "--- permissions in manifest ---"
-          grep -n "uses-permission" "$MF"
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const mf = process.env.PROJECT + "/android/app/src/main/AndroidManifest.xml";
+          if (!fs.existsSync(mf)) {
+            console.error("ERROR: AndroidManifest.xml not found");
+            process.exit(1);
+          }
+          let xml = fs.readFileSync(mf, "utf8");
+          const perms = [
+            "INTERNET",
+            "CAMERA",
+            "RECORD_AUDIO",
+            "MODIFY_AUDIO_SETTINGS",
+            "ACCESS_COARSE_LOCATION",
+            "ACCESS_FINE_LOCATION",
+            "POST_NOTIFICATIONS",
+            "SCHEDULE_EXACT_ALARM"
+          ];
+          const toAdd = [];
+          for (const p of perms) {
+            if (!xml.includes("android.permission." + p)) {
+              toAdd.push(`    <uses-permission android:name="android.permission.${p}" />`);
+            }
+          }
+          if (toAdd.length) {
+            const rx = /^([ \t]*<application\b)/m;
+            if (!rx.test(xml)) {
+              console.error("ERROR: <application> tag not found in AndroidManifest.xml");
+              process.exit(1);
+            }
+            xml = xml.replace(rx, toAdd.join("\n") + "\n$1");
+            fs.writeFileSync(mf, xml);
+          }
+          console.log("--- permissions in manifest ---");
+          xml.split("\n").forEach((line, i) => {
+            if (line.includes("uses-permission")) console.log(`${i + 1}:${line}`);
+          });
+          NODE_EOF
 
       - name: Restore optional legacy test signing key
         env:
           LEGACY_KEY: ${{ secrets.ZD_LEGACY_DEBUG_KEYSTORE_B64 }}
         run: |
           if [ -n "$LEGACY_KEY" ]; then
-            printf '%s' "$LEGACY_KEY" | base64 --decode > native/zikr.keystore
-            node scripts/patch-android.js
+            mkdir -p "$PROJECT/native"
+            printf '%s' "$LEGACY_KEY" | tr -d '\r\n ' | base64 --decode > "$PROJECT/native/zikr.keystore"
+            cd "$PROJECT" && node scripts/patch-android.js
           fi
 
       - name: Build debug APK
-        run: cd "$PROJECT/android" && chmod +x gradlew && ./gradlew assembleDebug
+        run: cd "$PROJECT/android" && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Verify permissions & Firebase inside the built APK
         run: |
-          AAPT=$(ls $ANDROID_HOME/build-tools/*/aapt2 2>/dev/null | tail -1)
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          AAPT=$(ls -1 "$SDK"/build-tools/*/aapt2 2>/dev/null | sort -V | tail -1)
+          if [ -z "$AAPT" ] || [ ! -x "$AAPT" ]; then
+            echo "ERROR: aapt2 not found under Android SDK ($SDK)"
+            exit 1
+          fi
           APK="$PROJECT/android/app/build/outputs/apk/debug/app-debug.apk"
+          test -f "$APK" || { echo "ERROR: APK not found at $APK"; exit 1; }
           OUT="$("$AAPT" dump permissions "$APK")"
           echo "$OUT"
-          echo "$OUT" | grep -q "CAMERA" || { echo "ERROR: camera permission is NOT inside the APK"; exit 1; }
-          echo "$OUT" | grep -q "RECORD_AUDIO" || { echo "ERROR: mic permission is NOT inside the APK"; exit 1; }
-          echo "$OUT" | grep -q "ACCESS_FINE_LOCATION" || { echo "ERROR: location permission is NOT inside the APK"; exit 1; }
-          echo "$OUT" | grep -q "POST_NOTIFICATIONS" || { echo "ERROR: notification permission is NOT inside the APK"; exit 1; }
+          for REQ in INTERNET CAMERA RECORD_AUDIO MODIFY_AUDIO_SETTINGS ACCESS_FINE_LOCATION POST_NOTIFICATIONS; do
+            echo "$OUT" | grep -q "$REQ" || { echo "ERROR: $REQ permission is NOT inside the APK"; exit 1; }
+          done
           if [ "$FIREBASE" = "on" ]; then
             if "$AAPT" dump resources "$APK" | grep -q "default_web_client_id"; then
               echo "Firebase Google login config is inside the APK"
