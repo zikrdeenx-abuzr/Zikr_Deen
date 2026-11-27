@@ -1,0 +1,230 @@
+name: Build Zikr Deen debug APK
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Select Android source
+        run: |
+          test -f capacitor.config.json
+          echo 'PROJECT=.' >> "$GITHUB_ENV"
+
+      - name: Run prayer regression tests
+        run: node tests/prayer.test.cjs
+
+      - name: Verify app assets
+        run: |
+          test "$(wc -c < www/intro.html)" -eq 175997
+          # Verify core + v40 + v41 + v42 + v43 modules
+          for F in qibla.js account.js ar-mode.js classroom.js learning-hub.js whatsapp-config.js whatsapp-hub.js interactive-motion.js visual-academy.js; do
+            test -f "$PROJECT/www/js/$F" || { echo "ERROR: www/js/$F missing"; exit 1; }
+            grep -q "$F" "$PROJECT/www/index.html" || { echo "ERROR: $F not linked in index.html"; exit 1; }
+          done
+          test -f "$PROJECT/www/quiz/index.html" || { echo "ERROR: Quiz (www/quiz) missing"; exit 1; }
+          test -f "$PROJECT/www/quiz/offline-api.js" || { echo "ERROR: quiz offline-api.js missing"; exit 1; }
+          grep -q "quiz/index.html" "$PROJECT/www/js/folders.js" || { echo "ERROR: Quiz card not linked in folders.js"; exit 1; }
+          grep -q "#/whatsapp" "$PROJECT/www/js/folders.js" || { echo "ERROR: WhatsApp AI card not linked in folders.js"; exit 1; }
+          test -f "$PROJECT/www/img/visuals/badge-silsila.webp" || { echo "ERROR: v43 visual assets missing"; exit 1; }
+          echo "All v43 modules, visuals & intro.html verified OK"
+
+      - name: Configure Ask Zikr Deen AI (Proxy-First Secure Mode)
+        env:
+          GEMINI_PROXY_URL: ${{ secrets.GEMINI_PROXY_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const file = process.env.PROJECT + "/www/js/ask-config.js";
+          let src = fs.readFileSync(file, "utf8");
+          const proxy = (process.env.GEMINI_PROXY_URL || "").trim();
+
+          if (proxy) {
+            if (!/^https:\/\/[^\s]+$/.test(proxy)) {
+              console.error("ERROR: GEMINI_PROXY_URL must be a valid https:// URL");
+              process.exit(1);
+            }
+            src = src.replace(/proxy:\s*['"][^'"]*['"]/, "proxy:" + JSON.stringify(proxy));
+            fs.writeFileSync(file, src);
+            console.log("Secure server-side GEMINI_PROXY_URL configured (API key NOT embedded in APK)");
+          } else if ((process.env.GEMINI_API_KEY || "").trim()) {
+            const k = process.env.GEMINI_API_KEY.trim();
+            if (!/^[A-Za-z0-9_\-]{20,}$/.test(k)) { console.error("ERROR: GEMINI_API_KEY looks invalid"); process.exit(1); }
+            src = src.replace(/key:\s*['"][^'"]*['"]/, "key:" + JSON.stringify(k));
+            fs.writeFileSync(file, src);
+            console.log("TEST MODE: GEMINI_API_KEY embedded in this APK (use only for your own testing)");
+          } else {
+            console.log("AI proxy is not configured");
+          }
+          NODE_EOF
+
+      - name: Configure Public WhatsApp AI & Community Links (Optional)
+        env:
+          WA_ASSISTANT_NUMBER: ${{ secrets.WA_ASSISTANT_NUMBER }}
+          WA_COMMUNITY_URL: ${{ secrets.WA_COMMUNITY_URL }}
+          WA_COMMUNITY_PAGE_URL: ${{ secrets.WA_COMMUNITY_PAGE_URL }}
+        run: |
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const file = process.env.PROJECT + "/www/js/whatsapp-config.js";
+          let src = fs.readFileSync(file, "utf8");
+          const num = (process.env.WA_ASSISTANT_NUMBER || "").replace(/\D/g, "");
+          const inv = (process.env.WA_COMMUNITY_URL || "").trim();
+          const pg  = (process.env.WA_COMMUNITY_PAGE_URL || "").trim();
+          if (num) src = src.replace("__WA_ASSISTANT_NUMBER__", num);
+          if (inv) src = src.replace("__WA_COMMUNITY_URL__", inv);
+          if (pg)  src = src.replace("__WA_COMMUNITY_PAGE_URL__", pg);
+          fs.writeFileSync(file, src);
+          console.log("WhatsApp public config -> number:", Boolean(num), "| invite:", Boolean(inv), "| page:", Boolean(pg));
+          NODE_EOF
+
+      # Google login + usage stats (Firebase). Switches ON only if GOOGLE_SERVICES_JSON secret exists.
+      # Must run BEFORE "Setup project" so plugin is included in "cap sync".
+      - name: Firebase - check secret and install login plugin
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "WARNING: GOOGLE_SERVICES_JSON secret not set - Google login / stats stay OFF (app works as before)"
+            echo "FIREBASE=off" >> $GITHUB_ENV
+            exit 0
+          fi
+          if [ ! -f "$PROJECT/www/js/account.js" ]; then
+            echo "WARNING: account.js not found - Firebase skipped"
+            echo "FIREBASE=off" >> $GITHUB_ENV
+            exit 0
+          fi
+          printf '%s' "$GOOGLE_SERVICES_JSON" > "$RUNNER_TEMP/google-services.json"
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const f = process.env.RUNNER_TEMP + "/google-services.json";
+          let j;
+          try { j = JSON.parse(fs.readFileSync(f, "utf8")); }
+          catch (e) { console.log("ERROR: GOOGLE_SERVICES_JSON secret is not valid JSON - paste the whole google-services.json file"); process.exit(1); }
+          const id = j.project_info && j.project_info.project_id;
+          if (!id) { console.log("ERROR: project_id missing in google-services.json"); process.exit(1); }
+          const c = (j.client || []).find(x => x.client_info && x.client_info.android_client_info && x.client_info.android_client_info.package_name === "com.zikrdeen.app");
+          if (!c) { console.log("ERROR: Android app com.zikrdeen.app is not in this google-services.json"); process.exit(1); }
+          const web = (c.oauth_client || []).some(o => o.client_type === 3);
+          console.log("Firebase project:", id, "| Web client (needed for Google login):", web);
+          if (!web) console.log("::warning::No Web client in google-services.json. In Firebase: add the SHA-1, enable Google sign-in, then download google-services.json again and update the secret.");
+          fs.writeFileSync(process.env.RUNNER_TEMP + "/fb_project_id.txt", id);
+          NODE_EOF
+          PID="$(cat "$RUNNER_TEMP/fb_project_id.txt")"
+          cd "$PROJECT"
+          sed -i "s|__FIREBASE_PROJECT_ID__|$PID|" www/js/account-config.js
+          if [ -n "$OWNER_EMAIL" ]; then
+            sed -i "s|__OWNER_EMAIL__|$OWNER_EMAIL|" www/js/account-config.js
+          else
+            echo "NOTE: OWNER_EMAIL secret not set - owner dashboard stays hidden"
+          fi
+          npm install --save --no-audit --no-fund @capacitor-firebase/authentication@6.3.1 firebase@^11.0.0
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const p = "capacitor.config.json";
+          const c = JSON.parse(fs.readFileSync(p, "utf8"));
+          c.plugins = c.plugins || {};
+          c.plugins.FirebaseAuthentication = { skipNativeAuth: false, providers: ["google.com"] };
+          fs.writeFileSync(p, JSON.stringify(c, null, 2));
+          NODE_EOF
+          echo "FIREBASE=on" >> $GITHUB_ENV
+          echo "Firebase login plugin installed"
+
+      # Phone's own voice (Android Text-to-Speech) fallback for Ask Zikr Deen.
+      - name: Install phone voice plugin
+        run: cd "$PROJECT" && npm install --save --no-audit --no-fund @capacitor-community/text-to-speech@5.1.0
+
+      - name: Setup project
+        run: cd "$PROJECT" && node scripts/setup.js
+
+      - name: Check phone voice plugin is linked
+        run: |
+          test -d "$PROJECT/node_modules/@capacitor-community/text-to-speech" || { echo "ERROR: text-to-speech plugin not installed"; exit 1; }
+          grep -qi "text-to-speech" "$PROJECT/android/capacitor.settings.gradle" || { echo "ERROR: text-to-speech plugin not linked into Android project"; exit 1; }
+          echo "Phone voice plugin OK"
+
+      - name: Apply Android launcher icons
+        run: |
+          RES="$PROJECT/android/app/src/main/res"
+          ICONS=patch_src/android-res; [ -d "$ICONS" ] || ICONS="$PROJECT/android-res"
+          if [ -d "$ICONS" ] && [ -d "$RES" ]; then
+            cp -r "$ICONS"/. "$RES/"
+            echo "Launcher icons replaced"
+          else
+            echo "Icon patch skipped"
+          fi
+
+      - name: Firebase - Android files
+        if: env.FIREBASE == 'on'
+        run: |
+          cp "$RUNNER_TEMP/google-services.json" "$PROJECT/android/app/google-services.json"
+          VG="$PROJECT/android/variables.gradle"
+          grep -q "rgcfaIncludeGoogle" "$VG" || sed -i '0,/ext {/s//ext {\n    rgcfaIncludeGoogle = true/' "$VG"
+          echo "--- variables.gradle ---"
+          cat "$VG"
+          grep -q "rgcfaIncludeGoogle *= *true" "$VG" || { echo "ERROR: could not switch Google sign-in on in variables.gradle"; exit 1; }
+          test -d "$PROJECT/node_modules/@capacitor-firebase/authentication" || { echo "ERROR: Firebase plugin not installed"; exit 1; }
+          grep -q "capacitor-firebase-authentication" "$PROJECT/android/capacitor.settings.gradle" || { echo "ERROR: Firebase plugin not linked into Android project"; exit 1; }
+          grep -q "FirebaseAuthentication" "$PROJECT/android/app/src/main/assets/capacitor.config.json" || { echo "ERROR: plugin config missing in capacitor.config.json"; exit 1; }
+          echo "Firebase files OK"
+
+      - name: Ensure Android permissions (camera, mic, location, notifications, exact alarm)
+        run: |
+          MF="$PROJECT/android/app/src/main/AndroidManifest.xml"
+          if [ ! -f "$MF" ]; then echo "ERROR: AndroidManifest.xml not found"; exit 1; fi
+          for P in CAMERA RECORD_AUDIO MODIFY_AUDIO_SETTINGS ACCESS_COARSE_LOCATION ACCESS_FINE_LOCATION POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM; do
+            grep -q "android.permission.$P" "$MF" || sed -i "s|<application|<uses-permission android:name=\"android.permission.$P\" />\n    <application|" "$MF"
+          done
+          echo "--- permissions in manifest ---"
+          grep -n "uses-permission" "$MF"
+
+      - name: Restore optional legacy test signing key
+        env:
+          LEGACY_KEY: ${{ secrets.ZD_LEGACY_DEBUG_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$LEGACY_KEY" ]; then
+            printf '%s' "$LEGACY_KEY" | base64 --decode > native/zikr.keystore
+            node scripts/patch-android.js
+          fi
+
+      - name: Build debug APK
+        run: cd "$PROJECT/android" && chmod +x gradlew && ./gradlew assembleDebug
+
+      - name: Verify permissions & Firebase inside the built APK
+        run: |
+          AAPT=$(ls $ANDROID_HOME/build-tools/*/aapt2 2>/dev/null | tail -1)
+          APK="$PROJECT/android/app/build/outputs/apk/debug/app-debug.apk"
+          OUT="$("$AAPT" dump permissions "$APK")"
+          echo "$OUT"
+          echo "$OUT" | grep -q "CAMERA" || { echo "ERROR: camera permission is NOT inside the APK"; exit 1; }
+          echo "$OUT" | grep -q "RECORD_AUDIO" || { echo "ERROR: mic permission is NOT inside the APK"; exit 1; }
+          echo "$OUT" | grep -q "ACCESS_FINE_LOCATION" || { echo "ERROR: location permission is NOT inside the APK"; exit 1; }
+          echo "$OUT" | grep -q "POST_NOTIFICATIONS" || { echo "ERROR: notification permission is NOT inside the APK"; exit 1; }
+          if [ "$FIREBASE" = "on" ]; then
+            if "$AAPT" dump resources "$APK" | grep -q "default_web_client_id"; then
+              echo "Firebase Google login config is inside the APK"
+            else
+              echo "::warning::default_web_client_id missing in the APK - Google login will NOT work. Re-download google-services.json after adding SHA-1 and enabling Google sign-in."
+            fi
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zikr-Deen-v46-debug-APK
+          path: ${{ env.PROJECT }}/android/app/build/outputs/apk/debug/app-debug.apk
