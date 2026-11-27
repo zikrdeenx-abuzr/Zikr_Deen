@@ -1,9 +1,9 @@
-/* Public HTTPS backend configuration. */
 window.ZD_ASK={
   key:'',
   proxy:'',
-  models:['gemini-2.5-flash','gemini-2.5-flash-lite','gemini-2.0-flash'],
-  voiceModel:'gemini-2.5-flash-preview-tts',
-  voiceModels:['gemini-2.5-flash-preview-tts','gemini-2.5-pro-preview-tts'],
-  voiceName:'Charon'
+  models:['gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash-lite','gemini-3.1-flash-lite','gemini-2.5-flash','gemini-2.5-flash-lite'],
+  voiceModel:'gemini-3.8-flash-tts',
+  voiceModels:['gemini-3.8-flash-tts','gemini-3.8-flash-lite-tts','gemini-3.1-flash-tts-preview','gemini-2.5-flash-preview-tts'],
+  voiceName:'Charon',
+  micAutoSend:true
 };
