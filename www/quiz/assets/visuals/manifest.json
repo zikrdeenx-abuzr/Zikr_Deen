@@ -12,10 +12,22 @@
       "fallback": "./assets/visuals/biology/cell-structure-2d.svg",
       "alt": "3D animated landscape cutaway of an animal cell showing nucleus, mitochondria and Golgi apparatus",
       "parts": [
-        { "name": "Cell Membrane", "role": "Outer protective boundary jo control karti hai kya andar-bahar jayega." },
-        { "name": "Nucleus", "role": "Cell ka control center jismein genetic instructions (DNA) rehti hain." },
-        { "name": "Mitochondria", "role": "Energy powerhouse jo food se ATP energy banata hai." },
-        { "name": "Golgi & ER", "role": "Proteins banane, pack karne aur transport karne ka system." }
+        {
+          "name": "Cell Membrane",
+          "role": "Outer protective boundary jo control karti hai kya andar-bahar jayega."
+        },
+        {
+          "name": "Nucleus",
+          "role": "Cell ka control center jismein genetic instructions (DNA) rehti hain."
+        },
+        {
+          "name": "Mitochondria",
+          "role": "Energy powerhouse jo food se ATP energy banata hai."
+        },
+        {
+          "name": "Golgi & ER",
+          "role": "Proteins banane, pack karne aur transport karne ka system."
+        }
       ],
       "science": "Har living organism cells se bana hai. Ek animal cell ka lagbhag 70% se 80% hissa paani (cytoplasm) hota hai, jismein sabhi organelles mil kar kaam karte hain.",
       "quran": {
@@ -38,9 +50,18 @@
       "fallback": "./assets/visuals/biology/cell-structure-2d.svg",
       "alt": "3D animated landscape view of glowing DNA double helix strands and base pairs",
       "parts": [
-        { "name": "Double Helix Backbone", "role": "Sugar aur phosphate ki do twisted strands jo code ko safe rakhti hain." },
-        { "name": "Base Pairs (A-T, C-G)", "role": "4 chemical letters ka exact sequence jo body traits decide karta hai." },
-        { "name": "Genes", "role": "DNA ke specific segments jo proteins banane ki instructions dete hain." }
+        {
+          "name": "Double Helix Backbone",
+          "role": "Sugar aur phosphate ki do twisted strands jo code ko safe rakhti hain."
+        },
+        {
+          "name": "Base Pairs (A-T, C-G)",
+          "role": "4 chemical letters ka exact sequence jo body traits decide karta hai."
+        },
+        {
+          "name": "Genes",
+          "role": "DNA ke specific segments jo proteins banane ki instructions dete hain."
+        }
       ],
       "science": "Har insaan ka DNA lagbhag 3 billion base pairs ka bana hota hai, jo har cell ko batata hai ki use kaise grow aur repair karna hai.",
       "quran": {
@@ -63,10 +84,22 @@
       "fallback": "./assets/visuals/biology/cell-structure-2d.svg",
       "alt": "3D animated landscape view of a glowing human brain with neural impulses",
       "parts": [
-        { "name": "Prefrontal Cortex", "role": "Peshani ke peeche ka hissa jo planning, faisle aur self-control sambhalta hai." },
-        { "name": "Cerebrum", "role": "Sochna, bhasha samajhna, yaaddaasht aur senses process karna." },
-        { "name": "Cerebellum", "role": "Body ka balance aur smooth movement control karna." },
-        { "name": "Brainstem", "role": "Saans, heartbeat aur neend jaise automatic functions chalana." }
+        {
+          "name": "Prefrontal Cortex",
+          "role": "Peshani ke peeche ka hissa jo planning, faisle aur self-control sambhalta hai."
+        },
+        {
+          "name": "Cerebrum",
+          "role": "Sochna, bhasha samajhna, yaaddaasht aur senses process karna."
+        },
+        {
+          "name": "Cerebellum",
+          "role": "Body ka balance aur smooth movement control karna."
+        },
+        {
+          "name": "Brainstem",
+          "role": "Saans, heartbeat aur neend jaise automatic functions chalana."
+        }
       ],
       "science": "Insaani dimaag mein lagbhag 86 billion neurons hote hain jo electrical signals ke zariye seekhne, yaad rakhne aur faisle lene ka kaam karte hain.",
       "quran": {
@@ -89,9 +122,18 @@
       "fallback": "./assets/visuals/technology/ai-verification-2d.svg",
       "alt": "3D animated landscape view of a biological neuron firing electrical impulses across a synapse",
       "parts": [
-        { "name": "Dendrites", "role": "Doosre neurons se incoming signals receive karna." },
-        { "name": "Axon", "role": "Electrical impulse ko high speed par aage bhejna." },
-        { "name": "Synapse & Vesicles", "role": "Chemical messengers (neurotransmitters) ke zariye agle neuron tak message pahunchana." }
+        {
+          "name": "Dendrites",
+          "role": "Doosre neurons se incoming signals receive karna."
+        },
+        {
+          "name": "Axon",
+          "role": "Electrical impulse ko high speed par aage bhejna."
+        },
+        {
+          "name": "Synapse & Vesicles",
+          "role": "Chemical messengers (neurotransmitters) ke zariye agle neuron tak message pahunchana."
+        }
       ],
       "science": "Revision aur practice se synaptic connections strong hote hain (Neuroplasticity). Modern AI Artificial Neural Networks isi biological design se inspired hain, par AI galti bhi kar sakta hai.",
       "quran": {
@@ -114,9 +156,18 @@
       "fallback": "./assets/visuals/physics/earth-day-night-2d.svg",
       "alt": "3D animated landscape view of Earth rotating between sunlight and night with the Moon in space",
       "parts": [
-        { "name": "Sunlight (Day Side)", "role": "Earth ka jo hissa Sooraj ke saamne hota hai wahan din hota hai." },
-        { "name": "Night Side", "role": "Opposite side par raat hoti hai jahan city lights aur aaram ka waqt hai." },
-        { "name": "Moon Orbit", "role": "Chaand ki manzilein (phases) lunar/Hijri mahino aur Ramadan/Eid ka hisab batati hain." }
+        {
+          "name": "Sunlight (Day Side)",
+          "role": "Earth ka jo hissa Sooraj ke saamne hota hai wahan din hota hai."
+        },
+        {
+          "name": "Night Side",
+          "role": "Opposite side par raat hoti hai jahan city lights aur aaram ka waqt hai."
+        },
+        {
+          "name": "Moon Orbit",
+          "role": "Chaand ki manzilein (phases) lunar/Hijri mahino aur Ramadan/Eid ka hisab batati hain."
+        }
       ],
       "science": "Earth apni axis par 24 ghante mein ek rotation poori karti hai jisse din-raat badalte hain, aur Moon Earth ke gird ~29.5 din mein ek lunar cycle poora karta hai.",
       "quran": {
@@ -139,9 +190,18 @@
       "fallback": "./assets/visuals/quran-arabic/word-study-template.svg",
       "alt": "3D animated landscape scene of the Holy Quran resting on a wooden rehal with warm lanterns and crescent moon",
       "parts": [
-        { "name": "Arabic Text (Mushaf)", "role": "Original wahi ke alfaaz jinhe tajweed ke saath padhna zaroori hai." },
-        { "name": "Root Words (Sarf)", "role": "3-harfi Arabic roots samajhne se poore Qur'an ke maani aasaan hote hain." },
-        { "name": "Tafsir & Tadabbur", "role": "Moatabar ulama ki tafsir padh kar zindagi mein amal karna." }
+        {
+          "name": "Arabic Text (Mushaf)",
+          "role": "Original wahi ke alfaaz jinhe tajweed ke saath padhna zaroori hai."
+        },
+        {
+          "name": "Root Words (Sarf)",
+          "role": "3-harfi Arabic roots samajhne se poore Qur'an ke maani aasaan hote hain."
+        },
+        {
+          "name": "Tafsir & Tadabbur",
+          "role": "Moatabar ulama ki tafsir padh kar zindagi mein amal karna."
+        }
       ],
       "science": "Structured learning research batati hai ki root-based vocabulary aur active reflection se nayi zabaan aur concepts 3x zyada der tak yaad rehte hain.",
       "quran": {
@@ -164,8 +224,14 @@
       "fallback": "./assets/visuals/mathematics/geometry-symmetry-2d.svg",
       "alt": "2D geometric symmetry and Islamic pattern diagram",
       "parts": [
-        { "name": "Symmetry", "role": "Barabar hisse aur balance jo Islamic architecture aur nature mein dikhta hai." },
-        { "name": "Ratios & Measurement", "role": "Sateek naap-tol jo engineering, mirath aur tijarat ka base hai." }
+        {
+          "name": "Symmetry",
+          "role": "Barabar hisse aur balance jo Islamic architecture aur nature mein dikhta hai."
+        },
+        {
+          "name": "Ratios & Measurement",
+          "role": "Sateek naap-tol jo engineering, mirath aur tijarat ka base hai."
+        }
       ],
       "science": "Geometry shapes, angles aur spatial balance ki study hai jisse architecture, engineering aur computer graphics bante hain.",
       "quran": {
@@ -188,8 +254,14 @@
       "fallback": "./assets/visuals/history/source-verification-2d.svg",
       "alt": "2D source verification and historical timeline diagram",
       "parts": [
-        { "name": "Primary Source (Sanad)", "role": "Waqiye ki asli riwayat aur chain of narration check karna." },
-        { "name": "Cross-Checking", "role": "Tareekh, jagah aur reliable historians se compare karna." }
+        {
+          "name": "Primary Source (Sanad)",
+          "role": "Waqiye ki asli riwayat aur chain of narration check karna."
+        },
+        {
+          "name": "Cross-Checking",
+          "role": "Tareekh, jagah aur reliable historians se compare karna."
+        }
       ],
       "science": "Historical method mein kisi bhi claim ko sach maanne se pehle primary evidence, date aur multiple independent sources verify kiye jaate hain.",
       "quran": {
