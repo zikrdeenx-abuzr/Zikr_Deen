@@ -47,6 +47,16 @@ Upar diye gaye se zyada kuch bhi — owner ka phone number, address, email, inco
 
 const STARTERS=['App me Hadith kahan milegi?','Wudu ka tareeqa app me kahan hai?','Subah-shaam ke azkaar kahan hain?','Namaz me bhool jaaye to sajda sahw kab?','Zakat kis par farz hai?','App me kya kya features hain?'];
 
+/* Modern Gemini / ChatGPT / Claude style SVG icons */
+const SVG_SPEAKER='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2.5 9 2.5 15 6 15 11 19 11 5"/><path d="M15.2 8.8a5 5 0 0 1 0 6.4"/><path d="M18.4 5.8a9.2 9.2 0 0 1 0 12.4"/></svg>';
+const SVG_MUTE='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2.5 9 2.5 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>';
+const SVG_PHONE='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6.5" y="2.5" width="11" height="19" rx="2.2"/><line x1="11" y1="18.5" x2="13" y2="18.5"/></svg>';
+const SVG_MIC='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 10.5a6.5 6.5 0 0 0 13 0"/><path d="M12 17v4"/><path d="M8.5 21h7"/></svg>';
+function vIcon(k){
+  if(window.ZDVoice&&window.ZDVoice.icons&&window.ZDVoice.icons[k])return window.ZDVoice.icons[k];
+  return ({speaker:SVG_SPEAKER,speakerOff:SVG_MUTE,mic:SVG_MIC})[k]||SVG_SPEAKER;
+}
+
 function load(){try{return JSON.parse(localStorage.getItem(HKEY)||'[]')}catch(e){return[]}}
 function save(h){try{localStorage.setItem(HKEY,JSON.stringify(h.slice(-40)))}catch(e){}}
 function hasBackend(){return !!(CFG.proxy||(CFG.key&&CFG.key.indexOf('__')!==0))}
@@ -77,7 +87,7 @@ const TTS_OK=('speechSynthesis' in window&&typeof SpeechSynthesisUtterance!=='un
 const AC=window.AudioContext||window.webkitAudioContext;
 const VOICE_OK=TTS_OK||!!AC;
 const BASE='https://generativelanguage.googleapis.com/v1beta/models/';
-const VMODEL=CFG.voiceModel||'gemini-3.8-flash-tts';
+const VMODEL=CFG.voiceModel||'gemini-2.5-flash-preview-tts';
 const VKEY='zdAskVoiceMode',VO={sp:0,pend:'',first:false,said:0};
 const GT={ctx:null,gen:0,tail:Promise.resolve(),t:0,src:[],failUntil:0};
 
@@ -91,11 +101,59 @@ function voiceMode(){
 }
 function setVoiceMode(m){try{localStorage.setItem(VKEY,m)}catch(e){}}
 const VNAME_KEY='zdAskVoiceName',VRATE_KEY='zdAskVoiceRate',AMOD_KEY='zdAskModelMode';
-const VOICE_STYLES=[['Charon','Charon · गंभीर और शांत'],['Kore','Kore · साफ़ और सौम्य'],['Puck','Puck · तेज़ और फ्रेंडली'],['Fenrir','Fenrir · गहरी आवाज़'],['Aoede','Aoede · मधुर आवाज़']];
-function voiceName(){try{const v=localStorage.getItem(VNAME_KEY);if(v&&VOICE_STYLES.some(x=>x[0]===v))return v}catch(e){}return CFG.voiceName||'Charon'}
-function setVoiceName(v){try{localStorage.setItem(VNAME_KEY,v)}catch(e){}}
-function voiceRate(){try{const r=parseFloat(localStorage.getItem(VRATE_KEY)||'1');if(r>=0.7&&r<=1.5)return r}catch(e){}return 1}
-function setVoiceRate(r){try{localStorage.setItem(VRATE_KEY,String(r))}catch(e){}}
+const VOICE_STYLES=[
+  ['Orus','Orus (Male) · शांत व साफ़'],
+  ['Charon','Charon (Male) · गंभीर और शांत'],
+  ['Fenrir','Fenrir (Male) · गहरी आवाज़'],
+  ['Alnilam','Alnilam (Male) · स्पष्ट उच्चारण'],
+  ['Algieba','Algieba (Male) · स्मूथ टीचर'],
+  ['Algenib','Algenib (Male) · हल्की पुरुष आवाज़'],
+  ['Achird','Achird (Male) · फ्रेंडली'],
+  ['Enceladus','Enceladus (Male) · धीमी और कोमल'],
+  ['Iapetus','Iapetus (Male) · संतुलित'],
+  ['Puck','Puck (Male) · तेज़ और फ्रेंडली'],
+  ['Kore','Kore (Female) · साफ़ और सौम्य'],
+  ['Aoede','Aoede (Female) · मधुर आवाज़'],
+  ['Leda','Leda (Female) · युवा और स्पष्ट'],
+  ['Achernar','Achernar (Female) · सॉफ्ट'],
+  ['Autonoe','Autonoe (Female) · ब्राइट'],
+  ['Callirrhoe','Callirrhoe (Female) · आरामदायक'],
+  ['Despina','Despina (Female) · स्मूथ'],
+  ['Erinome','Erinome (Female) · स्पष्ट'],
+  ['Gacrux','Gacrux (Female) · परिपक्व'],
+  ['Laomedeia','Laomedeia (Female) · उत्साही'],
+  ['Pulcherrima','Pulcherrima (Female) · विनम्र']
+];
+function voiceName(){
+  try{
+    if(window.ZDVoice&&typeof window.ZDVoice.getVoice==='function'){
+      const zv=window.ZDVoice.getVoice();
+      if(zv&&VOICE_STYLES.some(x=>x[0]===zv))return zv;
+    }
+    const v=localStorage.getItem(VNAME_KEY);
+    if(v&&VOICE_STYLES.some(x=>x[0]===v))return v;
+  }catch(e){}
+  return CFG.voiceName||'Orus';
+}
+function setVoiceName(v){
+  try{localStorage.setItem(VNAME_KEY,v)}catch(e){}
+  try{if(window.ZDVoice&&typeof window.ZDVoice.setVoice==='function')window.ZDVoice.setVoice(v)}catch(e){}
+}
+function voiceRate(){
+  try{
+    if(window.ZDVoice&&typeof window.ZDVoice.getPrefs==='function'){
+      const r=Number(window.ZDVoice.getPrefs().speed);
+      if(r>=0.7&&r<=1.5)return r;
+    }
+    const r=parseFloat(localStorage.getItem(VRATE_KEY)||'1');
+    if(r>=0.7&&r<=1.5)return r;
+  }catch(e){}
+  return 1;
+}
+function setVoiceRate(r){
+  try{localStorage.setItem(VRATE_KEY,String(r))}catch(e){}
+  try{if(window.ZDVoice&&typeof window.ZDVoice.setPrefs==='function')window.ZDVoice.setPrefs({speed:r})}catch(e){}
+}
 function aiModelMode(){try{return localStorage.getItem(AMOD_KEY)==='lite'?'lite':'auto'}catch(e){return 'auto'}}
 function setAiModelMode(m){try{localStorage.setItem(AMOD_KEY,m==='lite'?'lite':'auto')}catch(e){}}
 
@@ -152,7 +210,7 @@ function deviceSay(s,gen){
 function loadCool(k){try{return JSON.parse(sessionStorage.getItem(k)||'{}')}catch(e){return{}}}
 function saveCool(k,o){try{sessionStorage.setItem(k,JSON.stringify(o))}catch(e){}}
 
-const VMODELS=[...new Set([...(Array.isArray(CFG.voiceModels)?CFG.voiceModels:[]),VMODEL])];
+const VMODELS=[...new Set([...(Array.isArray(CFG.voiceModels)?CFG.voiceModels:[]),VMODEL,'gemini-2.5-flash-preview-tts'])];
 const VCOOL=loadCool('zdAskVCool');
 async function geminiVoice(text){
   if(!hasBackend()){const e=new Error('tts nokey');e.nokey=true;throw e}
@@ -440,18 +498,18 @@ function bubble(m,idx){
   const hasAr=!m.e&&/[\u0600-\u06FF]{3,}/.test(m.t||'');
   const trust=m.e?'':'<div class="ask-trust"><span class="tb '+((m.s&&m.s.length)?'ok':'warn')+'">'+((m.s&&m.s.length)?'🔗 Web sources diye gaye — khud bhi check karein':'⚠️ Koi source link nahi mila — verify karein')+'</span><span class="tb">🤖 AI jawab · fatwa nahi</span>'+(hasAr?'<span class="tb warn">📖 Arabic text AI ne likha ho sakta hai — mushaf/asli kitab se milayein</span>':'')+'</div>';
   return'<div class="ask-m a" data-idx="'+idx+'"><div class="ask-b'+(m.e?' err':'')+'"><div class="ask-txt">'+(m.e?esc(m.t):md(m.t))+'</div>'+src+trust+
-    (m.e?'':'<div class="ask-acts">'+(VOICE_OK?'<button class="ask-ab" data-say aria-label="Listen answer" title="सुनें">🔊</button>':'')+'<button class="ask-ab" data-cp aria-label="Copy answer" title="कॉपी करें">'+icon('copy')+'</button></div>')+'</div></div>';
+    (m.e?'':'<div class="ask-acts">'+(VOICE_OK?'<button class="ask-ab" data-say aria-label="Listen answer" title="सुनें">'+vIcon('speaker')+'</button>':'')+'<button class="ask-ab" data-cp aria-label="Copy answer" title="कॉपी करें">'+icon('copy')+'</button></div>')+'</div></div>';
 }
 
 R.ask=async function(){
   let hist=load(),busy=false;
   const v=$('#view');
-  v.innerHTML='<header class="topbar"><h1>Ask Zikr Deen<span class="sub">Islamic sawal-jawab · Quran, Hadith & web se</span></h1>'+
-   '<span style="display:flex;gap:4px;align-items:center">'+(VOICE_OK?'<button class="ibtn" id="askVoice" type="button" aria-label="Voice on/off" style="font-size:18px"></button>':'')+'<button class="ibtn" id="askCfgBtn" type="button" aria-label="AI & Voice settings">'+icon('gear')+'</button><button class="ibtn" id="askClr" aria-label="Clear chat">'+icon('trash')+'</button></span></header>'+
+  v.innerHTML='<header class="topbar"><h1>Ask Zikr Deen<span class="sub">Islamic sawal-jawab · Quran, Hadith &amp; web se</span></h1>'+
+   '<span style="display:flex;gap:4px;align-items:center">'+(VOICE_OK?'<button class="ibtn" id="askVoice" type="button" aria-label="Voice on/off"></button>':'')+'<button class="ibtn" id="askCfgBtn" type="button" aria-label="AI &amp; Voice settings">'+icon('gear')+'</button><button class="ibtn" id="askClr" aria-label="Clear chat">'+icon('trash')+'</button></span></header>'+
    '<main class="ask"><div id="askList"></div>'+
    '<p class="ask-note">AI se galti ho sakti hai. Zaroori masail me kisi aalim se zaroor poochein.'+(ZD.acct?esc(ZD.acct.note()):'')+'</p>'+
    '<form class="ask-bar" id="askForm"><canvas id="askWave" class="ask-wave" hidden></canvas><textarea id="askIn" rows="1" placeholder="Apna sawal likhein…" aria-label="Your question" maxlength="2000"></textarea>'+
-   (MIC_OK?'<button class="ask-mic-x" id="askMicX" type="button" aria-label="Recording cancel" title="Cancel" hidden>✕</button><button class="ask-mic" id="askMic" type="button" aria-label="Bolkar sawal poochein" title="Bolkar sawal poochein"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>':'')+'<button class="ask-send" id="askSend" aria-label="Send" type="submit">'+icon('send')+'</button></form></main>';
+   (MIC_OK?'<button class="ask-mic-x" id="askMicX" type="button" aria-label="Recording cancel" title="Cancel" hidden>✕</button><button class="ask-mic" id="askMic" type="button" aria-label="Bolkar sawal poochein" title="Bolkar sawal poochein">'+vIcon('mic')+'</button>':'')+'<button class="ask-send" id="askSend" aria-label="Send" type="submit">'+icon('send')+'</button></form></main>';
   const list=$('#askList'),inp=$('#askIn'),send=$('#askSend');
   const draw=()=>{
     if(!hist.length){list.innerHTML='<div class="ask-hello card"><div class="ask-logo">'+icon('ask')+'</div><h2 class="h2" style="margin:0 0 4px">Assalamu Alaikum 👋</h2><p class="muted small" style="margin:0 0 12px">Islam, Quran, Hadith, namaz, roza, zakat — koi bhi sawal poochein. Jawab Quran, sahih Hadith aur bharosemand websites se check karke diya jata hai.</p><div class="ask-chips">'+STARTERS.map(s=>'<button type="button" class="ask-chip" data-q="'+esc(s)+'">'+esc(s)+'</button>').join('')+'</div></div>'}
@@ -500,7 +558,7 @@ R.ask=async function(){
         voiceStop();voiceUnlock();
         if(voiceMode()==='x')setVoiceMode(AC?'n':'p');
         if(voiceMode()==='n')GT.failUntil=0;
-        const vb0=$('#askVoice');if(vb0)vb0.textContent=voiceMode()==='n'?'🔊':'📱';
+        const vb0=$('#askVoice');if(vb0)vb0.innerHTML=voiceMode()==='n'?vIcon('speaker'):SVG_PHONE;
         voiceFeed(txt,true);
         try{ZD.toast('जवाब पढ़कर सुनाया जा रहा है…')}catch(_){}
       }
@@ -517,8 +575,8 @@ R.ask=async function(){
   $('#askClr').addEventListener('click',()=>{if(!hist.length)return;if(confirm('Poori chat saaf kar dein?')){voiceStop();hist=[];save(hist);draw()}});
   const vb=$('#askVoice');
   if(vb){
-    const NAME={n:['🔊','Natural awaaz (Gemini)'],p:['📱','Phone ki awaaz'],x:['🔇','Awaaz band']};
-    const paint=()=>{const m=voiceMode();vb.textContent=NAME[m][0];vb.title=NAME[m][1];vb.setAttribute('aria-label','Voice: '+NAME[m][1])};paint();
+    const NAME={n:[vIcon('speaker'),'Natural awaaz (Gemini)'],p:[SVG_PHONE,'Phone ki awaaz'],x:[vIcon('speakerOff'),'Awaaz band']};
+    const paint=()=>{const m=voiceMode();vb.innerHTML=NAME[m][0];vb.title=NAME[m][1];vb.setAttribute('aria-label','Voice: '+NAME[m][1])};paint();
     vb.addEventListener('click',()=>{
       const order=[AC?'n':null,TTS_OK?'p':null,'x'].filter(Boolean),nx=order[(order.indexOf(voiceMode())+1)%order.length];
       setVoiceMode(nx);if(nx==='n')GT.failUntil=0;voiceStop();voiceUnlock();paint();try{ZD.toast(NAME[nx][1])}catch(e){}
@@ -528,17 +586,19 @@ R.ask=async function(){
   if(cfgBtn&&ZD.openSheet){
     cfgBtn.addEventListener('click',()=>{
       const sheetHtml='<h3>AI &amp; Voice सेटिंग्स</h3>'+
-        '<div class="field"><label for="asMod">AI मॉडल मोड</label><select id="asMod"><option value="auto">Auto (Smart · Gemini 3.8 Flash)</option><option value="lite">Fast Lite (तेज़ · ज़्यादा फ्री लिमिट)</option></select></div>'+
-        (VOICE_OK?'<div class="field"><label for="asVM">वॉइस मोड</label><select id="asVM">'+(AC?'<option value="n">🔊 Natural AI आवाज़ (Gemini TTS)</option>':'')+(TTS_OK?'<option value="p">📱 Phone ऑफलाइन आवाज़</option>':'')+'<option value="x">🔇 आवाज़ बंद</option></select></div>'+
-        (AC?'<div class="field"><label for="asVN">Gemini आवाज़ चुनें</label><select id="asVN">'+VOICE_STYLES.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('')+'</select></div>':'')+
-        '<div class="field"><label for="asVR">बोलने की स्पीड</label><select id="asVR"><option value="0.85">0.85× (धीरे)</option><option value="1">1.0× (सामान्य)</option><option value="1.15">1.15× (थोड़ा तेज़)</option><option value="1.3">1.3× (तेज़)</option></select></div>':'')+
+        '<div class="field"><label for="asMod">AI मॉडल मोड</label><select id="asMod"><option value="auto">Auto (Smart · Gemini Flash)</option><option value="lite">Fast Lite (तेज़ · ज़्यादा फ्री लिमिट)</option></select></div>'+
+        (VOICE_OK?'<div class="field"><label for="asVM">वॉइस मोड</label><select id="asVM">'+(AC?'<option value="n">Natural AI आवाज़ (Gemini TTS)</option>':'')+(TTS_OK?'<option value="p">Phone ऑफलाइन आवाज़</option>':'')+'<option value="x">आवाज़ बंद</option></select></div>'+
+        (AC?'<div class="field"><label for="asVN">Gemini आवाज़ चुनें (21 Voices)</label><select id="asVN">'+VOICE_STYLES.map(x=>'<option value="'+x[0]+'">'+x[1]+'</option>').join('')+'</select></div>':'')+
+        '<div class="field"><label for="asVR">बोलने की स्पीड</label><select id="asVR"><option value="0.85">0.85× (धीरे)</option><option value="1">1.0× (सामान्य)</option><option value="1.15">1.15× (थोड़ा तेज़)</option><option value="1.3">1.3× (तेज़)</option></select></div>'+
+        (window.ZDVoice?'<button type="button" class="btn sm ghost" id="asOpenStudio" style="width:100%;margin-top:8px">Open All 21 Voices Studio (Test &amp; Custom Tone)</button>':''):'')+
         '<p class="muted small" style="margin:8px 2px 0">पहले सभी फ्री Gemini वॉइस मॉडल क्रम से चलते हैं। जब सबकी लिमिट पूरी हो जाए, तभी फोन की ऑफलाइन आवाज़ चलती है।</p>';
       ZD.openSheet(sheetHtml,sh=>{
         $('#asMod',sh).value=aiModelMode();
         $('#asMod',sh).addEventListener('change',e=>{setAiModelMode(e.target.value);ZD.toast('AI मॉडल अपडेट हो गया')});
-        const vm=$('#asVM',sh);if(vm){vm.value=voiceMode();vm.addEventListener('change',e=>{setVoiceMode(e.target.value);if(e.target.value==='n')GT.failUntil=0;voiceStop();voiceUnlock();if(vb){const NAME2={n:'🔊',p:'📱',x:'🔇'};vb.textContent=NAME2[voiceMode()]||'🔊'}ZD.toast('वॉइस मोड सेव हो गया')})}
+        const vm=$('#asVM',sh);if(vm){vm.value=voiceMode();vm.addEventListener('change',e=>{setVoiceMode(e.target.value);if(e.target.value==='n')GT.failUntil=0;voiceStop();voiceUnlock();if(vb){const NAME2={n:vIcon('speaker'),p:SVG_PHONE,x:vIcon('speakerOff')};vb.innerHTML=NAME2[voiceMode()]||vIcon('speaker')}ZD.toast('वॉइस मोड सेव हो गया')})}
         const vn=$('#asVN',sh);if(vn){vn.value=voiceName();vn.addEventListener('change',e=>{setVoiceName(e.target.value);voiceStop();ZD.toast('आवाज़: '+e.target.value)})}
         const vr=$('#asVR',sh);if(vr){vr.value=String(voiceRate());vr.addEventListener('change',e=>{setVoiceRate(parseFloat(e.target.value)||1);voiceStop();ZD.toast('स्पीड: '+e.target.value+'×')})}
+        const os=$('#asOpenStudio',sh);if(os&&window.ZDVoice){os.addEventListener('click',()=>{ZD.closeSheet&&ZD.closeSheet();window.ZDVoice.openSettings()})}
       });
     });
   }
