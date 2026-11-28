@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0d211c">
-<meta name="description" content="Zikr Deen Visual Learning Lab — science, Quran reflection, interactive discovery and reasoning for learners aged 14–18.">
+<meta name="description" content="Zikr Deen Visual Learning Lab — science, Quran & Hadith reflection, interactive 3D visuals and reasoning for learners aged 14–18.">
 <title>Zikr Deen | Visual Learning Lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,7 +49,10 @@ button,select,textarea{font:inherit}
 .visual-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:17px 0}
 .visual{border:1px solid var(--line);border-radius:17px;background:#0a1b16;padding:12px;min-width:0}
 .visual h3{margin:0 0 8px;font-size:12px;color:var(--muted)}
-.visual svg,.visual img{width:100%;height:auto;display:block;max-height:245px;object-fit:contain;border-radius:10px}
+.visual svg{width:100%;height:auto;display:block;max-height:245px;object-fit:contain;border-radius:10px}
+.visual-frame{position:relative;width:100%;aspect-ratio:16 / 9;border-radius:12px;overflow:hidden;border:1px solid #244337;background:#06120e}
+.visual-frame img{width:100%;height:100%;display:block;object-fit:cover}
+.visual-frame img.svg-fit{object-fit:contain;padding:8px}
 .visual p{font-size:11px;line-height:1.6;color:var(--muted);margin:8px 0 0}
 .model-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .model-controls button,.model-controls a{font-size:11px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:#18362b;color:var(--ink);cursor:pointer}
@@ -59,6 +62,8 @@ button,select,textarea{font:inherit}
 .callout h3{margin:0 0 8px;color:var(--gold);font-size:14px}
 .callout p{margin:0;color:#e5eee6;font-size:13px;line-height:1.85}
 .source{font-size:11px;color:var(--muted);margin-top:8px}
+.hadith-note{margin-top:10px;padding:10px 12px;border-left:3px solid var(--gold);border-radius:9px;background:#0e231c;font-size:12px;color:#dbe8dc;line-height:1.7}
+.hadith-note b{color:var(--gold)}
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
 .step{background:#10271f;border:1px solid var(--line);padding:10px;border-radius:12px;font-size:11px;color:var(--muted)}
 .step b{display:block;color:var(--gold);font-size:12px;margin-bottom:4px}
@@ -106,7 +111,7 @@ button,select,textarea{font:inherit}
     <div class="eyebrow">DISCOVER · VISUALIZE · REFLECT</div>
     <h1 data-i="hero">देखो, समझो और ज्ञान को जोड़ो।</h1>
     <p data-i="intro">14–18 वर्ष के विद्यार्थियों के लिए विषय-आधारित Visual Learning। पहले वैज्ञानिक या अकादमिक अवधारणा को समझें, फिर प्रमाणित इस्लामी संदर्भ के साथ चिंतन करें और अंत में स्वयं हल करके दिखाएँ।</p>
-    <div class="chips"><span class="chip">2D + 3D-style models</span><span class="chip">Multilingual</span><span class="chip">Reasoning challenges</span><span class="chip">Auto-saved notes</span></div>
+    <div class="chips"><span class="chip">16:9 3D Visuals</span><span class="chip">Multilingual</span><span class="chip">Qur'an &amp; Hadith</span><span class="chip">Auto-saved notes</span></div>
   </div>
   <div class="hero-art">
     <svg viewBox="0 0 600 340" role="img" aria-label="Connected knowledge illustration"><defs><radialGradient id="g"><stop stop-color="#d8b66a"/><stop offset="1" stop-color="#477d61"/></radialGradient><linearGradient id="earth" x2="1" y2="1"><stop stop-color="#9ad6c0"/><stop offset="1" stop-color="#276a65"/></linearGradient></defs><circle cx="300" cy="165" r="116" fill="none" stroke="#477d61" stroke-width="1" stroke-dasharray="5 8"/><circle cx="300" cy="165" r="84" fill="url(#earth)" opacity=".95"/><path d="M243 133l24-28 27 8 9 28-22 14-6 28-28-7-13-25zM321 184l26-21 24 12-7 34-25 15-18-17z" fill="#d6e6ba" opacity=".8"/><g fill="#d8b66a" stroke="#f3dca0" stroke-width="2"><circle cx="300" cy="28" r="16"/><circle cx="490" cy="165" r="16"/><circle cx="300" cy="302" r="16"/><circle cx="110" cy="165" r="16"/></g><g stroke="#d8b66a" stroke-width="2" opacity=".8"><path d="M300 44v37M316 165h157M300 286v-37M127 165h89"/></g><g fill="#f4f3e9" font-size="14" font-family="sans-serif" text-anchor="middle"><text x="300" y="12">QURAN</text><text x="520" y="170">SCIENCE</text><text x="300" y="333">REFLECT</text><text x="75" y="170">LOGIC</text></g></svg>
@@ -114,7 +119,7 @@ button,select,textarea{font:inherit}
 </section>
 
 <div class="section-title">
-  <div><h2 data-i="choose">अपना विषय चुनें</h2><p data-i="chooseSub">हर विषय में visual model, explanation, Islamic reflection और challenge।</p></div>
+  <div><h2 data-i="choose">अपना विषय चुनें</h2><p data-i="chooseSub">हर विषय में 3D landscape visual, explanation, Islamic reflection और challenge।</p></div>
   <span class="chip">MODULE 01</span>
 </div>
 
@@ -123,7 +128,7 @@ button,select,textarea{font:inherit}
   <a class="btn primary" href="./brain-master.html">Open Brain Master →</a>
 </section>
 <section class="brain-feature">
-  <div><h3>🧊 Advanced 3D Visual Studio</h3><p>Rotate interactive WebGL learning models for cells, DNA, brain overview, solar system, geometry and AI networks.</p></div>
+  <div><h3>🧊 Advanced 3D Visual Studio</h3><p>Explore 16:9 landscape animated 3D visuals for cells, DNA, brain, neurons, Earth &amp; space, and Qur'an — with Qur'an &amp; Hadith tabs.</p></div>
   <a class="btn primary" href="./visual-studio.html">Open 3D Studio →</a>
 </section>
 
@@ -137,17 +142,432 @@ button,select,textarea{font:inherit}
 
 <script>
 const STORAGE_KEY = 'zdLearningLab_v2';
-const MODEL_LINK = { biology: 'cell', physics: 'solar', maths: 'geometry', quran: 'geometry', history: 'solar', ai: 'network' };
-const DIAGRAM_SRC = {
-  biology: './assets/visuals/biology/cell-structure-2d.svg',
-  physics: './assets/visuals/physics/earth-day-night-2d.svg',
-  maths: './assets/visuals/mathematics/geometry-symmetry-2d.svg',
-  quran: './assets/visuals/quran-arabic/word-study-template.svg',
-  history: './assets/visuals/history/source-verification-2d.svg',
-  ai: './assets/visuals/technology/ai-verification-2d.svg'
+const MODEL_LINK = { biology: 'cell', physics: 'solar', maths: 'geometry', quran: 'quran', history: 'history', ai: 'network' };
+const VISUAL_MEDIA = {
+  biology: { src: './assets/visuals/biology/cell-3d.gif', fallback: './assets/visuals/biology/cell-structure-2d.svg', is3d: true },
+  physics: { src: './assets/visuals/physics/earth-space-3d.gif', fallback: './assets/visuals/physics/earth-day-night-2d.svg', is3d: true },
+  maths:   { src: './assets/visuals/mathematics/geometry-symmetry-2d.svg', fallback: './assets/visuals/mathematics/geometry-symmetry-2d.svg', is3d: false },
+  quran:   { src: './assets/visuals/quran-arabic/quran-3d.gif', fallback: './assets/visuals/quran-arabic/word-study-template.svg', is3d: true },
+  history: { src: './assets/visuals/history/source-verification-2d.svg', fallback: './assets/visuals/history/source-verification-2d.svg', is3d: false },
+  ai:      { src: './assets/visuals/technology/neuron-3d.gif', fallback: './assets/visuals/technology/ai-verification-2d.svg', is3d: true }
 };
 
 const lessons = {
-  biology: { icon:'🧬', title:{ hi:'Biology — जीवन की बनावट', en:'Biology — The Architecture of Life', ur:'حیاتیات — زندگی کی ساخت', hinglish:'Biology — Life ki Banawat' }, sub:{ hi:'Cell, DNA और मानव शरीर को दृश्य रूप में समझें।', en:'Explore cells, DNA and the human body visually.', ur:'خلیے، DNA اور انسانی جسم کو بصری طور پر سمجھیں۔', hinglish:'Cell, DNA aur human body ko visualize karein.' }, level:'BASIC → MODERATE', visual:'cell', fact:{ hi:'कोशिका (Cell) जीवन की मूल संरचनात्मक और क्रियात्मक इकाई है। अलग-अलग कोशिकाओं की संरचना और कार्य अलग हो सकते हैं।', en:'The cell is the basic structural and functional unit of life. Cell types vary in structure and function.', ur:'خلیہ زندگی کی بنیادی ساختی اور فعلی اکائی ہے۔ مختلف خلیوں کی ساخت اور کام مختلف ہو سکتے ہیں۔', hinglish:'Cell zindagi ki basic structural aur functional unit hai.' }, islam:{ hi:'कुरआन इंसान को अपनी रचना और जीवन पर विचार करने के लिए प्रेरित करता है। सूरह अत-तारिक 86:5–7 में इंसान को अपनी उत्पत्ति पर गौर करने की ओर ध्यान दिलाया गया है। इस पाठ में Cell Biology वैज्ञानिक विषय है; आयत की तफ़सीर को कोशिका का वैज्ञानिक वर्णन नहीं बताया जा रहा।', en:'The Quran invites reflection on human creation. At-Tariq 86:5–7 asks people to reflect on their origin. Cell biology remains a scientific topic; the verse is not presented as a technical description of cells.', ur:'قرآن انسان کو اپنی تخلیق پر غور کی دعوت دیتا ہے۔ سورۃ الطارق 86:5–7 میں انسان کو اپنی ابتدا پر غور کرنے کی طرف متوجہ کیا گیا ہے۔', hinglish:'Quran insaan ko apni takhleeq par ghour ki dawat deta hai. Cell biology scientific topic hai; ayat ko cell ka technical description nahi banaya jayega.' }, ref:'Quran 86:5–7 · Surah At-Tariq (translation and tafsir must be selected/verified by the institution).', q:{ hi:'कोशिका के अंदर ऊर्जा उत्पादन में कौन-सा organelle मुख्य भूमिका निभाता है?', en:'Which organelle plays a major role in cellular energy production?', ur:'خلیے میں توانائی پیدا کرنے میں کون سا عضیہ اہم کردار ادا کرتا ہے؟', hinglish:'Cell ke andar energy production mein kaunsa organelle major role play karta hai?' }, opts:{ hi:['राइबोसोम','माइटोकॉन्ड्रिया','न्यूक्लियस'], en:['Ribosome','Mitochondrion','Nucleus'], ur:['رائبوسوم','مائٹوکانڈریا','نیوکلیئس'], hinglish:['Ribosome','Mitochondria','Nucleus'] }, correct:1, why:{ hi:'माइटोकॉन्ड्रिया कोशिका में ATP के उत्पादन का प्रमुख स्थान है। अलग-अलग कोशिकाओं में इसकी संख्या अलग हो सकती है।', en:'Mitochondria are a major site of ATP production in many eukaryotic cells.', ur:'مائٹوکانڈریا خلیے میں ATP کی پیداوار کا اہم مقام ہے۔', hinglish:'Mitochondria ATP production ki major site hai.' }, reflection:{ hi:'जीवन की सूक्ष्म संरचना को समझने से आपके अंदर कौन-सा नया सवाल या चिंतन पैदा हुआ?', en:'What new question or reflection arose as you explored the microscopic structure of life?', ur:'زندگی کی باریک ساخت کو سمجھ کر آپ کے ذہن میں کون سا سوال پیدا ہوا؟', hinglish:'Life ki microscopic structure dekh kar aapke zehan mein kya naya sawal aaya?' } },
-  physics: { icon:'🌍', title:{ hi:'Physics — पृथ्वी और अंतरिक्ष', en:'Physics — Earth & Space', ur:'طبیعیات — زمین اور خلا', hinglish:'Physics — Earth aur Space' }, sub:{ hi:'पृथ्वी के घूर्णन और दिन-रात को समझें।', en:'Understand Earth’s rotation and the day-night cycle.', ur:'زمین کی گردش اور دن رات کے نظام کو سمجھیں۔', hinglish:'Earth rotation aur day-night cycle samjhein.' }, level:'BASIC → MODERATE', visual:'earth', fact:{ hi:'पृथ्वी अपनी धुरी पर घूमती है। जिस हिस्से पर सूर्य का प्रकाश पड़ता है वहाँ दिन और दूसरी ओर रात होती है।', en:'Earth rotates on its axis. The side facing the Sun experiences day while the opposite side experiences night.', ur:'زمین اپنے محور پر گردش کرتی ہے۔ سورج کی طرف والا حصہ دن اور دوسرا حصہ رات کا تجربہ کرتا ہے۔', hinglish:'Earth apni axis par rotate karti hai; sun-facing side par day hota hai.' }, islam:{ hi:'सूरह आले-इमरान 3:190–191 में आकाशों और धरती की रचना तथा रात-दिन के परिवर्तन पर चिंतन करने वालों का उल्लेख है। वैज्ञानिक मॉडल पृथ्वी के घूर्णन की व्याख्या करता है; आयत चिंतन की ओर मार्गदर्शन देती है।', en:'Quran 3:190–191 mentions the creation of the heavens and earth and the alternation of night and day as signs for reflection. The scientific model explains Earth’s rotation; the verses invite reflection.', ur:'سورۃ آل عمران 3:190–191 میں آسمانوں اور زمین کی تخلیق اور رات دن کے بدلنے پر غور کرنے والوں کا ذکر ہے۔', hinglish:'Surah Aal-e-Imran 3:190–191 raat-din ke badalne par ghour ki dawat deti hai. Science rotation explain karti hai.' }, ref:'Quran 3:190–191 · Surah Aal-e-Imran.', q:{ hi:'दिन और रात का मुख्य कारण क्या है?', en:'What is the main cause of day and night?', ur:'دن اور رات ہونے کی بنیادی وجہ کیا ہے؟', hinglish:'Day aur night hone ki main wajah kya hai?' }, opts:{ hi:['पृथ्वी का अपनी धुरी पर घूमना','चंद्रमा का घूमना','सूर्य का पृथ्वी के चारों ओर घूमना'], en:['Earth rotating on its axis','The Moon rotating','The Sun orbiting Earth'], ur:['زمین کا اپنے محور پر گھومنا','چاند کا گھومنا','سورج کا زمین کے گرد گھومنا'], hinglish:['Earth ka apni axis par rotate karna','Moon ka rotate karna','Sun ka Earth ke gird ghoomna'] }, correct:0, why:{ hi:'पृथ्वी का अपनी धुरी पर घूमना दिन और रात के चक्र का मुख्य कारण है।', en:'Earth’s rotation on its axis causes the day-night cycle.', ur:'زمین کی اپنے محور پر گردش دن اور رات کا بنیادی سبب ہے۔', hinglish:'Earth ki axis par rotation day-night cycle ka sabab hai.' }, reflection:{ hi:'रात और दिन के नियमित बदलाव से प्रकृति और इंसानी जीवन को क्या लाभ होते हैं?', en:'How do regular day-night cycles benefit nature and human life?', ur:'رات اور دن کی تبدیلی سے فطرت اور انسانی زندگی کو کیا فائدہ ہوتا ہے؟', hinglish:'Day-night cycle nature aur human life ke liye kaise faidemand hai?' } },
-  maths: { icon:'📐', title:{ hi:'Mathematics — पैटर्न और न्याय', en:'Mathematics — Patterns & Fairness', ur:'ریاضی — نمونے اور انصاف', hinglish:'Mathematics — Patterns aur Insaf' }, sub:{ hi:'अनुपात, पैटर्न और ईमानदार नाप-तौल।', en:'Explore ratios, patterns and honest measurement.', ur:'تناسب، نمونوں اور درست پیمائش کو سمجھیں۔', hinglish:'Ratio, patterns aur imandaar measurement.' }, level:'BASIC → MODERATE', visual:'geometry', fact:{ hi:'ज्यामिति आकृतियों, दूरी, कोण और स्थानिक संबंधों का अध्ययन है। सममिति और दोहराए जाने वाले पैटर्न वास्तुकला और डिज़ाइन में दिखाई देते हैं।', en:'Geometry studies shapes, distances, angles and spatial relationships. Symmetry and repeating patterns appear in architecture and design.', ur:'جیومیٹری اشکال، فاصلے، زاویوں اور مکانی تعلقات کا مطالعہ ہے۔', hinglish:'Geometry shapes, angles aur spatial relations ka study hai.' }, islam:{ hi:'सूरह अल-मुतफ़्फ़िफ़ीन 83:1–3 नाप-तौल में कमी करने वालों के लिए चेतावनी देती है। यहाँ गणितीय मापन को ईमानदारी और लोगों के अधिकारों से जोड़ा गया है।', en:'Quran 83:1–3 warns against giving short measure. This creates an ethical connection between mathematical measurement, honesty and people’s rights.', ur:'سورۃ المطففین 83:1–3 ناپ تول میں کمی کرنے والوں کے لیے تنبیہ ہے۔', hinglish:'Surah Al-Mutaffifin 83:1–3 naap-tol mein kami se rokti hai. Yahan measurement ka link honesty se hai.' }, ref:'Quran 83:1–3 · Surah Al-Mutaffifin.', q:{ hi:'एक दुकानदार 1 kg के बजाय 900 g देता है। कमी कितनी है?', en:'A seller gives 900 g instead of 1 kg. What is the shortfall?', ur:'ایک دکاندار ایک کلو کے بجائے 900 گرام دیتا ہے۔ کمی کتنی ہے؟', hinglish:'Seller 1 kg ke badle 900 g deta hai. Kami kitni hai?' }, opts:{ hi:['10 ग्राम','100 ग्राम','900 ग्राम'], en:['10 grams','100 grams','900 grams'], ur:['10 گرام','100 گرام','900 گرام'], hinglish:['10 gram','100 gram','900 gram'] }, correct:1, why:{ hi:'1 kg = 1000 g; 1000 − 900 = 100 g की कमी।', en:'1 kg = 1000 g; 1000 − 900 = 100 g short.', ur:'ایک کلو 1000 گرام ہے؛ 100 گرام کی کمی ہے۔', hinglish:'1 kg = 1000 g; 1000 − 900 = 100 g.' }, reflection:{ hi:'आप अपने दैनिक जीवन में नाप-तौल और जानकारी के मामले में ईमानदारी कैसे रख सकते हैं?', en:'How can you practice honesty in me
+  biology: {
+    icon:'🧬',
+    title:{ hi:'Biology — जीवन की बनावट', en:'Biology — The Architecture of Life', ur:'حیاتیات — زندگی کی ساخت', hinglish:'Biology — Life ki Banawat' },
+    sub:{ hi:'Cell, DNA और मानव शरीर को 3D दृश्य रूप में समझें।', en:'Explore cells, DNA and the human body visually.', ur:'خلیے، DNA اور انسانی جسم کو بصری طور پر سمجھیں۔', hinglish:'Cell, DNA aur human body ko 3D visual mein samjhein.' },
+    level:'BASIC → MODERATE',
+    visual:'cell',
+    fact:{
+      hi:'कोशिका (Cell) जीवन की मूल संरचनात्मक और क्रियात्मक इकाई है। एक जीवित कोशिका का लगभग 70–80% हिस्सा पानी होता है और इसके अंदर Nucleus, Mitochondria व Golgi मिलकर काम करते हैं।',
+      en:'The cell is the basic structural and functional unit of life. About 70–80% of a living cell is water, inside which organelles like the nucleus, mitochondria and Golgi work together.',
+      ur:'خلیہ زندگی کی بنیادی ساختی اور فعلی اکائی ہے۔ زندہ خلیے کا تقریباً 70 سے 80 فیصد حصہ پانی ہوتا ہے جس میں تمام عضویات مل کر کام کرتے ہیں۔',
+      hinglish:'Cell zindagi ki basic structural aur functional unit hai. Ek living cell ka ~70-80% hissa paani hota hai jismein sab organelles mil kar kaam karte hain.'
+    },
+    islam:{
+      hi:'कुरआन इंसान को अपनी रचना और जीवन पर विचार करने की दावत देता है। सूरह अल-अंबिया 21:30 में पानी से हर जानदार चीज़ की रचना और सूरह अज़-ज़ारियात 51:20–21 में खुद अपने अंदर मौजूद निशानियों पर गौर करने की बात है। विज्ञान और तफ़सीर को अलग रखकर इसे चिंतन (तदब्बुर) के रूप में पढ़ें।',
+      en:'The Quran invites reflection on human creation. Al-Anbiya 21:30 mentions making every living thing from water, and Adh-Dhariyat 51:20–21 invites looking at the signs within ourselves. Cell biology remains a scientific topic while the verses guide reflection.',
+      ur:'قرآن انسان کو اپنی تخلیق پر غور کی دعوت دیتا ہے۔ سورۃ الانبیاء 21:30 میں پانی سے ہر جاندار کی تخلیق اور الذاریات 51:20–21 میں خود اپنے اندر موجود نشانیوں پر غور کا ذکر ہے۔',
+      hinglish:'Quran insaan ko apni takhleeq par ghaur ki dawat deta hai. Surah Al-Anbiya 21:30 aur Adh-Dhariyat 51:20-21 mein nishaniyon par tadabbur ka zikr hai.'
+    },
+    hadith:{
+      hi:'सहीह बुख़ारी 6011; सहीह मुस्लिम 2586 (तदब्बुर मिसाल) — जिस तरह मोमिन एक शरीर की तरह मिलकर काम करते हैं, उसी तरह एक सूक्ष्म कोशिका के सारे अंग तालमेल से जीवन चलाते हैं।',
+      en:'Sahih al-Bukhari 6011; Sahih Muslim 2586 (reflection analogy) — Just as believers function together like one body, the tiny organelles inside a cell coordinate to sustain life.',
+      ur:'صحیح بخاری 6011؛ صحیح مسلم 2586 (تدبر کی مثال) — جس طرح مومن ایک جسم کی طرح مل کر کام کرتے ہیں، اسی طرح ایک باریک خلیے کے تمام حصے باہمی ربط سے زندگی چلاتے ہیں۔',
+      hinglish:'Sahih Bukhari 6011; Sahih Muslim 2586 (tadabbur misaal) — Jis tarah momin ek jism ki tarah mil kar kaam karte hain, waise hi ek cell ke organelles coordination se zindagi chalate hain.'
+    },
+    ref:'Quran 21:30, 51:20–21, 86:5–7 · Sahih al-Bukhari 6011 (verify translation/tafsir with a qualified teacher).',
+    q:{ hi:'कोशिका के अंदर ऊर्जा उत्पादन में कौन-सा organelle मुख्य भूमिका निभाता है?', en:'Which organelle plays a major role in cellular energy production?', ur:'خلیے میں توانائی پیدا کرنے میں کون سا عضیہ اہم کردار ادا کرتا ہے؟', hinglish:'Cell ke andar energy production mein kaunsa organelle major role play karta hai?' },
+    opts:{ hi:['राइबोसोम','माइटोकॉन्ड्रिया','न्यूक्लियस'], en:['Ribosome','Mitochondrion','Nucleus'], ur:['رائبوسوم','مائٹوکانڈریا','نیوکلیئس'], hinglish:['Ribosome','Mitochondria','Nucleus'] },
+    correct:1,
+    why:{ hi:'माइटोकॉन्ड्रिया कोशिका में ATP के उत्पादन का प्रमुख स्थान है। अलग-अलग कोशिकाओं में इसकी संख्या अलग हो सकती है।', en:'Mitochondria are a major site of ATP production in many eukaryotic cells.', ur:'مائٹوکانڈریا خلیے میں ATP کی پیداوار کا اہم مقام ہے۔', hinglish:'Mitochondria ATP production ki major site hai.' },
+    reflection:{ hi:'जीवन की सूक्ष्म संरचना को समझने से आपके अंदर कौन-सा नया सवाल या चिंतन पैदा हुआ?', en:'What new question or reflection arose as you explored the microscopic structure of life?', ur:'زندگی کی باریک ساخت کو سمجھ کر آپ کے ذہن میں کون سا سوال پیدا ہوا؟', hinglish:'Life ki microscopic structure dekh kar aapke zehan mein kya naya sawal aaya?' }
+  },
+  physics: {
+    icon:'🌍',
+    title:{ hi:'Physics — पृथ्वी और अंतरिक्ष', en:'Physics — Earth & Space', ur:'طبیعیات — زمین اور خلا', hinglish:'Physics — Earth aur Space' },
+    sub:{ hi:'पृथ्वी के घूर्णन, दिन-रात और चाँद की कक्षा को समझें।', en:'Understand Earth’s rotation, day-night cycle and lunar orbit.', ur:'زمین کی گردش، دن رات اور چاند کے مدار کو سمجھیں۔', hinglish:'Earth rotation, day-night aur Moon orbit ko samjhein.' },
+    level:'BASIC → MODERATE',
+    visual:'earth',
+    fact:{
+      hi:'पृथ्वी अपनी धुरी पर 24 घंटे में घूमती है — सूर्य की ओर वाले हिस्से में दिन और दूसरी ओर रात होती है। चंद्रमा पृथ्वी के चारों ओर ~29.5 दिन में एक चक्र पूरा करता है।',
+      en:'Earth rotates on its axis every 24 hours, creating day on the sunlit side and night on the opposite side. The Moon completes a lunar cycle in ~29.5 days.',
+      ur:'زمین اپنے محور پر 24 گھنٹوں میں گردش کرتی ہے جس سے دن اور رات بدلتے ہیں، اور چاند تقریباً 29.5 دنوں میں قمری دور مکمل کرتا ہے۔',
+      hinglish:'Earth apni axis par 24 ghante mein ghoomti hai jisse din-raat hote hain, aur Moon ~29.5 din mein lunar cycle poora karta hai.'
+    },
+    islam:{
+      hi:'सूरह आले-इमरान 3:190–191 में आकाशों और धरती की रचना तथा रात-दिन के परिवर्तन पर चिंतन करने वालों का उल्लेख है। सूरह यासीन 36:40 बताती है कि हर खगोलीय पिंड अपने दायरे (फ़लक) में तैर रहा है।',
+      en:'Quran 3:190–191 mentions the creation of the heavens and earth and the alternation of night and day as signs for reflection. Ya-Sin 36:40 mentions each swimming in its orbit.',
+      ur:'سورۃ آل عمران 3:190–191 میں آسمانوں اور زمین کی تخلیق اور رات دن کے بدلنے پر غور کرنے والوں کا ذکر ہے، اور یٰسین 36:40 میں ہر ایک کے اپنے مدار میں تیرنے کا بیان ہے۔',
+      hinglish:'Surah Aal-e-Imran 3:190-191 raat-din ke badalne par ghaur ki dawat deti hai, aur Surah Ya-Sin 36:40 har ek ke apne falak (orbit) mein tairne ka zikr karti hai.'
+    },
+    hadith:{
+      hi:'सहीह बुख़ारी 1041; सहीह मुस्लिम 901 — "सूरज और चाँद अल्लाह की निशानियों में से दो निशानियाँ हैं; किसी की मौत या पैदाइश पर इन्हें ग्रहण नहीं लगता।"',
+      en:'Sahih al-Bukhari 1041; Sahih Muslim 901 — "The sun and the moon are two of the signs of Allah; they do not eclipse because of anyone’s death or birth."',
+      ur:'صحیح بخاری 1041؛ صحیح مسلم 901 — "سورج اور چاند اللہ کی نشانیوں میں سے دو نشانیاں ہیں؛ کسی کی موت یا پیدائش پر انہیں گرہن نہیں لگتا۔"',
+      hinglish:'Sahih Bukhari 1041; Sahih Muslim 901 — "Sooraj aur chaand Allah ki do nishaniyan hain; kisi ki maut ya paidaish par inhe grahan nahi lagta."'
+    },
+    ref:'Quran 3:190–191; 36:40; 10:5 · Sahih al-Bukhari 1041; Sahih Muslim 901.',
+    q:{ hi:'दिन और रात का मुख्य कारण क्या है?', en:'What is the main cause of day and night?', ur:'دن اور رات ہونے کی بنیادی وجہ کیا ہے؟', hinglish:'Day aur night hone ki main wajah kya hai?' },
+    opts:{ hi:['पृथ्वी का अपनी धुरी पर घूमना','चंद्रमा का घूमना','सूर्य का पृथ्वी के चारों ओर घूमना'], en:['Earth rotating on its axis','The Moon rotating','The Sun orbiting Earth'], ur:['زمین کا اپنے محور پر گھومنا','چاند کا گھومنا','سورج کا زمین کے گرد گھومنا'], hinglish:['Earth ka apni axis par rotate karna','Moon ka rotate karna','Sun ka Earth ke gird ghoomna'] },
+    correct:0,
+    why:{ hi:'पृथ्वी का अपनी धुरी पर घूमना दिन और रात के चक्र का मुख्य कारण है।', en:'Earth’s rotation on its axis causes the day-night cycle.', ur:'زمین کی اپنے محور پر گردش دن اور رات کا بنیادی سبب ہے۔', hinglish:'Earth ki axis par rotation day-night cycle ka sabab hai.' },
+    reflection:{ hi:'रात और दिन के नियमित बदलाव से प्रकृति और इंसानी जीवन को क्या लाभ होते हैं?', en:'How do regular day-night cycles benefit nature and human life?', ur:'رات اور دن کی تبدیلی سے فطرت اور انسانی زندگی کو کیا فائدہ ہوتا ہے؟', hinglish:'Day-night cycle nature aur human life ke liye kaise faidemand hai?' }
+  },
+  maths: {
+    icon:'📐',
+    title:{ hi:'Mathematics — पैटर्न और न्याय', en:'Mathematics — Patterns & Fairness', ur:'ریاضی — نمونے اور انصاف', hinglish:'Mathematics — Patterns aur Insaf' },
+    sub:{ hi:'अनुपात, पैटर्न और ईमानदार नाप-तौल।', en:'Explore ratios, patterns and honest measurement.', ur:'تناسب، نمونوں اور درست پیمائش کو سمجھیں۔', hinglish:'Ratio, patterns aur imandaar measurement.' },
+    level:'BASIC → MODERATE',
+    visual:'geometry',
+    fact:{
+      hi:'ज्यामिति आकृतियों, दूरी, कोण और स्थानिक संबंधों का अध्ययन है। सममिति और दोहराए जाने वाले पैटर्न वास्तुकला और डिज़ाइन में दिखाई देते हैं।',
+      en:'Geometry studies shapes, distances, angles and spatial relationships. Symmetry and repeating patterns appear in architecture and design.',
+      ur:'جیومیٹری اشکال، فاصلے، زاویوں اور مکانی تعلقات کا مطالعہ ہے۔',
+      hinglish:'Geometry shapes, angles aur spatial relations ka study hai.'
+    },
+    islam:{
+      hi:'सूरह अल-मुतफ़्फ़िफ़ीन 83:1–3 नाप-तौल में कमी करने वालों के लिए चेतावनी देती है। यहाँ गणितीय मापन को ईमानदारी और लोगों के अधिकारों से जोड़ा गया है।',
+      en:'Quran 83:1–3 warns against giving short measure. This creates an ethical connection between mathematical measurement, honesty and people’s rights.',
+      ur:'سورۃ المطففین 83:1–3 ناپ تول میں کمی کرنے والوں کے لیے تنبیہ ہے۔',
+      hinglish:'Surah Al-Mutaffifin 83:1–3 naap-tol mein kami se rokti hai. Yahan measurement ka link honesty se hai.'
+    },
+    hadith:{
+      hi:'सहीह मुस्लिम 102 — "जिसने धोखा दिया वह हम में से नहीं है।" नाप-तौल और हिसाब में ईमानदारी ईमान का हिस्सा है।',
+      en:'Sahih Muslim 102 — "Whoever deceives us is not one of us." Honesty in calculation and measurement is part of faith.',
+      ur:'صحیح مسلم 102 — "جس نے دھوکہ دیا وہ ہم میں سے نہیں۔" پیمائش اور حساب میں دیانت ایمان کا حصہ ہے۔',
+      hinglish:'Sahih Muslim 102 — "Jisne dhoka diya woh hum mein se nahi hai." Naap-tol mein imaandari imaan ka hissa hai.'
+    },
+    ref:'Quran 83:1–3; 55:7–9 · Sahih Muslim 102.',
+    q:{ hi:'एक दुकानदार 1 kg के बजाय 900 g देता है। कमी कितनी है?', en:'A seller gives 900 g instead of 1 kg. What is the shortfall?', ur:'ایک دکاندار ایک کلو کے بجائے 900 گرام دیتا ہے۔ کمی کتنی ہے؟', hinglish:'Seller 1 kg ke badle 900 g deta hai. Kami kitni hai?' },
+    opts:{ hi:['10 ग्राम','100 ग्राम','900 ग्राम'], en:['10 grams','100 grams','900 grams'], ur:['10 گرام','100 گرام','900 گرام'], hinglish:['10 gram','100 gram','900 gram'] },
+    correct:1,
+    why:{ hi:'1 kg = 1000 g; 1000 − 900 = 100 g की कमी।', en:'1 kg = 1000 g; 1000 − 900 = 100 g short.', ur:'ایک کلو 1000 گرام ہے؛ 100 گرام کی کمی ہے۔', hinglish:'1 kg = 1000 g; 1000 − 900 = 100 g.' },
+    reflection:{ hi:'आप अपने दैनिक जीवन में नाप-तौल और जानकारी के मामले में ईमानदारी कैसे रख सकते हैं?', en:'How can you practice honesty in measurement and information in daily life?', ur:'روزمرہ زندگی میں ناپ تول اور معلومات میں دیانت داری کیسے اختیار کریں گے؟', hinglish:'Daily life mein measurement aur information mein honesty kaise rakhenge?' }
+  },
+  quran: {
+    icon:'📖',
+    title:{ hi:'Quran & Arabic — अर्थ की खोज', en:'Quran & Arabic — Explore Meaning', ur:'قرآن و عربی — معنی کی تلاش', hinglish:'Quran & Arabic — Meaning ki Talaash' },
+    sub:{ hi:'सूरह अल-अस्र के मुख्य शब्द, अरबी रूट और संदेश समझें।', en:'Explore key words, Arabic roots and the message of Surah Al-Asr.', ur:'سورۃ العصر کے اہم الفاظ اور پیغام کو سمجھیں۔', hinglish:'Surah Al-Asr ke key words aur message samjhein.' },
+    level:'BASIC → MODERATE',
+    visual:'quran',
+    fact:{
+      hi:'सूरह अल-अस्र की तीसरी आयत में ईमान, अच्छे कर्म, सत्य की नसीहत और सब्र की नसीहत का उल्लेख है। 3-अक्षरी अरबी रूट समझने से कई कुरआनी शब्द आसानी से याद रहते हैं।',
+      en:'Surah Al-Asr, verse 3, mentions faith, righteous deeds, mutual counsel to truth and patience. Learning 3-letter Arabic roots helps unlock many Quranic words.',
+      ur:'سورۃ العصر کی تیسری آیت میں ایمان، نیک اعمال، حق اور صبر کی نصیحت کا ذکر ہے۔ عربی سہ حرفی مادّے سمجھنے سے قرآن کے معنی آسان ہو جاتے ہیں۔',
+      hinglish:'Surah Al-Asr ayat 3 mein iman, nek amal, haq aur sabr ki naseehat ka zikr hai. Arabic roots samajhne se maani aasaan hote hain.'
+    },
+    islam:{
+      hi:'सूरह साद 38:29 बताती है कि यह बरकत वाली किताब इसलिए उतारी गई ताकि लोग इसकी आयतों पर तदब्बुर (गौर) करें। मूल अरबी पाठ, अनुवाद और मोतबर तफ़सीर को अलग-अलग स्तर पर पढ़ें।',
+      en:'Surah Sad 38:29 states this blessed Book was revealed so people may reflect upon its verses. Study Arabic text, translation and authentic tafsir as distinct layers.',
+      ur:'سورۃ ص 38:29 میں بیان ہے کہ یہ بابرکت کتاب اس لیے نازل کی گئی تاکہ لوگ اس کی آیات پر تدبر کریں۔ اصل عربی متن، ترجمہ اور تفسیر کو الگ الگ سمجھیں۔',
+      hinglish:'Surah Sad 38:29 mein ayaton par tadabbur ki dawat hai. Arabic text, translation aur tafsir ko alag layers mein padhein.'
+    },
+    hadith:{
+      hi:'सहीह बुख़ारी 5027 — "तुम में सबसे बेहतर वह है जो कुरआन सीखे और सिखाए।" (सहीह मुस्लिम 804: कुरआन क़यामत के दिन अपने पढ़ने वालों की शफ़ाअत करेगा।)',
+      en:'Sahih al-Bukhari 5027 — "The best among you are those who learn the Quran and teach it." (Sahih Muslim 804: it will intercede for its companions.)',
+      ur:'صحیح بخاری 5027 — "تم میں سب سے بہتر وہ ہے جو قرآن سیکھے اور سکھائے۔" (صحیح مسلم 804: قرآن قیامت کے دن شفاعت کرے گا۔)',
+      hinglish:'Sahih Bukhari 5027 — "Tum mein sabse behtar woh hai jo Quran seekhe aur sikhaye." (Sahih Muslim 804)'
+    },
+    ref:'Surah Al-Asr 103:1–3; Surah Sad 38:29 · Sahih al-Bukhari 5027; Sahih Muslim 804.',
+    q:{ hi:'आयत 3 में किन चार गुणों का उल्लेख है?', en:'Which four qualities are mentioned in verse 3?', ur:'آیت 3 میں کن چار صفات کا ذکر ہے؟', hinglish:'Ayat 3 mein kin chaar qualities ka zikr hai?' },
+    opts:{ hi:['ईमान, अच्छे कर्म, सत्य और सब्र की नसीहत','धन, प्रसिद्धि, शक्ति और गति','केवल ज्ञान और यात्रा'], en:['Faith, good deeds, counsel to truth and patience','Wealth, fame, power and speed','Only knowledge and travel'], ur:['ایمان، نیک اعمال، حق اور صبر کی نصیحت','مال، شہرت، طاقت اور رفتار','صرف علم اور سفر'], hinglish:['Iman, nek amal, haq aur sabr ki naseehat','Daulat, fame, power aur speed','Sirf knowledge aur travel'] },
+    correct:0,
+    why:{ hi:'सूरह अल-अस्र 103:3 में इन चार गुणों का उल्लेख है।', en:'These four qualities are stated in Surah Al-Asr 103:3.', ur:'یہ چار صفات سورۃ العصر 103:3 میں بیان ہوئی ہیں۔', hinglish:'Ye chaar qualities Surah Al-Asr 103:3 mein hain.' },
+    reflection:{ hi:'इन चार गुणों में से किस पर आप इस सप्ताह अभ्यास करना चाहेंगे और कैसे?', en:'Which of these four qualities would you like to practice this week, and how?', ur:'آپ اس ہفتے ان چار صفات میں سے کس پر عمل کی کوشش کریں گے اور کیسے؟', hinglish:'In chaar qualities mein se kis par is haftay practice karenge aur kaise?' }
+  },
+  history: {
+    icon:'🗺️',
+    title:{ hi:'History — इतिहास और स्रोत', en:'History — Timeline & Evidence', ur:'تاریخ — واقعات اور شواہد', hinglish:'History — Timeline aur Evidence' },
+    sub:{ hi:'घटनाओं को क्रम, नक्शे और स्रोतों से समझें।', en:'Understand events through timelines, maps and sources.', ur:'واقعات کو ترتیب، نقشوں اور ذرائع سے سمجھیں۔', hinglish:'Events ko timeline, maps aur sources se samjhein.' },
+    level:'BASIC → MODERATE',
+    visual:'timeline',
+    fact:{
+      hi:'इतिहास में किसी घटना को समझने के लिए समय, स्थान, प्राथमिक स्रोत और बाद के विश्लेषण को अलग-अलग देखना चाहिए।',
+      en:'Historical study distinguishes time, place, primary sources and later interpretations.',
+      ur:'تاریخی مطالعے میں وقت، مقام، بنیادی ماخذ اور بعد کی تشریحات میں فرق کیا جاتا ہے۔',
+      hinglish:'History mein time, place, primary sources aur later interpretations ko alag dekhte hain.'
+    },
+    islam:{
+      hi:'सीरत और इस्लामी इतिहास पढ़ते समय घटना की तारीख़, सनद/स्रोत और विद्वानों की व्याख्या जाँचें। सूरह अल-हुजुरात 49:6 हर ख़बर की जाँच का आदेश देती है।',
+      en:'When studying Seerah and Islamic history, check dates, primary sources and scholarly interpretation. Quran 49:6 instructs verifying reports before acting on them.',
+      ur:'سیرت اور اسلامی تاریخ پڑھتے وقت تاریخ، ماخذ اور اہل علم کی تشریح کی تحقیق کریں۔ سورۃ الحجرات 49:6 خبر کی تحقیق کا حکم دیتی ہے۔',
+      hinglish:'Seerah aur Islamic history mein dates, sources aur scholarly interpretation verify karein. Quran 49:6 khabar ki tahqeeq sikhata hai.'
+    },
+    hadith:{
+      hi:'सहीह मुस्लिम (मुक़द्दमा, हदीस 5) — "किसी व्यक्ति के झूठा होने के लिए इतना ही काफ़ी है कि वह हर सुनी-सुनाई बात बिना जाँचे आगे बयान कर दे।"',
+      en:'Sahih Muslim (Introduction, Hadith 5) — "It is enough falsehood for a person to narrate everything they hear without verifying."',
+      ur:'صحیح مسلم (مقدمہ، حدیث 5) — "کسی شخص کے جھوٹا ہونے کے لیے اتنا ہی کافی ہے کہ وہ ہر سنی سنائی بات بغیر تحقیق آگے بیان کر دے۔"',
+      hinglish:'Sahih Muslim (Intro, Hadith 5) — "Kisi shakhs ke jhoota hone ke liye itna hi kaafi hai ki woh har suni-sunayi baat bina jaanche aage bayan kar de."'
+    },
+    ref:'Quran 49:6 · Sahih Muslim (Introduction, Hadith 5).',
+    q:{ hi:'किसी ऐतिहासिक दावे की जाँच में सबसे उपयोगी पहला कदम क्या है?', en:'What is a useful first step when checking a historical claim?', ur:'کسی تاریخی دعوے کی تحقیق میں پہلا مفید قدم کیا ہے؟', hinglish:'Historical claim check karne ka pehla useful step kya hai?' },
+    opts:{ hi:['सिर्फ़ सोशल मीडिया पोस्ट देखना','मूल स्रोत और विश्वसनीय इतिहासकारों की जाँच','किसी एक अनाम संदेश पर भरोसा'], en:['Only check a social media post','Check primary sources and reliable historians','Trust an anonymous message'], ur:['صرف سوشل میڈیا پوسٹ دیکھنا','اصل ماخذ اور معتبر مؤرخین کو جانچنا','گمنام پیغام پر یقین کرنا'], hinglish:['Sirf social media post dekhna','Primary sources aur reliable historians check karna','Anonymous message par trust karna'] },
+    correct:1,
+    why:{ hi:'मूल स्रोत, तारीख़ और विश्वसनीय शोध की जाँच से दावे की पुष्टि बेहतर होती है।', en:'Checking primary sources, dates and reliable scholarship improves verification.', ur:'اصل ماخذ، تاریخ اور معتبر تحقیق سے دعوے کی جانچ بہتر ہوتی ہے۔', hinglish:'Primary sources, dates aur reliable research claim verify karne mein madad karte hain.' },
+    reflection:{ hi:'आप किसी सुनी-सुनाई बात को आगे साझा करने से पहले उसकी पुष्टि कैसे करेंगे?', en:'How will you verify a story before sharing it?', ur:'کسی سنی سنائی بات کو آگے بھیجنے سے پہلے کیسے تحقیق کریں گے؟', hinglish:'Koi baat share karne se pehle uski tasdeeq kaise karenge?' }
+  },
+  ai: {
+    icon:'🤖',
+    title:{ hi:'Technology & AI — न्यूरॉन, ज्ञान और अमानत', en:'Technology & AI — Neurons, Knowledge & Trust', ur:'ٹیکنالوجی اور AI — علم اور امانت', hinglish:'Technology & AI — Neurons, Knowledge aur Amanat' },
+    sub:{ hi:'ब्रेन न्यूरॉन, AI नेटवर्क और डिजिटल ज़िम्मेदारी समझें।', en:'Understand brain synapses, AI networks and digital responsibility.', ur:'نیورون، AI کے جوابات کی تحقیق اور ڈیجیٹل ذمہ داری سمجھیں۔', hinglish:'Brain neuron, AI networks aur digital responsibility samjhein.' },
+    level:'MODERATE',
+    visual:'ai',
+    fact:{
+      hi:'ब्रेन के न्यूरॉन्स बार-बार दोहराने से मज़बूत कनेक्शन (Synapse) बनाते हैं। आधुनिक AI Neural Networks इसी से प्रेरित होकर डेटा के पैटर्न सीखते हैं, लेकिन वे ग़लत या अधूरा उत्तर भी दे सकते हैं।',
+      en:'Brain neurons strengthen synaptic connections through repetition (neuroplasticity). Modern AI neural networks are inspired by this pattern learning, yet can still make mistakes.',
+      ur:'دماغ کے نیورون بار بار دہرانے سے مضبوط ربط بناتے ہیں۔ جدید AI اسی اصول سے متاثر ہو کر ڈیٹا سے سیکھتا ہے لیکن غلطی بھی کر سکتا ہے۔',
+      hinglish:'Brain neurons baar-baar revision se strong synapse banate hain. Modern AI neural networks isi se inspired hain, par AI galti bhi kar sakta hai.'
+    },
+    islam:{
+      hi:'इस्लामी नैतिकता में अमानत, सचाई और ख़बर की जाँच महत्वपूर्ण हैं। AI के उत्तर को बिना जाँचे आगे साझा न करना डिजिटल जिम्मेदारी है (सूरह अल-हुजुरात 49:6; सूरह ताहा 20:114 — "रब्बि ज़िदनी इल्मा")।',
+      en:'Islamic ethics values trust, truthfulness and verifying reports (Quran 49:6). Seeking beneficial knowledge (Taha 20:114) goes hand in hand with checking AI outputs before sharing.',
+      ur:'اسلامی اخلاق میں امانت، سچائی اور خبر کی تحقیق اہم ہیں۔ سورۃ الحجرات 49:6 میں خبر کی تحقیق اور طہٰ 20:114 میں علم میں اضافے کی دعا ہے۔',
+      hinglish:'Islamic ethics amanat, sachai aur khabar ki tasdeeq sikhati hai. AI output share karne se pehle verify karein (Quran 49:6; Taha 20:114).'
+    },
+    hadith:{
+      hi:'सहीह बुख़ारी 5033 — नबी ﷺ ने कुरआन की लगातार दोहरानी (Revision) की मिसाल बंधे हुए ऊँट से दी: पाबंदी रखो तो याद रहता है, छोड़ दो तो निकल जाता है — ठीक न्यूरल कनेक्शन की तरह।',
+      en:'Sahih al-Bukhari 5033 — The Prophet ﷺ compared regularly revising the Quran to tending a tied camel: stay consistent and it remains firm, neglect it and it slips away.',
+      ur:'صحیح بخاری 5033 — نبی ﷺ نے قرآن کی پابندی سے دہرائی کی مثال بندھے ہوئے اونٹ سے دی: پابندی کرو تو یاد رہتا ہے، چھوڑ دو تو نکل جاتا ہے۔',
+      hinglish:'Sahih Bukhari 5033 — Nabi (SAW) ne Quran revision ki misaal bandhe hue oont se di: regular revise karo to yaad rehta hai, chhod do to nikal jaata hai.'
+    },
+    ref:'Quran 49:6; 20:114 · Sahih al-Bukhari 5033.',
+    q:{ hi:'AI ने कोई धार्मिक तथ्य बताया है। आगे साझा करने से पहले क्या करना चाहिए?', en:'AI gives a religious claim. What should you do before sharing it?', ur:'AI نے دینی بات بتائی ہے۔ آگے بھیجنے سے پہلے کیا کرنا چاہیے؟', hinglish:'AI ne religious claim diya. Share karne se pehle kya karna chahiye?' },
+    opts:{ hi:['बिना जाँचे साझा करें','विश्वसनीय मूल स्रोत और योग्य शिक्षक से जाँचें','सिर्फ़ उत्तर की भाषा देखकर मान लें'], en:['Share without checking','Verify with reliable sources and a qualified teacher','Trust it based only on fluent wording'], ur:['بغیر تحقیق کے شیئر کریں','معتبر ماخذ اور اہل استاد سے تحقیق کریں','صرف اچھی زبان دیکھ کر مان لیں'], hinglish:['Bina check kiye share karein','Reliable source aur qualified teacher se verify karein','Sirf fluent language dekh kar maan lein'] },
+    correct:1,
+    why:{ hi:'AI गलती कर सकता है। धार्मिक दावे के लिए मूल स्रोत और योग्य शिक्षक की समीक्षा आवश्यक है।', en:'AI can be wrong. Religious claims need source verification and qualified human review.', ur:'AI غلطی کر سکتا ہے؛ دینی دعوے کے لیے معتبر ماخذ اور اہل استاد کی تحقیق ضروری ہے۔', hinglish:'AI galat ho sakta hai. Religious claim ko source aur qualified teacher se verify karein.' },
+    reflection:{ hi:'आप AI का उपयोग सीखने में कैसे करेंगे, बिना अपनी जाँच और सोचने की जिम्मेदारी छोड़े?', en:'How can you use AI to learn without giving up your own judgment?', ur:'اپنی سوچ اور تحقیق کی ذمہ داری برقرار رکھتے ہوئے AI سے کیسے سیکھیں گے؟', hinglish:'Apni thinking aur verification ki zimmedari rakhte hue AI kaise use karenge?' }
+  }
+};
+
+const ui = {
+  hi: {
+    back:'क्विज़', hero:'देखो, समझो और ज्ञान को जोड़ो।', intro:'14–18 वर्ष के विद्यार्थियों के लिए विषय-आधारित Visual Learning। पहले वैज्ञानिक या अकादमिक अवधारणा को समझें, फिर प्रमाणित इस्लामी संदर्भ के साथ चिंतन करें और अंत में स्वयं हल करके दिखाएँ।',
+    choose:'अपना विषय चुनें', chooseSub:'हर विषय में 3D landscape visual, explanation, Islamic reflection और challenge।',
+    fact:'विषय को समझें', islam:'इस्लामी संबंध और चिंतन', hadith:'हदीस संदर्भ', ref:'संदर्भ', challenge:'सोचकर जवाब दें', check:'उत्तर जाँचें',
+    reflection:'अपना चिंतन लिखें', teacher:'शिक्षक समीक्षा', note:'शिक्षक की टिप्पणी', save:'रिव्यू प्रिंट / PDF करें',
+    correct:'सही! ', wrong:'फिर से सोचें। ', pickFirst:'पहले एक उत्तर चुनें।', prompt:'अपना उत्तर यहाँ लिखें…',
+    vecCap:'यह इंटरैक्टिव कॉन्सेप्ट आरेख है। फुल-स्क्रीन और ज़ूम के लिए 3D Studio खोलें।',
+    gifCap:'16:9 लैंडस्केप 3D एनिमेटेड विज़ुअल — मुख्य अंगों और प्रक्रिया को जीवंत रूप में देखें।',
+    svgCap:'2D दृश्य अवधारणा के मुख्य हिस्सों और उनके संबंधों को सरल रूप में दिखाता है।',
+    open3d:'🧊 3D Studio में खोलें →', saved:'✓ डिवाइस पर सेव हो गया',
+    rubric:['विषय की अवधारणा सही समझी','इस्लामी संदर्भ सही पहचाना','अपने उत्तर का कारण दिया','स्रोत और संदर्भ का सम्मान किया']
+  },
+  en: {
+    back:'Quiz', hero:'See it. Understand it. Connect knowledge.', intro:'Subject-based visual learning for ages 14–18. Explore an academic concept, reflect through a verified Islamic connection, then solve and explain.',
+    choose:'Choose a subject', chooseSub:'Each topic includes a 3D landscape visual, explanation, Islamic reflection and challenge.',
+    fact:'Understand the topic', islam:'Islamic connection & reflection', hadith:'Hadith reference', ref:'Reference', challenge:'Think and answer', check:'Check answer',
+    reflection:'Write your reflection', teacher:'Teacher review', note:'Teacher note', save:'Print / save review as PDF',
+    correct:'Correct! ', wrong:'Think again. ', pickFirst:'Choose an answer first.', prompt:'Write your response here…',
+    vecCap:'Interactive concept diagram. Open 3D Studio for fullscreen zoom & parts breakdown.',
+    gifCap:'16:9 landscape animated 3D visual highlighting core structure and motion.',
+    svgCap:'The 2D view simplifies key components and relationships.',
+    open3d:'🧊 Open in 3D Studio →', saved:'✓ Saved on this device',
+    rubric:['Understood the core concept','Identified the Islamic reflection accurately','Explained reasoning clearly','Respected sources and references']
+  },
+  ur: {
+    back:'کوئز', hero:'دیکھیں، سمجھیں اور علم کو جوڑیں۔', intro:'14–18 سال کے طلبہ کے لیے بصری تعلیم۔ پہلے علمی تصور سمجھیں، پھر مستند اسلامی تعلق پر غور کریں اور خود سوال حل کریں۔',
+    choose:'اپنا موضوع منتخب کریں', chooseSub:'ہر موضوع میں 3D بصری ماڈل، وضاحت، اسلامی غور اور چیلنج شامل ہے۔',
+    fact:'موضوع سمجھیں', islam:'اسلامی تعلق اور غور', hadith:'حدیث کا حوالہ', ref:'حوالہ', challenge:'سوچ کر جواب دیں', check:'جواب چیک کریں',
+    reflection:'اپنا غور لکھیں', teacher:'استاد کا جائزہ', note:'استاد کا نوٹ', save:'جائزہ پرنٹ / PDF کریں',
+    correct:'درست! ', wrong:'دوبارہ غور کریں۔ ', pickFirst:'پہلے ایک جواب منتخب کریں۔', prompt:'اپنا جواب یہاں لکھیں…',
+    vecCap:'یہ انٹرایکٹو خاکہ ہے۔ فل اسکرین اور زوم کے لیے 3D اسٹوڈیو کھولیں۔',
+    gifCap:'16:9 لینڈ اسکیپ 3D متحرک ماڈل — بنیادی ساخت کو واضح انداز میں دیکھیں۔',
+    svgCap:'2D خاکہ بنیادی حصوں اور ان کے تعلق کو آسان انداز میں دکھاتا ہے۔',
+    open3d:'🧊 3D اسٹوڈیو میں کھولیں →', saved:'✓ اس ڈیوائس پر محفوظ ہو گیا',
+    rubric:['موضوع کا بنیادی تصور سمجھا','اسلامی حوالہ درست پہچانا','جواب کی دلیل واضح بیان کی','مآخذ اور حوالوں کا احترام کیا']
+  },
+  hinglish: {
+    back:'Quiz', hero:'Dekho, samjho aur knowledge connect karo.', intro:'14–18 age ke learners ke liye visual learning. Pehle academic concept samjho, phir verified Islamic connection par reflect karo aur challenge solve karo.',
+    choose:'Apna subject chunein', chooseSub:'Har topic mein 3D landscape visual, explanation, Islamic reflection aur challenge.',
+    fact:'Topic samjhein', islam:'Islamic connection aur reflection', hadith:'Hadith reference', ref:'Reference', challenge:'Soch kar jawab dein', check:'Answer check karein',
+    reflection:'Apna reflection likhein', teacher:'Teacher review', note:'Teacher note', save:'Review print / PDF karein',
+    correct:'Sahi! ', wrong:'Dobara sochein. ', pickFirst:'Pehle ek option select karein.', prompt:'Apna jawab yahan likhein…',
+    vecCap:'Ye interactive concept diagram hai. Fullscreen zoom aur parts ke liye 3D Studio kholein.',
+    gifCap:'16:9 landscape animated 3D visual — main parts aur structure live dekhein.',
+    svgCap:'2D diagram main parts aur unke relation ko simple tarike se dikhata hai.',
+    open3d:'🧊 3D Studio mein kholein →', saved:'✓ Device par save ho gaya',
+    rubric:['Topic ka concept sahi samjha','Islamic reference sahi pehchana','Apne answer ka reason diya','Sources aur references ka samman kiya']
+  }
+};
+
+let lang = 'hi', current = 'biology';
+const $ = (id) => document.getElementById(id);
+const text = (key) => ui[lang][key] || ui.en[key] || '';
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+function loadStore() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch (e) { return {}; }
+}
+function saveLessonState(topicId, patch) {
+  try {
+    const all = loadStore();
+    all[topicId] = Object.assign({}, all[topicId] || {}, patch);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+    const h = $('saveHint');
+    if (h) h.textContent = text('saved');
+  } catch (e) {}
+}
+
+function topics() {
+  $('topics').innerHTML = Object.entries(lessons).map(([id, l]) =>
+    `<button class="topic ${id === current ? 'active' : ''}" data-topic="${id}"><span class="ico">${l.icon}</span><span><b>${l.title[lang]}</b><small>${l.sub[lang]}</small></span></button>`
+  ).join('');
+}
+
+function visualSvg(type) {
+  if (type === 'cell') return `<svg viewBox="0 0 420 230" role="img" aria-label="Illustrative animal cell diagram"><defs><radialGradient id="cellg"><stop stop-color="#4d9d82"/><stop offset="1" stop-color="#173d32"/></radialGradient></defs><ellipse cx="210" cy="115" rx="175" ry="91" fill="url(#cellg)" stroke="#a5d8bd" stroke-width="5"/><ellipse cx="207" cy="115" rx="53" ry="43" fill="#a58acb" stroke="#e0c9ff" stroke-width="3"/><circle cx="207" cy="115" r="14" fill="#523d76"/><g fill="#d8b66a" stroke="#f4d998" stroke-width="2"><ellipse cx="105" cy="90" rx="26" ry="12" transform="rotate(-25 105 90)"/><ellipse cx="292" cy="150" rx="27" ry="12" transform="rotate(20 292 150)"/><ellipse cx="300" cy="78" rx="21" ry="10"/></g><g stroke="#b3d6e8" stroke-width="4" fill="none"><path d="M105 90q12-16 24 0q-12 16-24 0M280 150q12-16 24 0q-12 16-24 0"/></g><g fill="#e9f4eb" font-size="11"><text x="18" y="25">Cell membrane</text><path d="M87 28L70 49" stroke="#e9f4eb"/><text x="176" y="20">Nucleus</text><path d="M208 25v45" stroke="#e9f4eb"/><text x="318" y="207">Mitochondria</text><path d="M320 192l-22-31" stroke="#e9f4eb"/></g></svg>`;
+  if (type === 'earth') return `<svg viewBox="0 0 420 230" role="img" aria-label="Earth day night rotation model"><defs><linearGradient id="dayearth"><stop stop-color="#183f67"/><stop offset=".48" stop-color="#4f9f91"/><stop offset=".51" stop-color="#081b36"/><stop offset="1" stop-color="#102849"/></linearGradient><radialGradient id="sun"><stop stop-color="#fff4bf"/><stop offset="1" stop-color="#d8a64c"/></radialGradient></defs><circle cx="42" cy="110" r="32" fill="url(#sun)"/><g stroke="#d8b66a" opacity=".7"><path d="M42 62v-18M42 176v-18M-6 110h18M72 110h18M9 77l-13-13M76 144l13 13"/></g><circle cx="237" cy="112" r="86" fill="url(#dayearth)" stroke="#a8d7c5" stroke-width="3"/><path d="M193 55l31 8 7 22-22 14-19-9-12 19 16 19-7 24-25-12-8-33zM278 127l24-14 18 16-11 28-27 10-14-18z" fill="#80bd91"/><path d="M237 17v190" stroke="#d9e9f0" stroke-dasharray="5 5" opacity=".7"/><path d="M152 112a85 85 0 0 0 170 0" fill="none" stroke="#d8b66a" stroke-width="3" stroke-dasharray="8 7"/><path d="M314 103l9 9-10 6" fill="none" stroke="#d8b66a" stroke-width="3"/><g fill="#e9f4eb" font-size="12"><text x="10" y="25">Sunlight</text><text x="145" y="222">Day side</text><text x="279" y="222">Night side</text></g></svg>`;
+  if (type === 'geometry') return `<svg viewBox="0 0 420 230" role="img" aria-label="Geometry solids and symmetry"><g stroke="#9dd7bd" stroke-width="3" fill="#285d4c"><path d="M45 75l58-34 58 34v68l-58 34-58-34z"/><path d="M103 41v68l58 34M103 109L45 75" fill="none"/></g><g stroke="#d8b66a" stroke-width="3" fill="#735c35"><path d="M245 57l61 0 30 53-30 53h-61l-30-53z"/><path d="M245 57l30 53-30 53M306 57l-31 53 31 53" fill="none"/></g><path d="M210 20v190" stroke="#557868" stroke-dasharray="4 5"/><g fill="#f3f2e8" font-size="12"><text x="46" y="205">Cube / symmetry</text><text x="244" y="205">Hexagon / pattern</text></g></svg>`;
+  if (type === 'quran') return `<svg viewBox="0 0 420 230" role="img" aria-label="Arabic word learning concept map"><path d="M35 60q80-45 175 0v125q-95-45-175 0zM210 60q95-45 175 0v125q-95-45-175 0z" fill="#e9dfc8" stroke="#d8b66a" stroke-width="3"/><path d="M210 60v125" stroke="#a67e3e" stroke-width="3"/><g fill="#264638" font-size="27" text-anchor="middle" font-family="serif"><text x="120" y="115">وَالْعَصْرِ</text><text x="300" y="115">وَتَوَاصَوْا</text></g><g fill="#735c35" font-size="12" text-anchor="middle"><text x="120" y="145">Al-Asr · Time</text><text x="300" y="145">Mutual counsel</text></g><path d="M80 35h260M80 200h260" stroke="#d8b66a" stroke-dasharray="3 5"/></svg>`;
+  if (type === 'timeline') return `<svg viewBox="0 0 420 230" role="img" aria-label="Evidence-based history timeline"><path d="M40 115H380" stroke="#d8b66a" stroke-width="4"/><g fill="#7fc6a0" stroke="#e7f5e9" stroke-width="2"><circle cx="75" cy="115" r="11"/><circle cx="210" cy="115" r="11"/><circle cx="345" cy="115" r="11"/></g><g stroke="#7fc6a0" stroke-width="2"><path d="M75 102V54M210 102v-52M345 102v-48"/></g><g fill="#f4f3e9" font-size="12" text-anchor="middle"><text x="75" y="38">Source A</text><text x="210" y="35">Cross-check</text><text x="345" y="37">Conclusion</text><text x="75" y="151">Date / place</text><text x="210" y="151">Compare</text><text x="345" y="151">Cited claim</text></g><g fill="#b2c4b8" font-size="10" text-anchor="middle"><text x="210" y="190">Illustrative research workflow</text></g></svg>`;
+  return `<svg viewBox="0 0 420 230" role="img" aria-label="AI verification workflow"><rect x="18" y="70" width="105" height="85" rx="14" fill="#244f40" stroke="#7fc6a0"/><rect x="158" y="70" width="105" height="85" rx="14" fill="#27435b" stroke="#83c6e8"/><rect x="298" y="70" width="105" height="85" rx="14" fill="#5b4a2b" stroke="#d8b66a"/><g fill="#f4f3e9" text-anchor="middle" font-size="13"><text x="70" y="105">AI Output</text><text x="70" y="126" font-size="10">Possible answer</text><text x="210" y="105">Verify</text><text x="210" y="126" font-size="10">Sources / expert</text><text x="350" y="105">Share safely</text><text x="350" y="126" font-size="10">If confirmed</text></g><g stroke="#d8b66a" stroke-width="3" fill="none"><path d="M123 112h32m-8-8l8 8-8 8M263 112h32m-8-8l8 8-8 8"/></g></svg>`;
+}
+
+function render() {
+  const l = lessons[current];
+  const media = VISUAL_MEDIA[current];
+  const saved = loadStore()[current] || {};
+  const checks = Array.isArray(saved.checks) ? saved.checks : [];
+  const opts = l.opts[lang];
+  const rubric = ui[lang].rubric || ui.en.rubric;
+  topics();
+
+  $('lesson').innerHTML = `
+    <div class="lesson-head">
+      <div><div class="eyebrow">VISUAL LESSON · ${esc(current.toUpperCase())}</div><h2>${l.icon} ${l.title[lang]}</h2><p>${l.sub[lang]}</p></div>
+      <span class="level">${l.level}</span>
+    </div>
+    <div class="visual-grid">
+      <section class="visual">
+        <h3>${media.is3d ? '3D LANDSCAPE ANIMATED VISUAL (16:9)' : '2D LEARNING DIAGRAM'}</h3>
+        <div class="visual-frame">
+          <img id="lessonMedia" class="${media.is3d ? '' : 'svg-fit'}" src="${media.src}" alt="${esc(l.title[lang])} — visual" loading="eager">
+        </div>
+        <div class="model-controls">
+          <a class="studio-link" href="./visual-studio.html?model=${esc(MODEL_LINK[current] || 'cell')}">${esc(text('open3d'))}</a>
+        </div>
+        <p>${esc(media.is3d ? text('gifCap') : text('svgCap'))}</p>
+      </section>
+      <section class="visual">
+        <h3>CONCEPT LABELS &amp; STRUCTURE</h3>
+        ${visualSvg(l.visual)}
+        <div class="model-controls">
+          <button type="button" id="modelToggle" aria-pressed="false">Tilt / Explore</button>
+          <button type="button" id="resetModel">Reset view</button>
+        </div>
+        <p>${esc(text('vecCap'))}</p>
+      </section>
+    </div>
+    <div class="callout"><h3>01 · ${esc(text('fact'))}</h3><p>${l.fact[lang]}</p></div>
+    <div class="callout">
+      <h3>02 · ${esc(text('islam'))}</h3>
+      <p>${l.islam[lang]}</p>
+      ${l.hadith ? `<div class="hadith-note"><b>${esc(text('hadith'))}:</b> ${esc(l.hadith[lang])}</div>` : ''}
+      <div class="source">${esc(text('ref'))}: ${esc(l.ref)}</div>
+    </div>
+    <div class="steps">
+      <div class="step"><b>DISCOVER</b>Visual hook</div>
+      <div class="step"><b>LEARN</b>Concept</div>
+      <div class="step"><b>REFLECT</b>Islamic link</div>
+      <div class="step"><b>APPLY</b>Reason &amp; action</div>
+    </div>
+    <section class="challenge">
+      <h3>03 · ${esc(text('challenge'))}</h3>
+      <p style="font-size:13px;line-height:1.7">${l.q[lang]}</p>
+      <div class="options">${opts.map((o, i) => `<button class="opt" data-answer="${i}">${String.fromCharCode(65 + i)}. ${esc(o)}</button>`).join('')}</div>
+      <button class="btn primary" id="checkAnswer" style="margin-top:10px">${esc(text('check'))}</button>
+      <div class="feedback" id="feedback"></div>
+    </section>
+    <section class="reflection">
+      <label for="reflectionText">${esc(text('reflection'))}: ${esc(l.reflection[lang])}</label>
+      <textarea id="reflectionText" placeholder="${esc(text('prompt'))}">${esc(saved.reflection || '')}</textarea>
+    </section>
+    <div class="challenge">
+      <h3>04 · ${esc(text('teacher'))}</h3>
+      <div class="teacher">
+        ${rubric.map((r, idx) => `<label><input type="checkbox" data-rubric="${idx}" ${checks[idx] ? 'checked' : ''}> ${esc(r)}</label>`).join('')}
+      </div>
+      <label for="teacherNote" style="display:block;margin:13px 0 7px;font-size:12px">${esc(text('note'))}</label>
+      <textarea id="teacherNote" placeholder="Teacher feedback…">${esc(saved.teacherNote || '')}</textarea>
+      <div class="save-hint" id="saveHint"></div>
+      <button class="btn" id="printReview" style="margin-top:10px">${esc(text('save'))}</button>
+    </div>`;
+
+  const imgEl = $('lessonMedia');
+  if (imgEl) {
+    imgEl.onerror = () => {
+      if (imgEl.dataset.fallbackUsed) return;
+      imgEl.dataset.fallbackUsed = '1';
+      imgEl.classList.add('svg-fit');
+      imgEl.src = media.fallback;
+    };
+  }
+
+  let chosen = null;
+  document.querySelectorAll('[data-answer]').forEach((b) => b.addEventListener('click', () => {
+    chosen = Number(b.dataset.answer);
+    document.querySelectorAll('[data-answer]').forEach((x) => x.classList.toggle('selected', x === b));
+  }));
+
+  $('checkAnswer').addEventListener('click', () => {
+    const f = $('feedback');
+    if (chosen === null) { f.style.display = 'block'; f.textContent = text('pickFirst'); return; }
+    f.style.display = 'block';
+    f.textContent = (chosen === l.correct ? text('correct') : text('wrong')) + l.why[lang];
+  });
+
+  $('reflectionText').addEventListener('input', (e) => saveLessonState(current, { reflection: e.target.value }));
+  $('teacherNote').addEventListener('input', (e) => saveLessonState(current, { teacherNote: e.target.value }));
+  document.querySelectorAll('[data-rubric]').forEach((cb) => cb.addEventListener('change', () => {
+    const arr = [...document.querySelectorAll('[data-rubric]')].map((x) => x.checked);
+    saveLessonState(current, { checks: arr });
+  }));
+
+  $('printReview').addEventListener('click', () => window.print());
+  $('modelToggle').addEventListener('click', (e) => {
+    const active = e.currentTarget.getAttribute('aria-pressed') !== 'true';
+    e.currentTarget.setAttribute('aria-pressed', String(active));
+    const svg = document.querySelector('.visual svg');
+    if (svg) {
+      svg.style.transform = active ? 'perspective(700px) rotateY(18deg) rotateX(8deg) scale(1.03)' : 'none';
+      svg.style.transition = 'transform .5s ease';
+    }
+  });
+  $('resetModel').addEventListener('click', () => {
+    const svg = document.querySelector('.visual svg');
+    if (svg) svg.style.transform = 'none';
+    $('modelToggle').setAttribute('aria-pressed', 'false');
+  });
+}
+
+$('topics').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-topic]');
+  if (b) { current = b.dataset.topic; render(); }
+});
+
+function setLabLanguage(code, direction) {
+  const supported = ['hi', 'ur', 'en', 'hinglish'];
+  lang = supported.includes(code) ? code : 'en';
+  const dir = direction || (['ar', 'ur', 'fa'].includes(code) ? 'rtl' : 'ltr');
+  document.documentElement.lang = code === 'hinglish' ? 'en-IN' : code;
+  document.documentElement.dir = dir;
+  document.body.classList.toggle('rtl', dir === 'rtl');
+  document.querySelectorAll('[data-i]').forEach((n) => {
+    n.textContent = ui[lang][n.dataset.i] || ui.en[n.dataset.i] || '';
+  });
+  render();
+}
+
+$('lang').addEventListener('change', (e) => setLabLanguage(e.target.value));
+document.addEventListener('zikr:languagechange', (e) => {
+  if (e.detail) setLabLanguage(e.detail.language, e.detail.dir);
+});
+$('lang').value = lang;
+render();
+</script>
+<script src="./js/i18n-core.js" defer></script>
+<script src="./js/i18n.js" defer></script>
+</body>
+</html>
