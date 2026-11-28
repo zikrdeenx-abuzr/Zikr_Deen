@@ -1,43 +1,56 @@
 /* Zikr Deen App — Customizable Gemini-TTS Voice Engine (www/js/zd-voice.js)
-   Features:
    - All 21 Gemini-TTS voices (Male + Female) with 1-tap switching & live preview
-   - Customizable Tone/Style (Calm, Teacher, Deep, Natural, or Custom Prompt)
-   - Customizable Speed (0.75x to 1.25x) saved in localStorage
-   - Built-in Voice Settings Modal: call ZDVoice.openSettings() from anywhere
-   - Phone Cache API (saves free Gemini quota) + Long-text chunking + Offline browser fallback
+   - Customizable Tone/Style (Calm, Teacher, Deep, Natural, or Custom Prompt) + Speed
+   - Clean Gemini / ChatGPT / Claude style SVG icons exported at window.ZDVoice.icons
+   - Phone Cache API + Long-text chunking + Offline browser fallback
 */
 (function () {
   'use strict';
 
+  var ICONS = {
+    mic: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 10.5a6.5 6.5 0 0 0 13 0"/><path d="M12 17v4"/><path d="M8.5 21h7"/></svg>',
+    micOff: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="2" y1="2" x2="22" y2="22"/><path d="M15 9.34V5.5a3 3 0 0 0-5.68-1.33"/><path d="M9 9v1.5a3 3 0 0 0 5.12 2.12"/><path d="M5.5 10.5a6.5 6.5 0 0 0 10.8 4.86"/><path d="M12 17v4"/><path d="M8.5 21h7"/></svg>',
+    liveWave: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><line x1="4" y1="10" x2="4" y2="14"/><line x1="8.5" y1="6.5" x2="8.5" y2="17.5"/><line x1="13" y1="4" x2="13" y2="20"/><line x1="17.5" y1="7.5" x2="17.5" y2="16.5"/><path d="M21 5.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6.6-1.4Z" fill="currentColor" stroke="none"/></svg>',
+    speaker: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2.5 9 2.5 15 6 15 11 19 11 5"/><path d="M15.2 8.8a5 5 0 0 1 0 6.4"/><path d="M18.4 5.8a9.2 9.2 0 0 1 0 12.4"/></svg>',
+    speakerOff: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2.5 9 2.5 15 6 15 11 19 11 5"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>',
+    stop: '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>',
+    tune: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2.2" fill="currentColor"/><circle cx="15" cy="17" r="2.2" fill="currentColor"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    keyboard: '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="2.5"/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M7.5 14h9"/></svg>',
+    close: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    send: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>'
+  };
+
   var VOICES = [
-    { name: 'Orus', gender: 'Male', tag: 'शांत व साफ़ (हदीस/तर्जुमा के लिए बेस्ट)' },
-    { name: 'Charon', gender: 'Male', tag: 'गहरी और संतुलित आवाज़' },
-    { name: 'Fenrir', gender: 'Male', tag: 'नर्म और असरदार नैरेटर' },
-    { name: 'Alnilam', gender: 'Male', tag: 'साफ़ और स्पष्ट उच्चारण' },
-    { name: 'Algieba', gender: 'Male', tag: 'स्मूथ टीचर वॉइस' },
-    { name: 'Algenib', gender: 'Male', tag: 'हल्की और शांत पुरुष आवाज़' },
-    { name: 'Achird', gender: 'Male', tag: 'फ्रेंडली और सहज' },
-    { name: 'Enceladus', gender: 'Male', tag: 'धीमी और कोमल' },
-    { name: 'Iapetus', gender: 'Male', tag: 'संतुलित और साफ' },
-    { name: 'Puck', gender: 'Male', tag: 'ऊर्जावान (क्विज़ के लिए बढ़िया)' },
-    { name: 'Kore', gender: 'Female', tag: 'शांत टीचर (बेस्ट फीमेल वॉइस)' },
-    { name: 'Aoede', gender: 'Female', tag: 'वॉर्म और एक्सप्रेसिव' },
-    { name: 'Leda', gender: 'Female', tag: 'युवा और स्पष्ट' },
-    { name: 'Achernar', gender: 'Female', tag: 'सॉफ्ट और शांत' },
-    { name: 'Autonoe', gender: 'Female', tag: 'ब्राइट और साफ़' },
-    { name: 'Callirrhoe', gender: 'Female', tag: 'आरामदायक लय' },
-    { name: 'Despina', gender: 'Female', tag: 'स्मूथ नैरेशन' },
-    { name: 'Erinome', gender: 'Female', tag: 'स्पष्ट और सीधी' },
-    { name: 'Gacrux', gender: 'Female', tag: 'परिपक्व और गंभीर' },
-    { name: 'Laomedeia', gender: 'Female', tag: 'उत्साही और स्पष्ट' },
-    { name: 'Pulcherrima', gender: 'Female', tag: 'विनम्र और मधुर' }
+    { name: 'Orus', gender: 'Male', tag: 'Calm & Clear (Hadith / Tarjuma ke liye best)' },
+    { name: 'Charon', gender: 'Male', tag: 'Deep & Steady' },
+    { name: 'Fenrir', gender: 'Male', tag: 'Warm Narrator' },
+    { name: 'Alnilam', gender: 'Male', tag: 'Firm & Clear' },
+    { name: 'Algieba', gender: 'Male', tag: 'Smooth Teacher' },
+    { name: 'Algenib', gender: 'Male', tag: 'Soft Male' },
+    { name: 'Achird', gender: 'Male', tag: 'Friendly' },
+    { name: 'Enceladus', gender: 'Male', tag: 'Gentle & Slow' },
+    { name: 'Iapetus', gender: 'Male', tag: 'Balanced' },
+    { name: 'Puck', gender: 'Male', tag: 'Energetic (Quiz ke liye best)' },
+    { name: 'Kore', gender: 'Female', tag: 'Calm Teacher (Best Female)' },
+    { name: 'Aoede', gender: 'Female', tag: 'Warm & Expressive' },
+    { name: 'Leda', gender: 'Female', tag: 'Youthful & Clear' },
+    { name: 'Achernar', gender: 'Female', tag: 'Soft & Calm' },
+    { name: 'Autonoe', gender: 'Female', tag: 'Bright & Crisp' },
+    { name: 'Callirrhoe', gender: 'Female', tag: 'Easygoing' },
+    { name: 'Despina', gender: 'Female', tag: 'Smooth Narration' },
+    { name: 'Erinome', gender: 'Female', tag: 'Direct & Clear' },
+    { name: 'Gacrux', gender: 'Female', tag: 'Mature & Steady' },
+    { name: 'Laomedeia', gender: 'Female', tag: 'Upbeat' },
+    { name: 'Pulcherrima', gender: 'Female', tag: 'Polite & Warm' }
   ];
 
   var STYLES = [
-    { id: 'calm', label: 'शांत और अदब के साथ (Calm)', prompt: 'Speak slowly, calmly, and with deep respect.' },
-    { id: 'teacher', label: 'उस्ताद / समझाने वाला (Teacher)', prompt: 'Speak in a warm, clear, friendly teacher tone.' },
-    { id: 'deep', label: 'गंभीर और ठहराव के साथ (Deep)', prompt: 'Speak in a steady, measured, serious narrator voice with natural pauses.' },
-    { id: 'natural', label: 'सामान्य बातचीत (Natural)', prompt: 'Speak naturally, clearly, and smoothly.' }
+    { id: 'calm', label: 'Calm & Respectful', prompt: 'Speak slowly, calmly, and with deep respect.' },
+    { id: 'teacher', label: 'Teacher / Explainer', prompt: 'Speak in a warm, clear, friendly teacher tone.' },
+    { id: 'deep', label: 'Deep Narrator', prompt: 'Speak in a steady, measured, serious narrator voice with natural pauses.' },
+    { id: 'natural', label: 'Natural Conversational', prompt: 'Speak naturally, clearly, and smoothly.' }
   ];
 
   var VOICE_NAMES = VOICES.map(function (v) { return v.name; });
@@ -324,28 +337,29 @@
     }
   }
 
-  /* ---------- Built-in Voice Studio Modal ---------- */
+  /* ---------- Modern Voice Settings Bottom-Sheet Modal (Zero Old Emojis) ---------- */
   function injectModalCss() {
     if (document.getElementById('zd-voice-modal-css')) return;
     var s = document.createElement('style');
     s.id = 'zd-voice-modal-css';
     s.textContent =
-      '#zdVoiceModal{position:fixed;inset:0;z-index:9999;background:rgba(4,12,9,.72);display:flex;align-items:flex-end;justify-content:center;padding:12px}' +
-      '#zdVoiceModal .zvm-box{width:min(520px,100%);max-height:88vh;overflow:auto;background:#10251f;color:#f4f3e9;border:1px solid #2e5244;border-radius:20px;padding:16px;font-family:system-ui,sans-serif;box-shadow:0 20px 50px rgba(0,0,0,.5)}' +
-      '#zdVoiceModal .zvm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}' +
-      '#zdVoiceModal .zvm-head h3{margin:0;font-size:16px;color:#d8b66a}' +
-      '#zdVoiceModal .zvm-btn{border:1px solid #2e5244;background:#17352a;color:#f4f3e9;border-radius:10px;padding:7px 11px;font-size:12px;font-weight:700;cursor:pointer}' +
+      '#zdVoiceModal{position:fixed;inset:0;z-index:10010;background:rgba(4,12,9,.68);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;padding:10px}' +
+      '#zdVoiceModal .zvm-box{width:min(500px,100%);max-height:86vh;overflow:auto;background:#10251f;color:#f4f3e9;border:1px solid #2e5244;border-radius:24px;padding:16px;font-family:system-ui,-apple-system,sans-serif;box-shadow:0 24px 56px rgba(0,0,0,.55)}' +
+      '#zdVoiceModal .zvm-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px}' +
+      '#zdVoiceModal .zvm-head h3{margin:0;font-size:15px;color:#d8b66a;display:flex;align-items:center;gap:8px}' +
+      '#zdVoiceModal .zvm-btn{border:1px solid #2e5244;background:#17352a;color:#f4f3e9;border-radius:11px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}' +
+      '#zdVoiceModal .zvm-btn.icon-only{width:34px;height:34px;padding:0;justify-content:center;border-radius:50%}' +
       '#zdVoiceModal .zvm-btn.on,#zdVoiceModal .zvm-btn.pri{background:linear-gradient(130deg,#d8b66a,#a67e3e);color:#17241b;border:0}' +
       '#zdVoiceModal .zvm-tabs{display:flex;gap:6px;margin-bottom:10px}' +
       '#zdVoiceModal .zvm-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}' +
-      '#zdVoiceModal .zvm-v{text-align:left;padding:9px 10px;border-radius:11px;border:1px solid #29483c;background:#0a1b16;color:#f4f3e9;cursor:pointer}' +
+      '#zdVoiceModal .zvm-v{text-align:left;padding:9px 10px;border-radius:12px;border:1px solid #29483c;background:#0a1b16;color:#f4f3e9;cursor:pointer}' +
       '#zdVoiceModal .zvm-v.on{border-color:#d8b66a;background:#1b3b2e}' +
       '#zdVoiceModal .zvm-v b{display:block;font-size:13px;color:#f4f3e9}' +
       '#zdVoiceModal .zvm-v small{display:block;font-size:10px;color:#a8beb0;margin-top:2px}' +
       '#zdVoiceModal .zvm-row{margin:10px 0}' +
       '#zdVoiceModal label{display:block;font-size:12px;color:#b2c4b8;margin-bottom:5px}' +
-      '#zdVoiceModal select,#zdVoiceModal input[type=text]{width:100%;padding:9px 10px;border-radius:10px;border:1px solid #29483c;background:#091914;color:#f4f3e9;font-size:13px}' +
-      '#zdVoiceModal .zvm-foot{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}' +
+      '#zdVoiceModal select,#zdVoiceModal input[type=text]{width:100%;padding:9px 10px;border-radius:11px;border:1px solid #29483c;background:#091914;color:#f4f3e9;font-size:13px}' +
+      '#zdVoiceModal .zvm-foot{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;align-items:center}' +
       '@media(max-width:440px){#zdVoiceModal .zvm-grid{grid-template-columns:1fr}}';
     document.head.appendChild(s);
   }
@@ -366,11 +380,11 @@
       var list = VOICES.filter(function (v) { return filter === 'All' || v.gender === filter; });
       wrap.innerHTML =
         '<div class="zvm-box">' +
-          '<div class="zvm-head"><h3>🎙️ Gemini Voice सेटिंग्स (21 आवाज़ें)</h3><button type="button" class="zvm-btn" id="zvmClose">✕</button></div>' +
+          '<div class="zvm-head"><h3>' + ICONS.tune + '<span>Gemini Voice Settings (21)</span></h3><button type="button" class="zvm-btn icon-only" id="zvmClose" aria-label="Close">' + ICONS.close + '</button></div>' +
           '<div class="zvm-tabs">' +
             ['All', 'Male', 'Female'].map(function (g) {
               return '<button type="button" class="zvm-btn' + (filter === g ? ' on' : '') + '" data-g="' + g + '">' +
-                (g === 'All' ? 'सभी (21)' : g === 'Male' ? 'Male (10)' : 'Female (11)') + '</button>';
+                (g === 'All' ? 'All (21)' : g === 'Male' ? 'Male (10)' : 'Female (11)') + '</button>';
             }).join('') +
           '</div>' +
           '<div class="zvm-grid">' +
@@ -380,18 +394,18 @@
                 '<small>' + v.tag + '</small></button>';
             }).join('') +
           '</div>' +
-          '<div class="zvm-row"><label for="zvmStyle">बोलने का अंदाज़ (Tone / Style)</label>' +
+          '<div class="zvm-row"><label for="zvmStyle">Tone / Style</label>' +
             '<select id="zvmStyle">' + STYLES.map(function (st) {
               return '<option value="' + st.id + '"' + (prefs.style === st.id ? ' selected' : '') + '>' + st.label + '</option>';
             }).join('') + '</select></div>' +
-          '<div class="zvm-row"><label for="zvmSpeed">रफ़्तार (Speed: <b id="zvmSpVal">' + prefs.speed.toFixed(2) + 'x</b>)</label>' +
+          '<div class="zvm-row"><label for="zvmSpeed">Speed: <b id="zvmSpVal">' + prefs.speed.toFixed(2) + 'x</b></label>' +
             '<input type="range" id="zvmSpeed" min="0.75" max="1.25" step="0.05" value="' + prefs.speed + '" style="width:100%"></div>' +
-          '<div class="zvm-row"><label for="zvmCustom">कस्टम स्टाइल (वैकल्पिक, जैसे: soft &amp; emotional)</label>' +
-            '<input type="text" id="zvmCustom" maxlength="120" placeholder="उदाहरण: slow and gentle like a teacher" value="' + prefs.customPrompt.split('&').join('&amp;').split('"').join('&quot;').split('<').join('&lt;') + '"></div>' +
+          '<div class="zvm-row"><label for="zvmCustom">Custom style (optional)</label>' +
+            '<input type="text" id="zvmCustom" maxlength="120" placeholder="e.g. slow and gentle like a teacher" value="' + prefs.customPrompt.split('&').join('&amp;').split('"').join('&quot;').split('<').join('&lt;') + '"></div>' +
           '<div class="zvm-foot">' +
-            '<button type="button" class="zvm-btn pri" id="zvmTest">🔊 आवाज़ सुनकर चेक करें</button>' +
-            '<button type="button" class="zvm-btn" id="zvmStop">⏹ रोकें</button>' +
-            '<button type="button" class="zvm-btn" id="zvmDone" style="margin-left:auto">✓ सेव</button>' +
+            '<button type="button" class="zvm-btn pri" id="zvmTest">' + ICONS.speaker + '<span>Test Voice</span></button>' +
+            '<button type="button" class="zvm-btn" id="zvmStop">' + ICONS.stop + '<span>Stop</span></button>' +
+            '<button type="button" class="zvm-btn" id="zvmDone" style="margin-left:auto">Save</button>' +
           '</div>' +
         '</div>';
 
@@ -400,7 +414,7 @@
       wrap.querySelector('#zvmStop').onclick = stop;
       wrap.querySelector('#zvmTest').onclick = function () {
         savePrefs(prefs);
-        speak('अस्सलामु अलैकुम! ज़िक्र दीन की चुनी हुई जेमिनी आवाज़ अब तैयार है।', { lang: 'hi', mode: 'assistant' });
+        speak('Assalamu Alaikum! Zikr Deen ki aapki chuni hui Gemini voice ab ready hai.', { lang: 'hinglish', mode: 'assistant' });
       };
       wrap.querySelectorAll('[data-g]').forEach(function (b) {
         b.onclick = function () { filter = b.dataset.g; draw(); };
@@ -425,6 +439,7 @@
   }
 
   window.ZDVoice = {
+    icons: ICONS,
     VOICES: VOICES,
     STYLES: STYLES,
     getPrefs: loadPrefs,
@@ -437,4 +452,3 @@
     openSettings: openSettings
   };
 })();
-                             
