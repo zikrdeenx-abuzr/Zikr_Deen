@@ -1,5 +1,8 @@
-/* Zikr Deen Quiz - runs INSIDE the app, no server.
-   Upgraded V2: AbortController timeouts, offline detection, smarter cooldowns, safer JSON extraction. */
+/* Zikr Deen Quiz - runs INSIDE the app, no server (Upgraded V3 with all 21 Gemini-TTS Voices + Custom Tone Sync).
+   - /api/ask   -> Gemini through server-side proxy in ../js/ask-config.js
+   - /api/speak -> Gemini-TTS with all 21 voices + synced user voice prefs (zd-voice-prefs-v2)
+   - Online-only routes return 503 so built-in offline quiz data works cleanly.
+*/
 (function () {
   'use strict';
   if (typeof window.API_BASE === 'undefined') window.API_BASE = '';
@@ -9,7 +12,10 @@
   var PROXY = String(CFG.proxy || '').trim();
   var TEXT_MODELS = (CFG.models && CFG.models.length) ? CFG.models : ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
   var TTS_MODELS = [CFG.voiceModel || 'gemini-2.5-flash-preview-tts'];
-  var VOICES = ['Kore', 'Puck', 'Charon', 'Aoede', 'Fenrir', 'Orus'];
+  var VOICES = [
+    'Orus', 'Charon', 'Fenrir', 'Alnilam', 'Algieba', 'Algenib', 'Achird', 'Enceladus', 'Iapetus', 'Puck',
+    'Kore', 'Aoede', 'Leda', 'Achernar', 'Autonoe', 'Callirrhoe', 'Despina', 'Erinome', 'Gacrux', 'Laomedeia', 'Pulcherrima'
+  ];
   var BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
   var LANGS = {
     en: 'English', ar: 'Arabic in Arabic script', id: 'Bahasa Indonesia', ur: 'Urdu in Urdu script',
@@ -182,17 +188,25 @@
     return new Blob([buf], { type: 'audio/wav' });
   }
 
+  function getSavedVoicePrefs() {
+    try { return JSON.parse(localStorage.getItem('zd-voice-prefs-v2') || '{}') || {}; } catch (_) { return {}; }
+  }
+
   function handleSpeak(body) {
     if ((!KEY && !PROXY) || (typeof navigator !== 'undefined' && navigator.onLine === false)) {
       return Promise.resolve(json({ ok: false }, 503));
     }
     var text = String(body.text || '').trim().slice(0, 700);
     if (!text) return Promise.resolve(json({ ok: false }, 400));
-    var voice = VOICES.indexOf(body.voice) >= 0 ? body.voice : 'Kore';
+
+    var saved = getSavedVoicePrefs();
+    var reqVoice = body.voice || saved.voice || 'Orus';
+    var voice = VOICES.indexOf(reqVoice) >= 0 ? reqVoice : 'Orus';
     var language = LANGS[body.lang] || LANGS.en;
+    var styleNote = saved.customPrompt ? (' Style: ' + String(saved.customPrompt).slice(0, 120) + '.') : ' Use a calm, warm teacher voice.';
 
     return tryModels(TTS_MODELS, {
-      contents: [{ parts: [{ text: 'Speak the following text in ' + language + '. Use a calm, warm teacher voice. Preserve the original wording and script: ' + text }] }],
+      contents: [{ parts: [{ text: 'Speak the following text in ' + language + '.' + styleNote + ' Preserve the original wording and script: ' + text }] }],
       generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } }
     }, 15000).then(function (d) {
       var ps = (((d.candidates || [])[0] || {}).content || {}).parts || [], part = null;
@@ -229,7 +243,7 @@
     });
   }
 
-  window.ZDOfflineAPI = { version: '2.0', hasProxy: Boolean(PROXY), hasKey: Boolean(KEY) };
+  window.ZDOfflineAPI = { version: '3.0', voices: VOICES, hasProxy: Boolean(PROXY), hasKey: Boolean(KEY) };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hideOnline);
   else hideOnline();
