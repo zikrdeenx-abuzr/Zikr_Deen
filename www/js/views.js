@@ -40,7 +40,7 @@ R.home=function(){
     resume='<a class="card resume" style="text-decoration:none;color:inherit" href="#/read/'+last.s+'/'+last.a+'"><div class="ring" style="--p:'+prog+'"><b>'+prog+'%</b></div><div style="flex:1;min-width:0"><div class="muted small">'+esc(tr('Resume reading'))+'</div><div style="font-size:19px;font-weight:600">'+esc(sr.en)+'</div><div class="muted small">'+esc(tr('Ayah '+last.a+' of '+sr.count+' · Juz '+ZD.juzOf(last.s,last.a)))+'</div></div><span class="btn sm">'+esc(tr('Continue'))+'</span></a>';
   }else resume='<a class="card resume" style="text-decoration:none;color:inherit" href="#/read/1/1"><div class="ring" style="--p:0"><b>0%</b></div><div style="flex:1"><div class="muted small">'+esc(tr('Start reading'))+'</div><div style="font-size:19px;font-weight:600">Al-Fatihah</div><div class="muted small">'+esc(tr('The Opening · 7 ayat'))+'</div></div><span class="btn sm">'+esc(tr('Begin'))+'</span></a>';
   const mu=st.mulk.status,mem=Object.values(mu).filter(v=>v==='memorised').length,due=ZD.mulkDueList?ZD.mulkDueList().length:0;
-  view().innerHTML=top('Zikr Deen',hijri()?date+' · '+hijri():date,{right:'<button class="ibtn" data-act="theme" aria-label="App Theme" style="font-size:18px">🎨</button><button class="ibtn" data-act="lang" aria-label="App Language" style="font-size:18px">🌐</button><button class="ibtn" data-act="goto" aria-label="Go to surah and ayah">'+icon('hash')+'</button>'})+
+  view().innerHTML=top('Zikr Deen',hijri()?date+' · '+hijri():date,{right:'<a class="ibtn" href="#/listen" aria-label="Full Audio Player" style="font-size:18px;text-decoration:none">🎧</a><button class="ibtn" data-act="theme" aria-label="App Theme" style="font-size:18px">🎨</button><button class="ibtn" data-act="lang" aria-label="App Language" style="font-size:18px">🌐</button><button class="ibtn" data-act="goto" aria-label="Go to surah and ayah">'+icon('hash')+'</button>'})+
   '<main>'+
   '<div class="hero"><div class="bism" lang="ar">'+BISM+'</div>'+resume.replace('class="card resume"','class="resume"').replace('style="text-decoration:none;color:inherit"','style="text-decoration:none;color:inherit;display:flex"')+'</div>'+
   (ZD.mushafSlideBannerHTML?ZD.mushafSlideBannerHTML():'')+
@@ -61,23 +61,59 @@ R.home=function(){
 function indexHead(tab){return ZD.quranTabsHTML?ZD.quranTabsHTML(tab):'<div class="seg" role="tablist"><button role="tab" aria-selected="'+(tab==='surahs')+'" data-go="#/surahs">'+esc(tr('Surah'))+'</button><button role="tab" aria-selected="'+(tab==='juz')+'" data-go="#/juz">'+esc(tr('Juz'))+'</button><button role="tab" aria-selected="'+(tab==='mushaf')+'" data-go="#/mushaf">30 पारे (अरबी)</button></div>'}
 document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)location.hash=g.dataset.go});
 R.surahs=async function(){
-  const all=ZD.surahs();
-  view().innerHTML=top('Quran','114 surahs · 6,236 ayat',{right:'<a class="ibtn" href="#/listen" aria-label="Audio Player" style="font-size:18px;text-decoration:none">🎧</a><button class="ibtn" data-act="goto" aria-label="Go to surah and ayah">'+icon('hash')+'</button>'})+
-   '<main>'+(ZD.mushafSlideBannerHTML?ZD.mushafSlideBannerHTML():'')+(ZD.quranLastReadHTML?ZD.quranLastReadHTML():'')+
-   (ZD.reciterCardsHTML?'<section class="block"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 class="h2" style="margin:0">'+esc(tr('Listen to Quran by'))+'</h2><a class="small" href="#/listen" style="text-decoration:none;font-weight:600">'+esc(tr('Full Player →'))+'</a></div><div id="qRecWrap">'+ZD.reciterCardsHTML(ZD.prefs().reciter,true)+'</div></section>':'')+
-   indexHead('surahs')+'<label class="search">'+icon('search')+'<input id="q" type="search" placeholder="'+esc(tr('Search by name, number or meaning'))+'" autocomplete="off" aria-label="Search surahs"></label><div id="list"></div></main>';
-  const qrw=$('#qRecWrap');
-  if(qrw)qrw.addEventListener('click',e=>{
-    const b=e.target.closest('[data-qari]');if(!b)return;
-    const p=ZD.prefs();p.reciter=b.dataset.qari;ZD.updateCfg({reciter:p.reciter});ZD.save();
-    qrw.innerHTML=ZD.reciterCardsHTML(p.reciter,true);
-    const l=ZD.state().last;ZD.playSurah(l?l.s:1,l?l.a:1);location.hash='#/listen';
+  const all=ZD.surahs(),p=ZD.prefs();
+  const recOpts=ZD.RECITERS.map(r=>'<option value="'+esc(r[0])+'"'+(r[0]===p.reciter?' selected':'')+'>'+esc(r[1])+'</option>').join('');
+  view().innerHTML=top('Surah Index','114 surahs · 6,236 ayat',{right:'<button class="ibtn" id="srSearchToggle" aria-label="Search surahs">'+icon('search')+'</button><a class="ibtn" href="#/listen" aria-label="Audio Player" style="font-size:18px;text-decoration:none">🎧</a>'})+
+   '<main>'+
+   '<div style="background:linear-gradient(120deg,#2e8b57,#247347);color:#fff;border-radius:16px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px">'+
+   '<div><div style="font-size:12px;opacity:.9">Reciter</div><select id="srRecSel" style="background:transparent;color:#fff;border:0;font-weight:700;font-size:15px;padding:2px 0;max-width:250px">'+recOpts+'</select></div>'+
+   '<a class="btn sm ghost" href="#/listen" style="color:#fff;border-color:rgba(255,255,255,.35)">Player →</a></div>'+
+   (ZD.mushafSlideBannerHTML?ZD.mushafSlideBannerHTML():'')+
+   indexHead('surahs')+
+   '<label class="search" id="srSearchBox">'+icon('search')+'<input id="q" type="search" placeholder="'+esc(tr('Search by name, number or meaning'))+'" autocomplete="off" aria-label="Search surahs"></label>'+
+   '<div id="list"></div></main>';
+
+  $('#srRecSel').addEventListener('change',e=>{
+    p.reciter=e.target.value;
+    ZD.updateCfg({reciter:p.reciter});
+    ZD.save();
+    ZD.toast('Reciter updated');
   });
+  $('#srSearchToggle').addEventListener('click',()=>{
+    const inp=$('#q');
+    if(inp){inp.focus();inp.scrollIntoView({behavior:'smooth',block:'center'})}
+  });
+
   const list=$('#list');let cached=new Set();
-  const draw=f=>{const q=norm(f||'');const rows=all.filter(s=>!q||String(s.n)===q||norm(s.en).includes(q)||norm(s.mean).includes(q)||norm(s.ar).includes(q));
-    list.innerHTML=rows.length?rows.map(s=>'<div class="row"><a href="#/read/'+s.n+'/1" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;color:inherit;text-decoration:none"><div class="num"><span>'+s.n+'</span></div><div class="mid"><b>'+esc(s.en)+(cached.has(s.n)?'<i class="dot"></i>':'')+'</b><small>'+esc(s.mean)+' · '+s.count+' <span class="tag">'+esc(tr(s.type))+'</span></small></div><div class="arn" lang="ar">'+esc(s.ar)+'</div></a><div class="acts"><button class="ibtn" data-play="'+s.n+'" aria-label="Play '+esc(s.en)+'">'+icon('play')+'</button></div></div>').join(''):'<div class="empty"><div class="big">🔎</div>'+esc(f)+'</div>'};
-  draw('');$('#q').addEventListener('input',e=>draw(e.target.value));
-  list.addEventListener('click',e=>{const b=e.target.closest('[data-play]');if(b){e.preventDefault();ZD.playSurah(Number(b.dataset.play),1);ZD.toast(ZD.surah(Number(b.dataset.play)).en)}});
+  const draw=f=>{
+    const q=norm(f||'');
+    const rows=all.filter(s=>!q||String(s.n)===q||norm(s.en).includes(q)||norm(s.mean).includes(q)||norm(s.ar).includes(q));
+    const cur=P.cur();
+    list.innerHTML=rows.length?rows.map(s=>{
+      const isPlaying=cur&&cur.s===s.n&&P.playing;
+      return '<div class="row" style="gap:10px">'+
+        '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:15px;font-weight:700">'+s.n+'. '+esc(s.en)+(cached.has(s.n)?'<i class="dot"></i>':'')+'</div>'+
+        '<div class="arn" lang="ar" style="text-align:left;font-size:21px;margin-top:4px">'+esc(s.ar)+'</div>'+
+        '</div>'+
+        '<div class="acts" style="gap:8px">'+
+        '<button type="button" class="btn sm'+(isPlaying?'':' ghost')+'" data-play="'+s.n+'" style="border-radius:999px;padding:6px 12px">'+(isPlaying?'⏸ PLAYING':'▶ PLAY')+'</button>'+
+        '<a class="btn sm ghost" href="#/read/'+s.n+'/1" style="border-radius:999px;padding:6px 12px">📖 READ</a>'+
+        '</div></div>';
+    }).join(''):'<div class="empty"><div class="big">🔎</div>'+esc(f)+'</div>';
+  };
+  draw('');
+  $('#q').addEventListener('input',e=>draw(e.target.value));
+  list.addEventListener('click',e=>{
+    const b=e.target.closest('[data-play]');if(!b)return;
+    e.preventDefault();
+    const n=Number(b.dataset.play);
+    const cur=P.cur();
+    if(cur&&cur.s===n)P.toggle();
+    else{ZD.playSurah(n,1);location.hash='#/listen'}
+  });
+  const unsub=ZD.onPlayer(()=>{if(location.hash.startsWith('#/surahs'))draw($('#q')&&$('#q').value)});
+  ZD.onLeave(unsub);
   ZD.cachedSurahs().then(s=>{cached=s;if(location.hash.startsWith('#/surahs'))draw($('#q')&&$('#q').value)});
 };
 R.juz=function(){
@@ -136,7 +172,7 @@ R.read=async function(args){
   const s=Number(args[0]),a=Number(args[1]||1);
   if(!ZD.surah(s)){location.replace('#/surahs');return}
   const sr=ZD.surah(s),startA=Math.max(1,Math.min(sr.count,a||1));
-  view().innerHTML=top(sr.en,sr.mean+' · '+sr.count+' ayat · '+tr(sr.type),{back:true,right:'<button class="ibtn" data-act="playall" aria-label="Play surah">'+icon('play')+'</button><button class="ibtn" data-act="rset" aria-label="Reading and audio options">'+icon('gear')+'</button>'})+
+  view().innerHTML=top(sr.en,sr.mean+' · '+sr.count+' ayat · '+tr(sr.type),{back:true,right:'<a class="ibtn" href="#/listen" aria-label="Full Player" style="font-size:18px;text-decoration:none">🎧</a><button class="ibtn" data-act="playall" aria-label="Play surah">'+icon('play')+'</button><button class="ibtn" data-act="rset" aria-label="Reading and audio options">'+icon('gear')+'</button>'})+
    '<main><div id="rbody"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div></main>';
   let d;
   try{d=await ZD.loadSurah(s)}catch(e){
@@ -240,7 +276,7 @@ R.bookmarks=function(){
     return '<div class="row"><a href="#/read/'+x.s+'/'+x.a+'" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;color:inherit;text-decoration:none"><div class="num"><span>'+x.a+'</span></div><div class="mid"><b>'+esc(sr.en)+' '+x.s+':'+x.a+'</b><small>'+esc(tr('Juz'))+' '+ZD.juzOf(x.s,x.a)+' · '+dt+'</small></div><div class="arn" lang="ar">'+esc(sr.ar)+'</div></a><div class="acts"><button class="ibtn" data-bp="'+x.s+':'+x.a+'" aria-label="Play">'+icon('play')+'</button><button class="ibtn" data-bd="'+x.s+':'+x.a+'" aria-label="Remove bookmark">'+icon('trash')+'</button></div></div>'}).join(''):
     '<div class="empty"><div class="big">🔖</div><p>'+esc(tr('Saved'))+'</p><a class="btn" href="#/surahs">'+esc(tr('Quran'))+'</a></div>')+'</main>';
   $('#bmRoot').onclick=e=>{const p=e.target.closest('[data-bp]'),d=e.target.closest('[data-bd]');
-    if(p){const [s,a]=p.dataset.bp.split(':').map(Number);ZD.playAyah(s,a)}
+    if(p){const [s,a]=p.dataset.bp.split(':').map(Number);ZD.playAyah(s,a);location.hash='#/listen'}
     if(d){const [s,a]=d.dataset.bd.split(':').map(Number);ZD.toggleBookmark(s,a);R.bookmarks();ZD.toast('Saved')}};
 };
 
@@ -251,6 +287,9 @@ document.addEventListener('click',async e=>{if(e.target.closest('[data-act="inst
 const fmtMB=b=>b>1e9?(b/1e9).toFixed(1)+' GB':(b/1e6).toFixed(b>1e8?0:1)+' MB';
 R.more=async function(){
   const p=ZD.prefs(),L=p.langs;
+  if(!p.scriptStyle)p.scriptStyle='indo-pak';
+  if(typeof p.swipeVibrate!=='boolean')p.swipeVibrate=false;
+  if(typeof p.verticalScroll!=='boolean')p.verticalScroll=true;
   const TH_LIST=[
     ['milk','Milk (White)','करंट डिफ़ॉल्ट थीम','#faf7f0','#8a6410'],
     ['cream-green','Creamy Green','हल्का ग्रीन क्रीम','#f2f6ef','#1e7a56'],
@@ -262,9 +301,21 @@ R.more=async function(){
   ];
   const thCards='<div class="th-grid" id="thGrid">'+TH_LIST.map(t=>'<button type="button" class="th-card'+(p.theme===t[0]?' on':'')+'" data-th="'+t[0]+'"><span class="th-dot" style="background:'+t[3]+'"><i style="background:'+t[4]+'"></i></span><div><b>'+t[1]+'</b><span>'+t[2]+'</span></div></button>').join('')+'</div>';
 
-  const rec=ZD.RECITERS.map(r=>'<option value="'+r[0]+'"'+(r[0]===p.reciter?' selected':'')+'>'+esc(r[1])+'</option>').join('');
-  view().innerHTML=top('More','Settings, offline library & backup')+'<main id="moreRoot">'+
-  '<section class="block card"><h2 class="h2">'+esc(tr('Appearance'))+'</h2>'+
+  const rec=ZD.RECITERS.map(r=>'<option value="'+esc(r[0])+'"'+(r[0]===p.reciter?' selected':'')+'>'+esc(r[1])+'</option>').join('');
+  view().innerHTML=top('Settings','Quran Script, Language, Theme & Offline')+'<main id="moreRoot">'+
+  '<section class="block card"><h2 class="h2">FONT STYLE · QURAN SCRIPT</h2>'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+  '<button type="button" class="card" id="scIndo" style="text-align:left;cursor:pointer;border:2px solid '+(p.scriptStyle==='indo-pak'?'#2e8b57':'transparent')+'">'+
+  '<div style="display:flex;justify-content:space-between;align-items:center"><b>Indo-Pak</b><span>'+(p.scriptStyle==='indo-pak'?'✓':'')+'</span></div>'+
+  '<div class="muted small" style="color:#2e8b57">'+(p.scriptStyle==='indo-pak'?'Applied':'Tap to use')+'</div>'+
+  '<div class="ar" lang="ar" style="font-size:20px;margin-top:8px">الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ</div></button>'+
+  '<button type="button" class="card" id="scUsmani" style="text-align:left;cursor:pointer;border:2px solid '+(p.scriptStyle==='usmani'?'#2e8b57':'transparent')+'">'+
+  '<div style="display:flex;justify-content:space-between;align-items:center"><b>Usmani</b><span>'+(p.scriptStyle==='usmani'?'✓':'')+'</span></div>'+
+  '<div class="muted small" style="color:#2e8b57">'+(p.scriptStyle==='usmani'?'Applied':'Tap to use')+'</div>'+
+  '<div class="ar" lang="ar" style="font-size:20px;margin-top:8px">ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ</div></button></div></section>'+
+  '<section class="block card"><h2 class="h2">GENERAL</h2>'+
+   '<div class="field"><label>Vibrate<span class="muted small" style="display:block">On Page Swipe</span></label><button class="switch" id="sVib" role="switch" aria-checked="'+p.swipeVibrate+'" aria-label="Vibrate on page swipe"></button></div>'+
+   '<div class="field"><label>Vertical Scroll<span class="muted small" style="display:block">Scroll Page Vertically</span></label><button class="switch" id="sVScroll" role="switch" aria-checked="'+p.verticalScroll+'" aria-label="Vertical scroll"></button></div>'+
    (ZD.i18n?'<div class="field"><label for="sLang">'+esc(tr('App Language'))+'</label><select id="sLang" style="max-width:58%">'+ZD.i18n.optionsHTML()+'</select></div>':'')+
    '<div class="field"><label for="sTh">'+esc(tr('Theme'))+'</label><select id="sTh"><option value="cream-green">Creamy Green</option><option value="cream-yellow">Cream Yellowish</option><option value="brown-white">Brown &amp; White</option><option value="dark-brown">Dark Brown</option><option value="bw">Black &amp; White</option><option value="night">Royal Night (Blue)</option><option value="milk">Milk (White)</option></select></div>'+
    thCards+'<div class="field"><label for="sBgMot">✨</label><input type="checkbox" id="sBgMot"'+(p.bgMotion!==false?' checked':'')+'></div>'+'<div class="field"><label for="sGlowMot">🌈</label><input type="checkbox" id="sGlowMot"'+(p.glowMotion!==false?' checked':'')+'></div>'+'<div class="field"><label for="sIntro">'+esc(tr('Opening intro'))+'</label><select id="sIntro"><option value="always">always</option><option value="daily">daily</option><option value="never">never</option></select></div>'+
@@ -282,8 +333,15 @@ R.more=async function(){
   '<section class="block card"><h2 class="h2">'+esc(tr('Offline library'))+'</h2><p class="muted small" id="offInfo"></p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="offAll">'+icon('down')+' 114</button><button class="btn sm ghost" id="offClr">✕</button></div><div class="bar" style="margin-top:10px" hidden id="offBar"><i style="width:0"></i></div><div id="audList" style="margin-top:12px"></div><p class="muted small" id="offStor"></p></section>'+
   (deferred?'<section class="block"><button class="btn" data-act="install" style="width:100%">Zikr Deen</button></section>':'')+
   '<section class="block card"><h2 class="h2">'+esc(tr('Backup'))+'</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" id="bkOut">'+esc(tr('Backup'))+'</button><button class="btn sm ghost" id="bkIn">'+esc(tr('Continue'))+'</button><button class="btn sm ghost" id="bkReset">✕</button></div><input type="file" id="bkFile" accept="application/json,.json" hidden></section>'+
-  '<section class="block card"><h2 class="h2">'+esc(tr('About'))+'</h2><p class="small">Zikr Deen · <a href="journey.html">'+esc(tr('30-day journey'))+'</a></p><p class="small"><a href="https://www.instagram.com/zikr.deen_/" target="_blank" rel="noopener noreferrer">@zikr.deen_</a></p></section></main>';
+  '<section class="block card"><h2 class="h2">OTHER</h2>'+
+  '<p class="small"><a href="journey.html">30-day journey</a></p>'+
+  '<p class="small"><a href="https://www.instagram.com/zikr.deen_/" target="_blank" rel="noopener noreferrer">Feedback / Share (@zikr.deen_)</a></p>'+
+  '<p class="muted small">App Version · Zikr Deen</p></section></main>';
   const root=$('#moreRoot');$('#sTh').value=p.theme;const tg=$('#thGrid');if(tg)tg.addEventListener('click',e=>{const b=e.target.closest('[data-th]');if(!b)return;p.theme=b.dataset.th;$('#sTh').value=p.theme;tg.querySelectorAll('.th-card').forEach(x=>x.classList.toggle('on',x===b));ZD.applyPrefs();ZD.save()});$('#sIntro').value=p.intro;$('#sSnd').value=p.introSound;$('#introReplay').addEventListener('click',()=>{try{sessionStorage.setItem('zdReplay','1')}catch(e){}location.reload()});$('#sndTry').addEventListener('click',()=>{if(ZD.sound&&ZD.sound.supported)ZD.sound.preview($('#sSnd').value);else ZD.toast('Try again')});
+  $('#scIndo').addEventListener('click',()=>{p.scriptStyle='indo-pak';ZD.save();R.more()});
+  $('#scUsmani').addEventListener('click',()=>{p.scriptStyle='usmani';ZD.save();R.more()});
+  $('#sVib').addEventListener('click',e=>{const b=e.currentTarget,on=b.getAttribute('aria-checked')!=='true';b.setAttribute('aria-checked',on);p.swipeVibrate=on;ZD.save()});
+  $('#sVScroll').addEventListener('click',e=>{const b=e.currentTarget,on=b.getAttribute('aria-checked')!=='true';b.setAttribute('aria-checked',on);p.verticalScroll=on;ZD.save()});
   root.addEventListener('input',e=>{if(e.target.id==='sAr'){p.arSize=Number(e.target.value);ZD.applyPrefs();ZD.save()}else if(e.target.id==='sTr'){p.trSize=Number(e.target.value);ZD.applyPrefs();ZD.save()}else if(e.target.id==='sGoal'){p.goal=Math.min(100,Math.max(1,Math.round(Number(e.target.value))||3));ZD.save()}});
   root.addEventListener('change',e=>{if(e.target.id==='sBgMot'){p.bgMotion=e.target.checked;ZD.applyPrefs();ZD.save();return}else if(e.target.id==='sGlowMot'){p.glowMotion=e.target.checked;ZD.applyPrefs();ZD.save();return}else if(e.target.id==='sLang'&&ZD.i18n){ZD.i18n.set(e.target.value);return}else if(e.target.id==='sTh'){p.theme=e.target.value;ZD.applyPrefs();ZD.save()}else if(e.target.id==='sRec'){p.reciter=e.target.value;ZD.save();audioList()}else if(e.target.id==='sSnd'){p.introSound=e.target.value;ZD.save()}else if(e.target.id==='sIntro'){p.intro=e.target.value;ZD.save();ZD.toast(e.target.selectedOptions[0].text)}});
   root.addEventListener('click',e=>{const b=e.target.closest('[data-lang]');if(b){const on=b.getAttribute('aria-checked')!=='true';b.setAttribute('aria-checked',on);L[b.dataset.lang]=on;ZD.save()}});
