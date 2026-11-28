@@ -1,0 +1,1069 @@
+name: Build Zikr Deen debug APK
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: zikr-deen-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Select Android source
+        run: |
+          test -f capacitor.config.json || { echo "ERROR: capacitor.config.json not found in repo root"; exit 1; }
+          echo 'PROJECT=.' >> "$GITHUB_ENV"
+
+      - name: Run prayer regression tests
+        run: node tests/prayer.test.cjs
+
+      - name: Verify app assets and JS syntax
+        run: |
+          INTRO_BYTES=$(wc -c < www/intro.html | tr -d ' ')
+          if [ "$INTRO_BYTES" -ne 175997 ]; then
+            echo "ERROR: www/intro.html size mismatch (expected 175997, got $INTRO_BYTES)"
+            exit 1
+          fi
+          for F in prayer.js player.js ui-premium.js qibla.js account.js ar-mode.js classroom.js learning-hub.js whatsapp-config.js whatsapp-hub.js interactive-motion.js visual-academy.js; do
+            test -f "$PROJECT/www/js/$F" || { echo "ERROR: www/js/$F missing"; exit 1; }
+            grep -q "$F" "$PROJECT/www/index.html" || { echo "ERROR: $F not linked in index.html"; exit 1; }
+            node --check "$PROJECT/www/js/$F"
+          done
+          for F in audio-player-ui.js mushaf-slides.js; do
+            if [ -f "$PROJECT/www/js/$F" ]; then
+              grep -q "$F" "$PROJECT/www/index.html" || { echo "ERROR: $F not linked in index.html"; exit 1; }
+              node --check "$PROJECT/www/js/$F"
+            fi
+          done
+          for F in ask-config.js ask.js; do
+            if [ -f "$PROJECT/www/js/$F" ]; then
+              node --check "$PROJECT/www/js/$F"
+            fi
+          done
+          test -f "$PROJECT/www/quiz/index.html" || { echo "ERROR: Quiz (www/quiz) missing"; exit 1; }
+          test -f "$PROJECT/www/quiz/offline-api.js" || { echo "ERROR: quiz offline-api.js missing"; exit 1; }
+          grep -q "quiz/index.html" "$PROJECT/www/js/folders.js" || { echo "ERROR: Quiz card not linked in folders.js"; exit 1; }
+          grep -q "#/whatsapp" "$PROJECT/www/js/folders.js" || { echo "ERROR: WhatsApp AI card not linked in folders.js"; exit 1; }
+          test -f "$PROJECT/www/img/visuals/badge-silsila.webp" || { echo "ERROR: v43 visual assets missing"; exit 1; }
+          echo "All modules, JS syntax, visuals & intro.html verified OK"
+
+      - name: Configure Ask Zikr Deen AI (Proxy-First Secure Mode)
+        env:
+          GEMINI_PROXY_URL: ${{ secrets.GEMINI_PROXY_URL }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const file = process.env.PROJECT + "/www/js/ask-config.js";
+          if (!fs.existsSync(file)) {
+            console.error("ERROR: www/js/ask-config.js missing");
+            process.exit(1);
+          }
+          const src = fs.readFileSync(file, "utf8");
+          const proxy = (process.env.GEMINI_PROXY_URL || "").trim();
+          const key = (process.env.GEMINI_API_KEY || "").replace(/^\s*GEMINI_API_KEY\s*=/, "").replace(/[\s"']/g, "");
+
+          if (proxy) {
+            if (!/^https:\/\/[^\s]+$/.test(proxy)) {
+              console.error("ERROR: GEMINI_PROXY_URL must be a valid https:// URL");
+              process.exit(1);
+            }
+            const rx = /(["']?proxy["']?\s*:\s*)(['"][^'"]*['"]|null)/;
+            if (!rx.test(src)) {
+              console.error("ERROR: proxy field not found in www/js/ask-config.js");
+              process.exit(1);
+            }
+            const next = src.replace(rx, (_, prefix) => prefix + JSON.stringify(proxy));
+            fs.writeFileSync(file, next);
+            console.log("Secure server-side GEMINI_PROXY_URL configured (API key NOT embedded in APK)");
+          } else if (key) {
+            if (!/^[A-Za-z0-9_.\-]{20,}$/.test(key)) {
+              console.error("ERROR: GEMINI_API_KEY looks invalid. Length after cleanup = " + key.length + " (a Gemini key is about 39 chars and starts with AIza). Starts with AIza: " + key.startsWith("AIza"));
+              process.exit(1);
+            }
+            const rx = /(["']?key["']?\s*:\s*)(['"][^'"]*['"]|null)/;
+            if (!rx.test(src)) {
+              console.error("ERROR: key field not found in www/js/ask-config.js");
+              process.exit(1);
+            }
+            const next = src.replace(rx, (_, prefix) => prefix + JSON.stringify(key));
+            fs.writeFileSync(file, next);
+            console.log("TEST MODE: GEMINI_API_KEY embedded in this APK (use only for your own testing)");
+          } else {
+            console.log("::warning::Neither GEMINI_PROXY_URL nor GEMINI_API_KEY is configured");
+          }
+          NODE_EOF
+          node --check "$PROJECT/www/js/ask-config.js"
+
+      - name: Configure Public WhatsApp AI & Community Links (Optional)
+        env:
+          WA_ASSISTANT_NUMBER: ${{ secrets.WA_ASSISTANT_NUMBER }}
+          WA_COMMUNITY_URL: ${{ secrets.WA_COMMUNITY_URL }}
+          WA_COMMUNITY_PAGE_URL: ${{ secrets.WA_COMMUNITY_PAGE_URL }}
+        run: |
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const file = process.env.PROJECT + "/www/js/whatsapp-config.js";
+          if (!fs.existsSync(file)) {
+            console.error("ERROR: www/js/whatsapp-config.js missing");
+            process.exit(1);
+          }
+          let src = fs.readFileSync(file, "utf8");
+          const num = (process.env.WA_ASSISTANT_NUMBER || "").replace(/\D/g, "");
+          const inv = (process.env.WA_COMMUNITY_URL || "").trim();
+          const pg = (process.env.WA_COMMUNITY_PAGE_URL || "").trim();
+          if (num) src = src.replaceAll("__WA_ASSISTANT_NUMBER__", num);
+          if (inv) src = src.replaceAll("__WA_COMMUNITY_URL__", inv);
+          if (pg) src = src.replaceAll("__WA_COMMUNITY_PAGE_URL__", pg);
+          fs.writeFileSync(file, src);
+          console.log("WhatsApp public config -> number:", Boolean(num), "| invite:", Boolean(inv), "| page:", Boolean(pg));
+          NODE_EOF
+          node --check "$PROJECT/www/js/whatsapp-config.js"
+
+      - name: Firebase - check secret and install login plugin
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+          OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON" ]; then
+            echo "WARNING: GOOGLE_SERVICES_JSON secret not set - Google login / stats stay OFF (app works as before)"
+            echo "FIREBASE=off" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          if [ ! -f "$PROJECT/www/js/account.js" ]; then
+            echo "WARNING: account.js not found - Firebase skipped"
+            echo "FIREBASE=off" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          printf '%s' "$GOOGLE_SERVICES_JSON" > "$RUNNER_TEMP/google-services.json"
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const f = process.env.RUNNER_TEMP + "/google-services.json";
+          let j;
+          try { j = JSON.parse(fs.readFileSync(f, "utf8")); }
+          catch (e) { console.error("ERROR: GOOGLE_SERVICES_JSON secret is not valid JSON"); process.exit(1); }
+          const id = j.project_info && j.project_info.project_id;
+          if (!id) { console.error("ERROR: project_id missing in google-services.json"); process.exit(1); }
+          const c = (j.client || []).find(x => x.client_info && x.client_info.android_client_info && x.client_info.android_client_info.package_name === "com.zikrdeen.app");
+          if (!c) { console.error("ERROR: Android app com.zikrdeen.app is not in this google-services.json"); process.exit(1); }
+          const web = (c.oauth_client || []).some(o => o.client_type === 3);
+          console.log("Firebase project:", id, "| Web client (needed for Google login):", web);
+          if (!web) console.log("::warning::No Web client in google-services.json. Add SHA-1 in Firebase, enable Google sign-in, and re-download google-services.json.");
+          fs.writeFileSync(process.env.RUNNER_TEMP + "/fb_project_id.txt", id);
+
+          const cfgPath = process.env.PROJECT + "/www/js/account-config.js";
+          if (!fs.existsSync(cfgPath)) {
+            console.error("ERROR: www/js/account-config.js missing");
+            process.exit(1);
+          }
+          let cfg = fs.readFileSync(cfgPath, "utf8");
+          cfg = cfg.replaceAll("__FIREBASE_PROJECT_ID__", id);
+          const owner = (process.env.OWNER_EMAIL || "").trim();
+          if (owner) {
+            cfg = cfg.replaceAll("__OWNER_EMAIL__", owner);
+          } else {
+            console.log("NOTE: OWNER_EMAIL secret not set - owner dashboard stays hidden");
+          }
+          fs.writeFileSync(cfgPath, cfg);
+          NODE_EOF
+          cd "$PROJECT"
+          node --check www/js/account-config.js
+          npm install --save --no-audit --no-fund --legacy-peer-deps @capacitor-firebase/authentication@6.3.1 firebase@^11.0.0
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const p = "capacitor.config.json";
+          const c = JSON.parse(fs.readFileSync(p, "utf8"));
+          c.plugins = c.plugins || {};
+          c.plugins.FirebaseAuthentication = { skipNativeAuth: false, providers: ["google.com"] };
+          fs.writeFileSync(p, JSON.stringify(c, null, 2));
+          NODE_EOF
+          echo "FIREBASE=on" >> "$GITHUB_ENV"
+          echo "Firebase login plugin installed"
+
+      - name: Install phone voice plugin
+        run: cd "$PROJECT" && npm install --save --no-audit --no-fund --legacy-peer-deps @capacitor-community/text-to-speech@5.1.0
+
+      - name: Setup project
+        run: cd "$PROJECT" && node scripts/setup.js
+
+      - name: Check phone voice plugin is linked
+        run: |
+          test -d "$PROJECT/node_modules/@capacitor-community/text-to-speech" || { echo "ERROR: text-to-speech plugin not installed"; exit 1; }
+          grep -qi "text-to-speech" "$PROJECT/android/capacitor.settings.gradle" || { echo "ERROR: text-to-speech plugin not linked into Android project"; exit 1; }
+          echo "Phone voice plugin OK"
+
+      - name: Apply Android launcher icons
+        run: |
+          RES="$PROJECT/android/app/src/main/res"
+          ICONS=patch_src/android-res; [ -d "$ICONS" ] || ICONS="$PROJECT/android-res"
+          if [ -d "$ICONS" ] && [ -d "$RES" ]; then
+            cp -r "$ICONS"/. "$RES/"
+            echo "Launcher icons replaced"
+          else
+            echo "Icon patch skipped"
+          fi
+
+      - name: Firebase - Android files
+        if: env.FIREBASE == 'on'
+        run: |
+          cp "$RUNNER_TEMP/google-services.json" "$PROJECT/android/app/google-services.json"
+          VG="$PROJECT/android/variables.gradle"
+          grep -q "rgcfaIncludeGoogle" "$VG" || sed -i '0,/ext {/s//ext {\n    rgcfaIncludeGoogle = true/' "$VG"
+          echo "--- variables.gradle ---"
+          cat "$VG"
+          grep -q "rgcfaIncludeGoogle *= *true" "$VG" || { echo "ERROR: could not switch Google sign-in on in variables.gradle"; exit 1; }
+          test -d "$PROJECT/node_modules/@capacitor-firebase/authentication" || { echo "ERROR: Firebase plugin not installed"; exit 1; }
+          grep -q "capacitor-firebase-authentication" "$PROJECT/android/capacitor.settings.gradle" || { echo "ERROR: Firebase plugin not linked into Android project"; exit 1; }
+          grep -q "FirebaseAuthentication" "$PROJECT/android/app/src/main/assets/capacitor.config.json" || { echo "ERROR: plugin config missing in capacitor.config.json"; exit 1; }
+          echo "Firebase files OK"
+
+      - name: Restore optional legacy test signing key
+        env:
+          LEGACY_KEY: ${{ secrets.ZD_LEGACY_DEBUG_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$LEGACY_KEY" ]; then
+            mkdir -p "$PROJECT/native"
+            printf '%s' "$LEGACY_KEY" | tr -d '\r\n ' | base64 --decode > "$PROJECT/native/zikr.keystore"
+            cd "$PROJECT" && node scripts/patch-android.js
+          fi
+
+      - name: Install Native Sleep-Mode Azan Alarm Engine & Android Permissions
+        run: |
+          node << 'NODE_EOF'
+          const fs = require("fs");
+          const path = require("path");
+          const root = process.env.PROJECT;
+          const androidMain = path.join(root, "android", "app", "src", "main");
+          const javaRoot = path.join(androidMain, "java");
+          const rawDir = path.join(androidMain, "res", "raw");
+          const mfPath = path.join(androidMain, "AndroidManifest.xml");
+
+          if (!fs.existsSync(mfPath)) {
+            console.error("ERROR: AndroidManifest.xml not found");
+            process.exit(1);
+          }
+
+          fs.mkdirSync(rawDir, { recursive: true });
+          const rawTarget = path.join(rawDir, "azan.mp3");
+          if (!fs.existsSync(rawTarget) || fs.statSync(rawTarget).size < 1000) {
+            const candidates = [
+              path.join(root, "www", "audio", "azan.mp3"),
+              path.join(root, "www", "audio", "azan-intro.mp3")
+            ];
+            const audioDir = path.join(root, "www", "audio");
+            if (fs.existsSync(audioDir)) {
+              for (const f of fs.readdirSync(audioDir)) {
+                if (/azan.*\.mp3$/i.test(f)) candidates.push(path.join(audioDir, f));
+              }
+            }
+            const found = candidates.find(p => fs.existsSync(p) && fs.statSync(p).size >= 1000);
+            if (!found) {
+              console.error("ERROR: No valid Azan mp3 audio found in www/audio/");
+              process.exit(1);
+            }
+            fs.copyFileSync(found, rawTarget);
+            console.log("Copied native Azan audio:", found, "->", rawTarget);
+          } else {
+            console.log("Native Azan audio already present:", rawTarget);
+          }
+
+          function findMainActivity(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) {
+                const res = findMainActivity(full);
+                if (res) return res;
+              } else if (entry.name === "MainActivity.java") {
+                return full;
+              }
+            }
+            return null;
+          }
+
+          const mainActPath = findMainActivity(javaRoot);
+          if (!mainActPath) {
+            console.error("ERROR: MainActivity.java not found under", javaRoot);
+            process.exit(1);
+          }
+          let mainAct = fs.readFileSync(mainActPath, "utf8");
+          const pkgMatch = mainAct.match(/^\s*package\s+([a-zA-Z0-9_.]+)\s*;/m);
+          const pkg = pkgMatch ? pkgMatch[1] : "com.zikrdeen.app";
+          const azanDir = path.join(path.dirname(mainActPath), "azan");
+          fs.mkdirSync(azanDir, { recursive: true });
+
+          const serviceJava = `package ${pkg}.azan;
+
+          import android.app.Notification;
+          import android.app.NotificationChannel;
+          import android.app.NotificationManager;
+          import android.app.PendingIntent;
+          import android.app.Service;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.pm.ServiceInfo;
+          import android.content.res.AssetFileDescriptor;
+          import android.media.AudioAttributes;
+          import android.media.AudioFocusRequest;
+          import android.media.AudioManager;
+          import android.media.MediaPlayer;
+          import android.media.RingtoneManager;
+          import android.net.Uri;
+          import android.os.Build;
+          import android.os.Handler;
+          import android.os.IBinder;
+          import android.os.Looper;
+          import android.os.PowerManager;
+          import androidx.core.app.NotificationCompat;
+
+          public class AzanPlaybackService extends Service {
+              public static final String CHANNEL_ALARM = "zd_azan_alarm_v2";
+              public static final String EXTRA_TITLE = "title";
+              public static final String EXTRA_BODY = "body";
+              public static final int NOTIF_ID = 49101;
+              private static volatile boolean sPlaying = false;
+
+              private MediaPlayer mediaPlayer;
+              private PowerManager.WakeLock wakeLock;
+              private AudioManager audioManager;
+              private AudioFocusRequest focusRequest;
+              private final Handler handler = new Handler(Looper.getMainLooper());
+              private final Runnable autoStop = this::stopSelf;
+
+              public static boolean isPlaying() {
+                  return sPlaying;
+              }
+
+              @Override
+              public IBinder onBind(Intent intent) {
+                  return null;
+              }
+
+              @Override
+              public int onStartCommand(Intent intent, int flags, int startId) {
+                  String title = intent != null ? intent.getStringExtra(EXTRA_TITLE) : null;
+                  if (title == null || title.isEmpty()) title = "Namaz ka waqt ho gaya";
+                  String body = intent != null ? intent.getStringExtra(EXTRA_BODY) : null;
+                  if (body == null || body.isEmpty()) body = "Zikr Deen · Azan Alarm";
+
+                  ensureChannel();
+                  Notification notif = buildNotification(title, body);
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                      startForeground(NOTIF_ID, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                  } else {
+                      startForeground(NOTIF_ID, notif);
+                  }
+
+                  acquireWakeLock();
+                  AzanAlarmReceiver.releaseHandoffLock();
+                  startAudio();
+                  return START_NOT_STICKY;
+              }
+
+              private void ensureChannel() {
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                      NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                      if (nm == null) return;
+                      NotificationChannel ch = new NotificationChannel(CHANNEL_ALARM, "Azan Alarm", NotificationManager.IMPORTANCE_HIGH);
+                      ch.setDescription("Sleep mode Azan alarm playback");
+                      ch.setSound(null, null);
+                      ch.enableVibration(true);
+                      ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+                      ch.setBypassDnd(true);
+                      nm.createNotificationChannel(ch);
+                  }
+              }
+
+              private Notification buildNotification(String title, String body) {
+                  int piFlags = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0);
+                  Intent openIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
+                  if (openIntent == null) openIntent = new Intent();
+                  openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                  PendingIntent openPi = PendingIntent.getActivity(this, 49102, openIntent, piFlags);
+
+                  Intent stopIntent = new Intent(this, AzanAlarmReceiver.class);
+                  stopIntent.setAction(AzanAlarmReceiver.ACTION_STOP_AZAN);
+                  PendingIntent stopPi = PendingIntent.getBroadcast(this, 49103, stopIntent, piFlags);
+
+                  int iconId = getResources().getIdentifier("ic_launcher", "mipmap", getPackageName());
+                  if (iconId == 0) iconId = android.R.drawable.ic_lock_idle_alarm;
+
+                  return new NotificationCompat.Builder(this, CHANNEL_ALARM)
+                      .setSmallIcon(iconId)
+                      .setContentTitle(title)
+                      .setContentText(body)
+                      .setPriority(NotificationCompat.PRIORITY_MAX)
+                      .setCategory(NotificationCompat.CATEGORY_ALARM)
+                      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                      .setOngoing(true)
+                      .setAutoCancel(false)
+                      .setSilent(true)
+                      .setContentIntent(openPi)
+                      .addAction(android.R.drawable.ic_media_pause, "Azan Rokein", stopPi)
+                      .build();
+              }
+
+              private void acquireWakeLock() {
+                  try {
+                      if (wakeLock == null) {
+                          PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                          if (pm != null) {
+                              wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getPackageName() + ":AzanPlaybackLock");
+                              wakeLock.setReferenceCounted(false);
+                          }
+                      }
+                      if (wakeLock != null) {
+                          wakeLock.acquire(310000L);
+                      }
+                  } catch (Exception ignored) {
+                  }
+              }
+
+              private void releaseWakeLock() {
+                  try {
+                      if (wakeLock != null && wakeLock.isHeld()) {
+                          wakeLock.release();
+                      }
+                  } catch (Exception ignored) {
+                  }
+              }
+
+              private void requestAudioFocus(AudioAttributes attrs) {
+                  try {
+                      audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                      if (audioManager == null) return;
+                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                          focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+                              .setAudioAttributes(attrs)
+                              .setAcceptsDelayedFocusGain(false)
+                              .build();
+                          audioManager.requestAudioFocus(focusRequest);
+                      } else {
+                          audioManager.requestAudioFocus(null, AudioManager.STREAM_ALARM, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE);
+                      }
+                  } catch (Exception ignored) {
+                  }
+              }
+
+              private void abandonAudioFocus() {
+                  try {
+                      if (audioManager == null) return;
+                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && focusRequest != null) {
+                          audioManager.abandonAudioFocusRequest(focusRequest);
+                          focusRequest = null;
+                      } else {
+                          audioManager.abandonAudioFocus(null);
+                      }
+                  } catch (Exception ignored) {
+                  }
+              }
+
+              private void releasePlayer() {
+                  sPlaying = false;
+                  if (mediaPlayer != null) {
+                      try {
+                          if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+                      } catch (Exception ignored) {
+                      }
+                      try {
+                          mediaPlayer.reset();
+                          mediaPlayer.release();
+                      } catch (Exception ignored) {
+                      }
+                      mediaPlayer = null;
+                  }
+              }
+
+              private void startAudio() {
+                  releasePlayer();
+                  handler.removeCallbacks(autoStop);
+                  handler.postDelayed(autoStop, 300000L);
+
+                  try {
+                      AudioAttributes attrs = new AudioAttributes.Builder()
+                          .setUsage(AudioAttributes.USAGE_ALARM)
+                          .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                          .build();
+                      requestAudioFocus(attrs);
+
+                      MediaPlayer mp = new MediaPlayer();
+                      mediaPlayer = mp;
+                      mp.setAudioAttributes(attrs);
+                      mp.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+                      mp.setLooping(false);
+                      mp.setVolume(1.0f, 1.0f);
+
+                      int resId = getResources().getIdentifier("azan", "raw", getPackageName());
+                      if (resId != 0) {
+                          AssetFileDescriptor afd = getResources().openRawResourceFd(resId);
+                          if (afd != null) {
+                              try {
+                                  mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                              } finally {
+                                  afd.close();
+                              }
+                          } else {
+                              Uri fallback = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                              mp.setDataSource(this, fallback);
+                          }
+                      } else {
+                          Uri fallback = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                          mp.setDataSource(this, fallback);
+                      }
+
+                      mp.setOnCompletionListener(player -> stopSelf());
+                      mp.setOnErrorListener((player, what, extra) -> {
+                          stopSelf();
+                          return true;
+                      });
+                      mp.prepare();
+                      mp.start();
+                      sPlaying = true;
+                  } catch (Exception e) {
+                      stopSelf();
+                  }
+              }
+
+              @Override
+              public void onDestroy() {
+                  handler.removeCallbacks(autoStop);
+                  releasePlayer();
+                  abandonAudioFocus();
+                  releaseWakeLock();
+                  try {
+                      stopForeground(true);
+                  } catch (Exception ignored) {
+                  }
+                  super.onDestroy();
+              }
+          }
+          `;
+
+          const receiverJava = `package ${pkg}.azan;
+
+          import android.app.AlarmManager;
+          import android.app.Notification;
+          import android.app.NotificationChannel;
+          import android.app.NotificationManager;
+          import android.app.PendingIntent;
+          import android.content.BroadcastReceiver;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.media.RingtoneManager;
+          import android.os.Build;
+          import android.os.PowerManager;
+          import androidx.core.app.NotificationCompat;
+          import androidx.core.content.ContextCompat;
+          import org.json.JSONArray;
+          import org.json.JSONObject;
+
+          public class AzanAlarmReceiver extends BroadcastReceiver {
+              public static final String PREFS = "zd_azan_alarms_v2";
+              public static final String KEY_LIST = "alarms_json";
+              public static final String ACTION_TRIGGER = "${pkg}.ACTION_AZAN_TRIGGER";
+              public static final String ACTION_STOP_AZAN = "${pkg}.ACTION_STOP_AZAN";
+              public static final String CHANNEL_REMINDER = "zd_prayer_reminder_v2";
+              private static PowerManager.WakeLock handoffLock;
+
+              public static synchronized void acquireHandoffLock(Context ctx) {
+                  try {
+                      if (handoffLock == null) {
+                          PowerManager pm = (PowerManager) ctx.getApplicationContext().getSystemService(Context.POWER_SERVICE);
+                          if (pm != null) {
+                              handoffLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, ctx.getPackageName() + ":AzanHandoffLock");
+                              handoffLock.setReferenceCounted(false);
+                          }
+                      }
+                      if (handoffLock != null) {
+                          handoffLock.acquire(15000L);
+                      }
+                  } catch (Exception ignored) {
+                  }
+              }
+
+              public static synchronized void releaseHandoffLock() {
+                  try {
+                      if (handoffLock != null && handoffLock.isHeld()) {
+                          handoffLock.release();
+                      }
+                  } catch (Exception ignored) {
+                  }
+              }
+
+              @Override
+              public void onReceive(Context context, Intent intent) {
+                  String action = intent != null ? intent.getAction() : null;
+                  if (ACTION_STOP_AZAN.equals(action)) {
+                      try {
+                          context.stopService(new Intent(context, AzanPlaybackService.class));
+                      } catch (Exception ignored) {
+                      }
+                      NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                      if (nm != null) nm.cancel(AzanPlaybackService.NOTIF_ID);
+                      releaseHandoffLock();
+                      return;
+                  }
+
+                  if (Intent.ACTION_BOOT_COMPLETED.equals(action)
+                      || "android.intent.action.LOCKED_BOOT_COMPLETED".equals(action)
+                      || Intent.ACTION_TIME_CHANGED.equals(action)
+                      || Intent.ACTION_TIMEZONE_CHANGED.equals(action)
+                      || Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)
+                      || "android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED".equals(action)) {
+                      rescheduleSaved(context);
+                      return;
+                  }
+
+                  boolean playAzan = intent == null || intent.getBooleanExtra("azan", true);
+                  String title = intent != null ? intent.getStringExtra("title") : null;
+                  String body = intent != null ? intent.getStringExtra("body") : null;
+                  int id = intent != null ? intent.getIntExtra("id", 49110) : 49110;
+                  if (title == null || title.isEmpty()) title = "Namaz ka waqt ho gaya";
+                  if (body == null || body.isEmpty()) body = "Zikr Deen";
+
+                  if (playAzan) {
+                      acquireHandoffLock(context);
+                      Intent svc = new Intent(context, AzanPlaybackService.class);
+                      svc.putExtra(AzanPlaybackService.EXTRA_TITLE, title);
+                      svc.putExtra(AzanPlaybackService.EXTRA_BODY, body);
+                      try {
+                          ContextCompat.startForegroundService(context, svc);
+                      } catch (Exception e) {
+                          releaseHandoffLock();
+                          showReminderNotification(context, id, title, body);
+                      }
+                  } else {
+                      showReminderNotification(context, id, title, body);
+                  }
+              }
+
+              public static void showReminderNotification(Context context, int id, String title, String body) {
+                  NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+                  if (nm == null) return;
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                      NotificationChannel ch = new NotificationChannel(CHANNEL_REMINDER, "Namaz Reminder", NotificationManager.IMPORTANCE_HIGH);
+                      ch.setDescription("Namaz reminder notification");
+                      ch.enableVibration(true);
+                      ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+                      nm.createNotificationChannel(ch);
+                  }
+                  int piFlags = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0);
+                  Intent openIntent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+                  if (openIntent == null) openIntent = new Intent();
+                  openIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                  PendingIntent openPi = PendingIntent.getActivity(context, id + 10000, openIntent, piFlags);
+
+                  int iconId = context.getResources().getIdentifier("ic_launcher", "mipmap", context.getPackageName());
+                  if (iconId == 0) iconId = android.R.drawable.ic_lock_idle_alarm;
+
+                  Notification n = new NotificationCompat.Builder(context, CHANNEL_REMINDER)
+                      .setSmallIcon(iconId)
+                      .setContentTitle(title)
+                      .setContentText(body)
+                      .setPriority(NotificationCompat.PRIORITY_HIGH)
+                      .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                      .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                      .setAutoCancel(true)
+                      .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                      .setContentIntent(openPi)
+                      .build();
+                  nm.notify(id, n);
+              }
+
+              public static boolean canScheduleExact(Context context) {
+                  AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                  if (am == null) return false;
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                      return am.canScheduleExactAlarms();
+                  }
+                  return true;
+              }
+
+              public static void scheduleOne(Context context, int id, long timeMs, String title, String body, boolean azan) {
+                  AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                  if (am == null || timeMs <= System.currentTimeMillis() + 1000L) return;
+
+                  int piFlags = PendingIntent.FLAG_UPDATE_CURRENT | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0);
+                  Intent trg = new Intent(context, AzanAlarmReceiver.class);
+                  trg.setAction(ACTION_TRIGGER);
+                  trg.putExtra("id", id);
+                  trg.putExtra("title", title);
+                  trg.putExtra("body", body);
+                  trg.putExtra("azan", azan);
+                  PendingIntent op = PendingIntent.getBroadcast(context, id, trg, piFlags);
+
+                  Intent show = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+                  if (show == null) show = new Intent();
+                  PendingIntent showPi = PendingIntent.getActivity(context, id + 20000, show, piFlags);
+
+                  if (canScheduleExact(context)) {
+                      try {
+                          AlarmManager.AlarmClockInfo info = new AlarmManager.AlarmClockInfo(timeMs, showPi);
+                          am.setAlarmClock(info, op);
+                          return;
+                      } catch (SecurityException ignored) {
+                      }
+                  }
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                      am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, timeMs, op);
+                  } else {
+                      am.set(AlarmManager.RTC_WAKEUP, timeMs, op);
+                  }
+              }
+
+              public static void cancelOne(Context context, int id) {
+                  AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+                  if (am == null) return;
+                  int piFlags = PendingIntent.FLAG_NO_CREATE | (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0);
+                  Intent trg = new Intent(context, AzanAlarmReceiver.class);
+                  trg.setAction(ACTION_TRIGGER);
+                  PendingIntent op = PendingIntent.getBroadcast(context, id, trg, piFlags);
+                  if (op != null) {
+                      am.cancel(op);
+                      op.cancel();
+                  }
+              }
+
+              public static void cancelAll(Context context) {
+                  SharedPreferences sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+                  String raw = sp.getString(KEY_LIST, "[]");
+                  try {
+                      JSONArray arr = new JSONArray(raw);
+                      for (int i = 0; i < arr.length(); i++) {
+                          JSONObject o = arr.optJSONObject(i);
+                          if (o != null) cancelOne(context, o.optInt("id", i + 1));
+                      }
+                  } catch (Exception ignored) {
+                  }
+                  cancelOne(context, 9999);
+                  sp.edit().putString(KEY_LIST, "[]").apply();
+              }
+
+              public static void rescheduleSaved(Context context) {
+                  SharedPreferences sp = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+                  String raw = sp.getString(KEY_LIST, "[]");
+                  long now = System.currentTimeMillis();
+                  try {
+                      JSONArray arr = new JSONArray(raw);
+                      for (int i = 0; i < arr.length(); i++) {
+                          JSONObject o = arr.optJSONObject(i);
+                          if (o == null) continue;
+                          long t = o.optLong("timeMs", 0L);
+                          if (t <= now + 1000L) continue;
+                          scheduleOne(
+                              context,
+                              o.optInt("id", i + 1),
+                              t,
+                              o.optString("title", "Namaz ka waqt ho gaya"),
+                              o.optString("body", "Zikr Deen"),
+                              o.optBoolean("azan", true)
+                          );
+                      }
+                  } catch (Exception ignored) {
+                  }
+              }
+          }
+          `;
+
+          const pluginJava = `package ${pkg}.azan;
+
+          import android.app.NotificationManager;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.net.Uri;
+          import android.os.Build;
+          import android.os.PowerManager;
+          import android.provider.Settings;
+          import com.getcapacitor.JSArray;
+          import com.getcapacitor.JSObject;
+          import com.getcapacitor.Plugin;
+          import com.getcapacitor.PluginCall;
+          import com.getcapacitor.PluginMethod;
+          import com.getcapacitor.annotation.CapacitorPlugin;
+          import org.json.JSONArray;
+          import org.json.JSONObject;
+
+          @CapacitorPlugin(name = "AzanAlarm")
+          public class AzanAlarmPlugin extends Plugin {
+
+              @PluginMethod
+              public void schedule(PluginCall call) {
+                  Context ctx = getContext();
+                  AzanAlarmReceiver.cancelAll(ctx);
+                  JSArray arr = call.getArray("alarms");
+                  JSONArray saved = new JSONArray();
+                  int count = 0;
+                  long now = System.currentTimeMillis();
+                  if (arr != null) {
+                      for (int i = 0; i < arr.length(); i++) {
+                          JSONObject o = arr.optJSONObject(i);
+                          if (o == null) continue;
+                          int id = o.optInt("id", i + 1);
+                          long timeMs = o.optLong("timeMs", 0L);
+                          if (timeMs <= now + 1000L) continue;
+                          String title = o.optString("title", "Namaz ka waqt ho gaya");
+                          String body = o.optString("body", "Zikr Deen");
+                          boolean azan = o.optBoolean("azan", true);
+                          AzanAlarmReceiver.scheduleOne(ctx, id, timeMs, title, body, azan);
+                          saved.put(o);
+                          count++;
+                      }
+                  }
+                  SharedPreferences sp = ctx.getSharedPreferences(AzanAlarmReceiver.PREFS, Context.MODE_PRIVATE);
+                  sp.edit().putString(AzanAlarmReceiver.KEY_LIST, saved.toString()).apply();
+
+                  JSObject ret = new JSObject();
+                  ret.put("scheduled", count);
+                  ret.put("exactAllowed", AzanAlarmReceiver.canScheduleExact(ctx));
+                  call.resolve(ret);
+              }
+
+              @PluginMethod
+              public void cancelAll(PluginCall call) {
+                  AzanAlarmReceiver.cancelAll(getContext());
+                  JSObject ret = new JSObject();
+                  ret.put("cancelled", true);
+                  call.resolve(ret);
+              }
+
+              @PluginMethod
+              public void stopAzan(PluginCall call) {
+                  Context ctx = getContext();
+                  try {
+                      ctx.stopService(new Intent(ctx, AzanPlaybackService.class));
+                  } catch (Exception ignored) {
+                  }
+                  NotificationManager nm = (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+                  if (nm != null) nm.cancel(AzanPlaybackService.NOTIF_ID);
+                  JSObject ret = new JSObject();
+                  ret.put("stopped", true);
+                  call.resolve(ret);
+              }
+
+              @PluginMethod
+              public void testAlarm(PluginCall call) {
+                  Context ctx = getContext();
+                  Integer delayObj = call.getInt("delayMs", 10000);
+                  long delayMs = delayObj != null ? Math.max(2000L, delayObj.longValue()) : 10000L;
+                  Boolean azanObj = call.getBoolean("azan", true);
+                  boolean azan = azanObj == null || azanObj;
+                  String title = call.getString("title", "Test: Azan Alarm");
+                  String body = call.getString("body", "Phone sleep mode par bhi azan bajegi");
+                  long triggerAt = System.currentTimeMillis() + delayMs;
+                  AzanAlarmReceiver.scheduleOne(ctx, 9999, triggerAt, title, body, azan);
+
+                  JSObject ret = new JSObject();
+                  ret.put("scheduled", true);
+                  ret.put("triggerAt", triggerAt);
+                  ret.put("exactAllowed", AzanAlarmReceiver.canScheduleExact(ctx));
+                  call.resolve(ret);
+              }
+
+              @PluginMethod
+              public void checkStatus(PluginCall call) {
+                  Context ctx = getContext();
+                  String pkgName = ctx.getPackageName();
+                  boolean exact = AzanAlarmReceiver.canScheduleExact(ctx);
+                  boolean batteryIgnored = true;
+                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                      PowerManager pm = (PowerManager) ctx.getSystemService(Context.POWER_SERVICE);
+                      batteryIgnored = pm != null && pm.isIgnoringBatteryOptimizations(pkgName);
+                  }
+                  boolean hasAudio = ctx.getResources().getIdentifier("azan", "raw", pkgName) != 0;
+
+                  JSObject ret = new JSObject();
+                  ret.put("exactAllowed", exact);
+                  ret.put("batteryIgnored", batteryIgnored);
+                  ret.put("hasAzanAudio", hasAudio);
+                  ret.put("playing", AzanPlaybackService.isPlaying());
+                  call.resolve(ret);
+              }
+
+              @PluginMethod
+              public void openExactAlarmSettings(PluginCall call) {
+                  Context ctx = getContext();
+                  try {
+                      Intent i = new Intent("android.settings.REQUEST_SCHEDULE_EXACT_ALARM", Uri.parse("package:" + ctx.getPackageName()));
+                      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                      ctx.startActivity(i);
+                  } catch (Exception e) {
+                      openAppDetails(ctx);
+                  }
+                  call.resolve();
+              }
+
+              @PluginMethod
+              public void openBatterySettings(PluginCall call) {
+                  Context ctx = getContext();
+                  try {
+                      Intent i = new Intent("android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS", Uri.parse("package:" + ctx.getPackageName()));
+                      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                      ctx.startActivity(i);
+                  } catch (Exception e) {
+                      try {
+                          Intent i2 = new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+                          i2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                          ctx.startActivity(i2);
+                      } catch (Exception e2) {
+                          openAppDetails(ctx);
+                      }
+                  }
+                  call.resolve();
+              }
+
+              private void openAppDetails(Context ctx) {
+                  try {
+                      Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + ctx.getPackageName()));
+                      i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                      ctx.startActivity(i);
+                  } catch (Exception ignored) {
+                  }
+              }
+          }
+          `;
+
+          fs.writeFileSync(path.join(azanDir, "AzanPlaybackService.java"), serviceJava);
+          fs.writeFileSync(path.join(azanDir, "AzanAlarmReceiver.java"), receiverJava);
+          fs.writeFileSync(path.join(azanDir, "AzanAlarmPlugin.java"), pluginJava);
+
+          if (!mainAct.includes("AzanAlarmPlugin.class")) {
+            if (!mainAct.includes("import android.os.Bundle;")) {
+              mainAct = mainAct.replace(/(^\s*package\s+[^;]+;\s*)/m, "$1\nimport android.os.Bundle;\n");
+            }
+            if (!mainAct.includes(`import ${pkg}.azan.AzanAlarmPlugin;`)) {
+              mainAct = mainAct.replace(/(^\s*package\s+[^;]+;\s*)/m, `$1\nimport ${pkg}.azan.AzanAlarmPlugin;\n`);
+            }
+            if (/super\.onCreate\s*\(/.test(mainAct)) {
+              mainAct = mainAct.replace(/super\.onCreate\s*\(/, "registerPlugin(AzanAlarmPlugin.class);\n        super.onCreate(");
+            } else {
+              const lastBrace = mainAct.lastIndexOf("}");
+              if (lastBrace === -1) {
+                console.error("ERROR: Invalid MainActivity.java structure");
+                process.exit(1);
+              }
+              const method = "\n    @Override\n    public void onCreate(Bundle savedInstanceState) {\n        registerPlugin(AzanAlarmPlugin.class);\n        super.onCreate(savedInstanceState);\n    }\n";
+              mainAct = mainAct.slice(0, lastBrace) + method + mainAct.slice(lastBrace);
+            }
+            fs.writeFileSync(mainActPath, mainAct);
+          }
+
+          let xml = fs.readFileSync(mfPath, "utf8");
+          const perms = [
+            "INTERNET",
+            "CAMERA",
+            "RECORD_AUDIO",
+            "MODIFY_AUDIO_SETTINGS",
+            "ACCESS_COARSE_LOCATION",
+            "ACCESS_FINE_LOCATION",
+            "POST_NOTIFICATIONS",
+            "SCHEDULE_EXACT_ALARM",
+            "USE_EXACT_ALARM",
+            "WAKE_LOCK",
+            "VIBRATE",
+            "RECEIVE_BOOT_COMPLETED",
+            "FOREGROUND_SERVICE",
+            "FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+            "REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"
+          ];
+          const toAdd = [];
+          for (const p of perms) {
+            if (!xml.includes("android.permission." + p)) {
+              toAdd.push(`    <uses-permission android:name="android.permission.${p}" />`);
+            }
+          }
+          if (toAdd.length) {
+            const rx = /^([ \t]*<application\b)/m;
+            if (!rx.test(xml)) {
+              console.error("ERROR: <application> tag not found in AndroidManifest.xml");
+              process.exit(1);
+            }
+            xml = xml.replace(rx, toAdd.join("\n") + "\n$1");
+          }
+
+          if (!xml.includes("AzanAlarmReceiver")) {
+            const compXml = `
+              <receiver
+                  android:name="${pkg}.azan.AzanAlarmReceiver"
+                  android:enabled="true"
+                  android:exported="false">
+                  <intent-filter>
+                      <action android:name="android.intent.action.BOOT_COMPLETED" />
+                      <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                      <action android:name="android.intent.action.TIME_SET" />
+                      <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                      <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                      <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+                  </intent-filter>
+              </receiver>
+              <service
+                  android:name="${pkg}.azan.AzanPlaybackService"
+                  android:enabled="true"
+                  android:exported="false"
+                  android:foregroundServiceType="mediaPlayback" />
+          `;
+            xml = xml.replace(/<\/application>/, compXml + "\n</application>");
+          }
+
+          fs.writeFileSync(mfPath, xml);
+          console.log("Native Sleep-Mode Azan Alarm Engine installed for package:", pkg);
+          NODE_EOF
+
+      - name: Build debug APK
+        run: cd "$PROJECT/android" && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Verify permissions, Azan audio & Firebase inside the built APK
+        run: |
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          AAPT=$(ls -1 "$SDK"/build-tools/*/aapt2 2>/dev/null | sort -V | tail -1)
+          if [ -z "$AAPT" ] || [ ! -x "$AAPT" ]; then
+            echo "ERROR: aapt2 not found under Android SDK ($SDK)"
+            exit 1
+          fi
+          APK="$PROJECT/android/app/build/outputs/apk/debug/app-debug.apk"
+          test -f "$APK" || { echo "ERROR: APK not found at $APK"; exit 1; }
+          OUT="$("$AAPT" dump permissions "$APK")"
+          echo "$OUT"
+          for REQ in INTERNET CAMERA RECORD_AUDIO MODIFY_AUDIO_SETTINGS ACCESS_FINE_LOCATION POST_NOTIFICATIONS SCHEDULE_EXACT_ALARM WAKE_LOCK FOREGROUND_SERVICE RECEIVE_BOOT_COMPLETED; do
+            echo "$OUT" | grep -q "$REQ" || { echo "ERROR: $REQ permission is NOT inside the APK"; exit 1; }
+          done
+          unzip -l "$APK" | grep -q "res/raw/azan" || { echo "ERROR: res/raw/azan audio is NOT inside the APK"; exit 1; }
+          echo "Native Azan audio and all alarm permissions verified inside APK"
+          if [ "$FIREBASE" = "on" ]; then
+            if "$AAPT" dump resources "$APK" | grep -q "default_web_client_id"; then
+              echo "Firebase Google login config is inside the APK"
+            else
+              echo "::warning::default_web_client_id missing in the APK - Google login will NOT work. Re-download google-services.json after adding SHA-1 and enabling Google sign-in."
+            fi
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zikr-Deen-v47-debug-APK
+          path: ${{ env.PROJECT }}/android/app/build/outputs/apk/debug/app-debug.apk
