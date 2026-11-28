@@ -11,6 +11,33 @@ const BOOKS=[
 const bk=id=>BOOKS.find(b=>b[0]===id);
 const REF_BOOKS={bukhari:'Sahih al-Bukhari',muslim:'Sahih Muslim',tirmidhi:'Jami at-Tirmidhi',abudawud:'Sunan Abi Dawud',nasai:"Sunan an-Nasa'i",ibnmajah:'Sunan Ibn Majah'};
 const refBook=id=>REF_BOOKS[id]||((bk(id)||[])[1]||'Hadith collection');
+
+const SVG_SPEAKER='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2.5 9 2.5 15 6 15 11 19 11 5"/><path d="M15.2 8.8a5 5 0 0 1 0 6.4"/><path d="M18.4 5.8a9.2 9.2 0 0 1 0 12.4"/></svg>';
+const SVG_STOP='<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>';
+function spIcon(k){
+  if(window.ZDVoice&&window.ZDVoice.icons&&window.ZDVoice.icons[k])return window.ZDVoice.icons[k];
+  return k==='stop'?SVG_STOP:SVG_SPEAKER;
+}
+function sayHadithText(txt,lang){
+  if(!txt)return;
+  if(window.ZDVoice&&typeof window.ZDVoice.speak==='function'){
+    window.ZDVoice.speak(txt,{lang:lang==='hi'?'hinglish':lang,mode:'hadith'});
+    return;
+  }
+  try{
+    if('speechSynthesis' in window){
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(txt);
+      u.lang=lang==='ur'?'ur-PK':'hi-IN';
+      speechSynthesis.speak(u);
+    }
+  }catch(_){}
+}
+function stopHadithVoice(){
+  try{if(window.ZDVoice&&typeof window.ZDVoice.stop==='function')window.ZDVoice.stop()}catch(_){}
+  try{if('speechSynthesis' in window)speechSynthesis.cancel()}catch(_){}
+}
+
 function refKey(value){
   let s=String(value==null?'':value).trim().toLowerCase().replace(/\s+/g,'');
   if(!s)return'';
@@ -135,6 +162,7 @@ document.addEventListener('zikr:languagechange',e=>{
   const nextAppLang=(e&&e.detail&&e.detail.language)||appLangCode();
   try{localStorage.setItem(LK,mapAppLangToHadithTab(nextAppLang))}catch(_){}
 });
+window.addEventListener('hashchange',stopHadithVoice);
 
 const LANGS=[['hi','Hinglish'],['ur','Urdu'],['en','English']];
 const seg=cur=>'<div class="seg" id="hdSeg" role="tablist">'+LANGS.map(([k,l])=>'<button role="tab" aria-selected="'+(k===cur)+'" data-k="'+k+'">'+l+'</button>').join('')+'</div>';
@@ -162,6 +190,19 @@ async function runDl(id){
   catch(e){console.error(e);const b=$('#dl_'+id);if(b)b.innerHTML='<span class="hd-err">!</span> <button class="btn sm" data-dl="'+id+'">'+esc(tr('Try again'))+'</button>';return false}
 }
 document.addEventListener('click',async e=>{
+  const sp=e.target.closest('[data-hsay]');
+  if(sp){
+    const x=CUR[sp.dataset.hsay];
+    const txt=x?(x.hi||x.ur||x.en||''):'';
+    if(txt){sayHadithText(txt,getLang());try{ZD.toast('Hadith Gemini voice mein sunai ja rahi hai…')}catch(_){}}
+    return;
+  }
+  const stp=e.target.closest('[data-hstop]');
+  if(stp){stopHadithVoice();return}
+  const c=e.target.closest('[data-hcp]');if(c){const x=CUR[c.dataset.hcp];if(x)ZD.copy(x.ar+'\n\n'+(x.hi||x.en||'')+'\n\n— '+(x.ref||'Reference unverified')+(x.inBook?' · '+x.inBook:'')+' · Zikr Deen App');return}
+  const a=e.target.closest('[data-hai]');if(a){const x=CUR[a.dataset.hai];if(x){try{sessionStorage.setItem('zdAskPre',x.ref+' · '+(x.en||'').slice(0,500))}catch(_){}location.hash='#/ask'}return}
+  const h=e.target.closest('[data-hi]');if(h){const n=Number(h.dataset.hi)||h.dataset.hi,x=CUR[n];if(!x||!x.en)return;h.disabled=true;h.textContent='…';
+    try{const o=await translate(x.book,[{n,en:x.en}]);x.hi=o[0];const b=$('#hi_'+n);if(b)b.textContent=o[0]}catch(err){h.disabled=false;h.textContent=tr('Try again');ZD.toast('Try again')}}
   const d=e.target.closest('[data-dl]');if(d){d.disabled=true;if(await runDl(d.dataset.dl))R.hadith();return}
   const r=e.target.closest('[data-rm]');if(r){if(confirm('✕')){await removeOffline(r.dataset.rm);R.hadith()}}
 });
@@ -182,21 +223,15 @@ R.hbook=async function(a){
 };
 
 function card(book,h,lang){
-  const n=h.n,x=CUR[n];
+  const n=h.n,x=CUR[n]||h;
   let body;
   if(lang==='hi')body='<div class="hd-tr" id="hi_'+n+'">'+(x.hi?nl(x.hi):(x.en?'<button class="btn sm" data-hi="'+n+'">AI · Hinglish</button>':''))+'</div>';
   else body='<div class="hd-tr'+(lang==='ur'?' hd-ur':'')+'">'+nl(lang==='ur'?x.ur:x.en)+'</div>';
   const secondary=x.inBook?'<div class="muted small">'+esc(x.inBook)+'</div>':'';
   return '<article class="card hd" id="h_'+n+'"><div class="hd-top"><div><b>'+esc(x.ref||'Reference unverified')+'</b>'+secondary+'</div><span class="muted small">'+esc(x.g||'')+'</span></div>'+
    '<div class="ar hd-ar" lang="ar">'+esc(x.ar)+'</div>'+body+
-   '<div class="nz-btns"><button class="btn sm ghost" data-hcp="'+n+'">'+icon('copy')+' '+esc(tr('Copy'))+'</button><button class="btn sm ghost" data-hai="'+n+'">'+icon('ask')+' '+esc(tr('Ask AI'))+'</button></div></article>'}
+   '<div class="nz-btns"><button class="btn sm ghost" data-hsay="'+n+'" aria-label="Listen hadith" title="Sunen">'+spIcon('speaker')+' Listen</button><button class="btn sm ghost" data-hstop aria-label="Stop voice" title="Roken">'+spIcon('stop')+'</button><button class="btn sm ghost" data-hcp="'+n+'">'+icon('copy')+' '+esc(tr('Copy'))+'</button><button class="btn sm ghost" data-hai="'+n+'">'+icon('ask')+' '+esc(tr('Ask AI'))+'</button></div></article>'}
 
-document.addEventListener('click',async e=>{
-  const c=e.target.closest('[data-hcp]');if(c){const x=CUR[c.dataset.hcp];if(x)ZD.copy(x.ar+'\n\n'+(x.hi||x.en||'')+'\n\n— '+(x.ref||'Reference unverified')+(x.inBook?' · '+x.inBook:'')+' · Zikr Deen App');return}
-  const a=e.target.closest('[data-hai]');if(a){const x=CUR[a.dataset.hai];if(x){try{sessionStorage.setItem('zdAskPre',x.ref+' · '+(x.en||'').slice(0,500))}catch(_){}location.hash='#/ask'}return}
-  const h=e.target.closest('[data-hi]');if(h){const n=Number(h.dataset.hi)||h.dataset.hi,x=CUR[n];if(!x||!x.en)return;h.disabled=true;h.textContent='…';
-    try{const o=await translate(x.book,[{n,en:x.en}]);x.hi=o[0];const b=$('#hi_'+n);if(b)b.textContent=o[0]}catch(err){h.disabled=false;h.textContent=tr('Try again');ZD.toast('Try again')}}
-});
 async function fillHi(book,nums){for(const n of nums){const t=await hiGet(book,n);if(t&&CUR[n])CUR[n].hi=t}}
 
 let stopFlag=false;
@@ -267,4 +302,26 @@ R.hone=async function(a){
       });
     }else{
       box.innerHTML='<p class="muted" style="padding:20px 4px">…</p>';
-      const A=await api('editio
+      const A=await api('editions/ara-'+id+'.json');
+      if(!mine())return;
+      const matches=matchRefs(A.hadiths||[],r=>r.arabicnumber,wanted).slice(0,12);
+      if(!matches.length)throw new Error('nf');
+      const [U,E]=await Promise.all(['urd-','eng-'].map(p=>api('editions/'+p+id+'.json').catch(()=>({hadiths:[]}))));
+      if(!mine())return;
+      const um=new Map((U.hadiths||[]).map(x=>[x.hadithnumber,{text:x.text,ref:refKey(x.arabicnumber)}]));
+      const em=new Map((E.hadiths||[]).map(x=>[x.hadithnumber,{text:x.text,ref:refKey(x.arabicnumber)}]));
+      items=matches.map(rec=>{
+        const internalNo=rec.hadithnumber,publicRef=refKey(rec.arabicnumber);
+        return {n:internalNo,ar:rec.text,ur:matchedLangText(um,internalNo,publicRef),en:matchedLangText(em,internalNo,publicRef),g:(rec.grades||[]).map(g=>g.grade).filter(Boolean).join(' · '),arabicnumber:rec.arabicnumber,book:id,ref:makeRef(id,rec.arabicnumber),inBook:makeInBook(rec.reference&&rec.reference.book,rec.reference&&rec.reference.hadith),hadithnumber:internalNo};
+      });
+    }
+    if(!mine())return;
+    items.forEach(x=>{CUR[x.n]=x});
+    await fillHi(id,items.map(x=>x.n));
+    box.innerHTML=items.map(h=>card(id,h,lang)).join('');
+  }catch(e){
+    if(!mine())return;
+    box.innerHTML='<div class="empty"><div class="big">🔎</div><p><b>'+esc(makeRef(id,input))+'</b></p><p class="muted small">'+esc(tr('Try again'))+'</p></div>';
+  }
+};
+})();
