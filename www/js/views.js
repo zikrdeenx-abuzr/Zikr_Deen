@@ -13,7 +13,7 @@ function top(title,sub,o){o=o||{};
   '<h1'+(o.ar?' class="ar" style="direction:rtl"':'')+'>'+esc(tr(title))+(sub?'<span class="sub">'+esc(tr(sub))+'</span>':'')+'</h1>'+(o.right||'')+'</header>'}
 const norm=s=>String(s).toLowerCase().replace(/[^a-z0-9\u0600-\u06ff]/g,'');
 
-const NAVMAP={home:'home',surahs:'surahs',juz:'surahs',pages:'surahs',hizb:'surahs',listen:'surahs',read:'surahs',goto:'surahs',mulk:'mulk',bookmarks:'home',more:'more',ask:'ask',prayer:'home',folders:'folders',learn:'folders',repeat:'folders',puzzle:'folders',revision:'folders',namaz:'folders',path:'folders',nz:'folders',nsec:'folders',tasbih:'folders',zakat:'folders',ruqiyah:'folders',progress:'home',namaz3d:'folders','salah-builder':'folders','spot-mistake':'folders','knowledge-map':'folders',classroom:'folders','ar-mode':'folders',whatsapp:'folders','visual-academy':'folders',azkaar:'folders',hadith:'folders',hbook:'folders',hsec:'folders',hone:'folders'};
+const NAVMAP={home:'home',surahs:'surahs',juz:'surahs',mushaf:'surahs',mslide:'surahs',pages:'surahs',hizb:'surahs',listen:'surahs',read:'surahs',goto:'surahs',mulk:'mulk',bookmarks:'home',more:'more',ask:'ask',prayer:'home',folders:'folders',learn:'folders',repeat:'folders',puzzle:'folders',revision:'folders',namaz:'folders',path:'folders',nz:'folders',nsec:'folders',tasbih:'folders',zakat:'folders',ruqiyah:'folders',progress:'home',namaz3d:'folders','salah-builder':'folders','spot-mistake':'folders','knowledge-map':'folders',classroom:'folders','ar-mode':'folders',whatsapp:'folders','visual-academy':'folders',azkaar:'folders',hadith:'folders',hbook:'folders',hsec:'folders',hone:'folders'};
 async function route(){
   cleanups.forEach(f=>{try{f()}catch(e){}});cleanups=[];ZD.closeSheet();
   const h=location.hash.replace(/^#\/?/,'')||'home',parts=h.split('/'),name=parts[0],args=parts.slice(1);
@@ -43,6 +43,7 @@ R.home=function(){
   view().innerHTML=top('Zikr Deen',hijri()?date+' · '+hijri():date,{right:'<button class="ibtn" data-act="theme" aria-label="App Theme" style="font-size:18px">🎨</button><button class="ibtn" data-act="lang" aria-label="App Language" style="font-size:18px">🌐</button><button class="ibtn" data-act="goto" aria-label="Go to surah and ayah">'+icon('hash')+'</button>'})+
   '<main>'+
   '<div class="hero"><div class="bism" lang="ar">'+BISM+'</div>'+resume.replace('class="card resume"','class="resume"').replace('style="text-decoration:none;color:inherit"','style="text-decoration:none;color:inherit;display:flex"')+'</div>'+
+  (ZD.mushafSlideBannerHTML?ZD.mushafSlideBannerHTML():'')+
   (ZD.quickBarHTML?ZD.quickBarHTML():'')+(ZD.prayerHTML?ZD.prayerHTML():'')+(ZD.tasbihHTML?ZD.tasbihHTML():'')+(ZD.askHTML?ZD.askHTML():'')+(ZD.whatsappCardHTML?ZD.whatsappCardHTML():'')+
   (ZD.dailyHTML?ZD.dailyHTML():'')+
   '<section class="block card"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="h2" style="margin:0">'+esc(tr('Daily goal'))+'</h2><span class="muted small">'+done+' / '+goal+' '+esc(tr('ayat read'))+'</span></div>'+
@@ -57,12 +58,12 @@ R.home=function(){
   '</main>';
 };
 
-function indexHead(tab){return ZD.quranTabsHTML?ZD.quranTabsHTML(tab):'<div class="seg" role="tablist"><button role="tab" aria-selected="'+(tab==='surahs')+'" data-go="#/surahs">'+esc(tr('Surah'))+'</button><button role="tab" aria-selected="'+(tab==='juz')+'" data-go="#/juz">'+esc(tr('Juz'))+'</button></div>'}
+function indexHead(tab){return ZD.quranTabsHTML?ZD.quranTabsHTML(tab):'<div class="seg" role="tablist"><button role="tab" aria-selected="'+(tab==='surahs')+'" data-go="#/surahs">'+esc(tr('Surah'))+'</button><button role="tab" aria-selected="'+(tab==='juz')+'" data-go="#/juz">'+esc(tr('Juz'))+'</button><button role="tab" aria-selected="'+(tab==='mushaf')+'" data-go="#/mushaf">30 पारे (अरबी)</button></div>'}
 document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g)location.hash=g.dataset.go});
 R.surahs=async function(){
   const all=ZD.surahs();
   view().innerHTML=top('Quran','114 surahs · 6,236 ayat',{right:'<a class="ibtn" href="#/listen" aria-label="Audio Player" style="font-size:18px;text-decoration:none">🎧</a><button class="ibtn" data-act="goto" aria-label="Go to surah and ayah">'+icon('hash')+'</button>'})+
-   '<main>'+(ZD.quranLastReadHTML?ZD.quranLastReadHTML():'')+
+   '<main>'+(ZD.mushafSlideBannerHTML?ZD.mushafSlideBannerHTML():'')+(ZD.quranLastReadHTML?ZD.quranLastReadHTML():'')+
    (ZD.reciterCardsHTML?'<section class="block"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 class="h2" style="margin:0">'+esc(tr('Listen to Quran by'))+'</h2><a class="small" href="#/listen" style="text-decoration:none;font-weight:600">'+esc(tr('Full Player →'))+'</a></div><div id="qRecWrap">'+ZD.reciterCardsHTML(ZD.prefs().reciter,true)+'</div></section>':'')+
    indexHead('surahs')+'<label class="search">'+icon('search')+'<input id="q" type="search" placeholder="'+esc(tr('Search by name, number or meaning'))+'" autocomplete="off" aria-label="Search surahs"></label><div id="list"></div></main>';
   const qrw=$('#qRecWrap');
@@ -81,7 +82,7 @@ R.surahs=async function(){
 };
 R.juz=function(){
   const J=ZD.juzList();
-  view().innerHTML=top('Juz Index','30 paras')+'<main>'+indexHead('juz')+J.map(j=>{const sr=ZD.surah(j.s);return '<a class="row" href="#/read/'+j.s+'/'+j.a+'"><div class="num"><span>'+j.n+'</span></div><div class="mid"><b>'+esc(j.name)+'</b><small>'+esc(sr.en)+' '+j.s+':'+j.a+'</small></div><div class="arn" lang="ar">'+esc(sr.ar)+'</div></a>'}).join('')+'</main>';
+  view().innerHTML=top('Juz Index','30 paras')+'<main>'+(ZD.mushafSlideBannerHTML?ZD.mushafSlideBannerHTML():'')+indexHead('juz')+J.map(j=>{const sr=ZD.surah(j.s);return '<div class="row"><a href="#/read/'+j.s+'/'+j.a+'" style="display:flex;align-items:center;gap:12px;flex:1;min-width:0;color:inherit;text-decoration:none"><div class="num"><span>'+j.n+'</span></div><div class="mid"><b>'+esc(j.name)+'</b><small>'+esc(sr.en)+' '+j.s+':'+j.a+'</small></div><div class="arn" lang="ar">'+esc(sr.ar)+'</div></a><div class="acts"><a class="btn sm ghost" href="#/mslide/'+j.n+'/1">📖 स्लाइड</a></div></div>'}).join('')+'</main>';
 };
 
 function gotoSheet(){
