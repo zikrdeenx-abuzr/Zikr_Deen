@@ -239,4 +239,3 @@ ZD.mushafSlideBannerHTML=function(){
     '<span class="btn sm">खोलें</span></a>';
 };
 })();
-        
