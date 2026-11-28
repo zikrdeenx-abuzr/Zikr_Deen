@@ -54,6 +54,12 @@ jobs:
             grep -q "$F" "$PROJECT/www/index.html" || { echo "ERROR: $F not linked in index.html"; exit 1; }
             node --check "$PROJECT/www/js/$F"
           done
+          for F in audio-player-ui.js mushaf-slides.js; do
+            if [ -f "$PROJECT/www/js/$F" ]; then
+              grep -q "$F" "$PROJECT/www/index.html" || { echo "ERROR: $F not linked in index.html"; exit 1; }
+              node --check "$PROJECT/www/js/$F"
+            fi
+          done
           for F in ask-config.js ask.js; do
             if [ -f "$PROJECT/www/js/$F" ]; then
               node --check "$PROJECT/www/js/$F"
